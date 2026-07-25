@@ -1,167 +1,198 @@
-Voici l'analyse stratégique et le **Cahier des Charges Fonctionnel et Technique (CDCFT)** tirés de votre note de cadrage.
+# 📋 CAHIER DES CHARGES TECHNIQUE & FONCTIONNEL (CDCF)
 
----
+**Projet 1 :** Wrapper CLI de Veille IA Automatisée
+**Base de départ :** Environnement standardisé du Kit Projet 0 (Docker, Poetry, Ruff, Mypy, Pytest)
+**Niveau :** Débutant à Intermédiaire (Junior Dev → AI Product Engineer)
 
-## 1. Analyse critique du Projet
+-----
 
-Le projet adresse directement la **"dette technique initiale"**, responsable du naufrage de la majorité des PoC (Proof of Concept) en IA.
+## 🧭 1. Contexte & Objectifs Produit
 
-* **Points forts :** L'approche est pragmatique. L'intégration combinée de **Poetry** (déterminisme), **Ruff/Mypy** (rigueur du code et typage) et **Pre-commit** (sécurité passive) crée un cadre robuste. Séparer l'exploration (`notebooks/`) du code destiné à la production (`src/`) est la condition sine qua non pour éviter d'envoyer du code spaghetti en déploiement.
-* **Ajustement recommandé (Ruff vs Black) :** Le tableau de la note mentionne à la fois **Ruff** et **Black**. Sachez que Ruff intègre aujourd'hui son propre formateur (compatible à 99% avec Black). Conserver uniquement Ruff simplifie la chaîne de dépendances et gagne encore en vitesse d'exécution.
+### 1.1 Contexte Métier
 
----
+Dans un écosystème de l'IA en évolution continue (nouveaux modèles, benchmarks, grilles tarifaires), une équipe produit passe plusieurs heures par jour à éplucher manuellement les newsletters, blogs tech, dépêches et flux RSS pour identifier les tendances. Cette tâche artisanale est chronophage, sujette aux biais d'attention et déconnectée des workflows terminaux des développeurs. De plus, les interfaces web classiques (type ChatGPT/Claude) ne permettent pas de mesurer précisément les métriques d'ingénierie essentielles (coûts au million de tokens, latences réelles de calcul).
 
-## 2. Cahier des Charges Fonctionnel et Technique (CDCFT)
+### 1.2 Objectif Principal
 
-### Document de Spécifications — Project Baseline & Tooling
+Développer un **outil en ligne de commande (CLI)** industriel, résilient, typé et hautement configurable en Python. Cet outil automatise la récupération, l'analyse et la synthèse de textes bruts ou de sources d'actualités technologiques par l'intermédiaire de LLM, tout en assurant un contrôle strict FinOps (calcul des tokens, estimation budgétaire en USD) et une tolérance totale aux pannes réseau. Le programme est conçu pour être exécuté à la demande ou de manière automatisée via une tâche programmée (`cron` ou pipeline CI/CD).
+
+### 1.3 Indicateurs Clés de Performance (KPI Produit)
+
+  * **Temps de génération moyen :** \< 15 secondes par analyse.
+  * **Fiabilité de structuration :** Taux de conformité des outputs JSON/Pydantic \> 98%.
+  * **Intelligence Économique :** Coût moyen par analyse stabilisé en dessous de $0.05.
+  * **Flexibilité d'entrée :** Capacité à traiter indifféremment 3 types de sources (URL, fichier local, texte direct).
+
+-----
+
+## 🎯 2. Spécifications Fonctionnelles (MVP)
+
+### SF-01 : Saisie Utilisateur & Gestion des Sources
+
+Le CLI doit accepter plusieurs modes de capture d'information pour sa commande principale :
+
+  * **Texte direct :** Saisie brute entre guillemets via l'argument principal ou l'option `--text` / `-t`.
+  * **Fichier local :** Lecture de fichiers textes ou Markdown (`.txt`, `.md`).
+  * **URL (Web scraping) :** Extraction du contenu textuel d'une page HTML (ex: Hacker News, TechCrunch, arXiv) avec un pipeline de nettoyage (suppression des balises et des espaces superflus).
+  * **Validation :** Si la saisie est vide, inexistante ou constituée uniquement d'espaces, l'application doit lever une erreur explicite, renvoyer un code de retour `1` et s'interrompre proprement sans crash de l'interpréteur Python.
+
+### SF-02 : Pipeline de Génération par LLM (Orchestration)
+
+  * **Consignes du modèle :** Le système injecte le texte nettoyé dans un prompt systémique rigoureux qui instruit le LLM d'agir comme un analyste senior spécialisé en IA.
+  * **Contrainte de format :** La réponse finale doit être structurée selon un schéma de données strict (résumé exécutif, impacts clés, recommandations).
+  * **Contrainte de taille :** La génération est bridée via un paramètre `max_tokens` (configurable, par défaut entre 300 et 500 tokens pour les résumés simples, extensible jusqu'à 2000 tokens pour les analyses d'impact approfondies) afin d'éviter le gaspillage de budget.
+
+### SF-03 : Tracking Métriques & Observabilité FinOps
+
+Après chaque appel d'API réussi, le système extrait les métadonnées de consommation et calcule en temps réel :
+
+  * Le nombre exact de **tokens d'entrée** (*Prompt tokens*).
+  * Le nombre exact de **tokens de sortie** (*Completion tokens*).
+  * Le **temps d'exécution global** de la requête (latence en secondes ou millisecondes).
+  * Le **coût financier précis en USD**, calculé dynamiquement d'après la grille tarifaire au million de tokens du modèle sélectionné.
+
+### SF-04 : Affichage Console Enrichi & Formats de Sortie
+
+Le CLI s'appuie sur la bibliothèque **Rich** pour proposer une expérience utilisateur haut de gamme :
+
+  * **Rendu Markdown :** Affichage de la synthèse dans un panneau élégant prenant correctement en charge la syntaxe enrichie (titres, puces, gras).
+  * **Tableau récapitulatif :** Un tableau récapitule de manière hiérarchisée les métriques FinOps de l'inférence (durée, tokens, coût exact).
+  * **Options d'export (F5) :** L'utilisateur peut choisir le format via l'option `--output` / `-o` :
+      * `console` : Affichage Rich interactif (par défaut).
+      * `json` : Sortie brute exploitable pour les pipelines logiciels en aval.
+      * `markdown` : Sauvegarde directe dans un fichier externe (ex: `--output report.md`).
+
+### SF-05 : Système de Cache Local (Performance & FinOps)
+
+  * Pour éviter le re-traitement redondant du même contenu (et économiser la latence et les coûts d'API), l'application doit intégrer un système de persistance locale.
+  * Les données analysées sont stockées (par empreinte de hachage ou URI) dans un fichier JSON local (ex: `~/.cache/veille_ia.json`).
+  * Durée de validité du cache réglable (ex: `--cache-ttl 3600`), débrayable à la demande à l'aide d'un drapeau `--no-cache`.
+
+-----
+
+## 🛠️ 3. Spécifications Techniques & Architecture
+
+### ST-01 : Alignement Environnement Écosystème
+
+  * **Runtime :** Python **3.11+** avec typage statique strict.
+  * **Gestionnaire de dépendances :** **Poetry** configuré en mode strict avec fichier `poetry.lock` reproductible.
+  * **Secrets :** Isolation absolue de la clé d'authentification (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, etc.) via un fichier `.env` local, chargé à l'aide de `python-dotenv` ou `pydantic-settings`. Un fichier `.env.example` anonymisé doit être présent à la racine.
+
+### ST-02 : Modélisation des Données (Pydantic V2)
+
+Le traitement de l'information s'appuie sur des structures de données strictement typées pour la validation des requêtes et le parsing des réponses :
+
+``` python
+from pydantic import BaseModel, Field
+from typing import List, Optional
+from datetime import datetime
+
+class AnalysisReport(BaseModel):
+    source: str = Field(description="Source ou URL analysée")
+    analyzed_at: datetime = Field(default_factory=datetime.utcnow)
+    model_used: str = Field(description="Identifiant exact du modèle ayant effectué l'inférence")
+
+    title: str = Field(description="Titre synthétique de l'actualité IA")
+    summary: str = Field(description="Résumé condensé (max 200 mots)")
+    key_points: List[str] = Field(description="3 à 5 points clés essentiels extraits")
+
+    impact_technical: str = Field(description="Impact sur les architectures logicielles et les outils")
+    impact_business: str = Field(description="Opportunités ou menaces commerciales")
+    impact_regulatory: Optional[str] = Field(None, description="Implications vis-à-vis du RGPD ou de l'AI Act si pertinent")
+
+    recommendation: str = Field(description="Action concrète recommandée pour l'équipe technique")
+    priority: str = Field(description="Niveau de priorité : high, medium, low")
+
+    # Métriques FinOps injectées au runtime
+    prompt_tokens: int = Field(default=0)
+    completion_tokens: int = Field(default=0)
+    total_tokens: int = Field(default=0)
+    estimated_cost_usd: float = Field(default=0.0)
+    execution_time_seconds: float = Field(default=0.0)
 
 ```
-Projet : Blueprint AI Product Engineering
-Version : 1.0.0
-Statut : Validation des Spécifications
+
+### ST-03 : Architecture Modulaire des Dossiers
+
+L'arborescence du projet s'inscrit dans la continuité directe du Projet 0 en isolant de manière granulaire les responsabilités logicielles :
+
+``` text
+cli-ai-watcher/
+├── .env.example              # Gabarit des variables d'environnement (clé API)
+├── pyproject.toml            # Fichier de configuration Poetry et outils de dev
+├── README.md                 # Documentation d'installation et de prise en main
+├── src/
+│   └── ai_watcher/
+│       ├── __init__.py
+│       ├── main.py           # Point d'entrée de la CLI (Framework Typer ou Click)
+│       ├── config.py         # Chargement des Settings et validation via Pydantic
+│       ├── exceptions.py     # Définition des exceptions douces de l'application
+│       ├── core/
+│       │   ├── __init__.py
+│       │   ├── extractor.py  # Logique d'extraction (Scraping HTML / Lecture fichiers)
+│       │   ├── chunker.py    # Découpage sémantique intelligent si texte volumineux
+│       │   └── analyzer.py   # Orchestration du pipeline et de l'analyse
+│       ├── clients/
+│       │   ├── __init__.py
+│       │   └── llm_client.py # Client d'appel API encapsulé avec Tenacity (Retry)
+│       ├── utils/
+│       │   ├── __init__.py
+│       │   ├── cache.py      # Mécanisme de persistance et TTL du cache local
+│       │   └── cost.py       # Grille tarifaire et calculatrice de coût FinOps
+│       └── formatters/
+│           ├── __init__.py
+│           ├── console.py    # Génération des layouts et tableaux Rich
+│           └── markdown.py   # Logique d'écriture et export de fichiers .md
+└── tests/
+    ├── __init__.py
+    ├── unit/                 # Tests unitaires mockés (extractor, chunker, prompt)
+    └── integration/          # Tests de bout en bout (appels réels ou mockés du client)
+
 ```
 
----
+### ST-04 : Paramétrage du Modèle & Résilience Réseau
 
-### 1. Objectifs & Exigences Clés
+  * **Déterminisme Accru :** Pour garantir la fidélité factuelle et l'exactitude des synthèses techniques, la température du modèle doit être configurée de manière basse, entre `0.0` et `0.3`, associée à un `Top_p` de `0.9`.
+  * **Politique de Robustesse (Retry Policy) :** Les appels réseau vers les serveurs tiers étant soumis à des micro-coupures ou des surcharges, le module `llm_client.py` doit intercepter obligatoirement les erreurs transitoires (Rate Limits HTTP 429, Erreurs Serveur HTTP 5xx, Timeouts) via la bibliothèque **Tenacity**.
+      * Stratégie retenue : **Backoff exponentiel enrichi de Jitter**.
+      * Paramètres : Maximum **4 tentatives**, attente progressive interpolée (ex: 2s, 4s, 8s).
+      * **Logging :** Émission systématique d'un log d'avertissement jaune (`logger.warning`) indiquant le numéro de la tentative en cours avant de suspendre temporairement le thread.
 
-#### 1.1 Objectifs Métier
+-----
 
-* **Zero-Setup Friction :** Temps d'onboarding d'un développeur inférieur à 5 minutes (`git clone` -> `make install` -> prêt).
-* **Industrialisation Native :** Passer de la phase d'expérimentation au déploiement sans restructurer le code source.
-* **Sécurité & Conformité :** Zéro fuite de secrets (API Keys, identifiants) dans le suivi de version.
+## 📦 4. Stack Technique Mandatée
 
-#### 1.2 Métriques de Performance (KPIs)
+| Composant           | Technologie Choisie | Rôle Architectural                                                        |
+| :------------------ | :------------------ | :------------------------------------------------------------------------ |
+| **Langage**         | Python 3.11+        | Runtime d'exécution principal et typage statique.                         |
+| **Gestionnaire**    | Poetry              | Résolution, isolation et verrouillage des dépendances.                    |
+| **Interface CLI**   | Typer (ou Click)    | Framework de routage des arguments et options de la console.              |
+| **Client HTTP**     | HTTPX / OpenAI SDK  | Client asynchrone / synchrone pour les requêtes distantes.                |
+| **Résilience**      | Tenacity            | Décorateur d'automatisation des retries et du backoff exponentiel.        |
+| **Validation**      | Pydantic V2         | Modélisation stricte et typage des structures de données d'entrée/sortie. |
+| **Interface UX**    | Rich                | Moteur de rendu de texte Markdown, spinners de chargement et tableaux.    |
+| **Qualité & Style** | Ruff + Mypy         | Outils d'analyse statique et de conformité aux standards de code.         |
+| **Tests**           | Pytest + Pytest-cov | Suite d'exécution des tests automatisés et mesure de couverture.          |
 
-* **Couverture de typage statique :** 100% du code dans `src/` validé par Mypy (mode strict).
-* **Temps d'exécution des checks :** Linting + Formatting < 2 secondes localement via Ruff.
-* **Poids de l'image Docker final :** Minimaliste grâce à un build multi-stage (cible < 250 MB pour le runtime).
+-----
 
----
+## ✅ 5. Critères d'Acceptation (Definition of Done - DoD)
 
-### 2. Spécifications Fonctionnelles
+Pour déclarer le **Projet 1** finalisé et prêt à l'emploi, l'ensemble des cases suivantes doit être validé :
 
-#### F-01 : Isolation & Gestion des Environnements
+### Qualité d'Ingénierie & Robustesse
 
-* Le système doit bloquer l'installation globale de paquets Python sur la machine hôte.
-* Les dépendances de **Développement** (pytest, mypy, ruff) doivent être physiquement séparées des dépendances de **Production** (fastapi, pydantic, httpx).
+- [ ] **Zéro Déviation de Style :** L'exécution des outils de contrôle qualité statique (`ruff check .` et `mypy src/ --strict`) s'effectue sans soulever la moindre alerte ou erreur.
+- [ ] **Couverture de Code :** Les tests automatisés (`pytest --cov=src`) couvrent au minimum **80%** des lignes de code logiques, incluant des scénarios mockés pour le comportement des retries et du cache.
+- [ ] **Sécurité des Secrets :** Aucune clé d'authentification ou jeton d'API n'est écrit en dur dans les fichiers sources. Le script `detect-secrets` ou la configuration pre-commit intercepte tout oubli éventuel.
+- [ ] **Résilience Vérifiée :** Lors d'une coupure réseau simulée, l'application ne crash pas ; elle affiche ses logs de retry successifs dans la console avant d'échouer proprement si la panne persiste.
 
-#### F-02 : Gatekeeping & Contrôle Qualité (Pre-commit)
+### Validation Fonctionnelle
 
-* À chaque commande `git commit`, le système doit automatiquement intercepter les fichiers modifiés et exécuter :
-  1. Le nettoyage des espaces et fins de lignes.
-  2. La détection de secrets ou clés d'API (via `detect-secrets`).
-  3. Le linting et le formatage automatique du code (`ruff`).
-  4. L'analyse statique de type (`mypy`).
+- [ ] **Routage des Commandes :** La commande de base `poetry run python src/ai_watcher/main.py scan "<source>"` s'exécute correctement sur les trois types de sources demandés (URL, Fichier, Chaîne).
+- [ ] **Exactitude FinOps :** Les coûts calculés et présentés en fin de traitement reflètent la réalité de la tarification du français (surcoût sémantique de 30% à 50% pris en compte lors des multiplications volumétriques).
+- [ ] **Rendu Visuel :** Les synthèses générées sont correctement mises en forme à l'aide de Rich sous forme de panneaux stylisés et colorés, avec un affichage distinct pour les succès (vert), les alertes (jaune) et les échecs (rouge).
 
-* Si une seule vérification échoue, le commit doit être bloqué.
+-----
 
-#### F-03 : Interface de Commande Unifiée (CLI Local)
-
-L'interaction avec le projet ne doit pas nécessiter de retenir de longues commandes CLI. Un fichier `Makefile` doit faire office d'interface standard :
-
-* `make install` : Initialise l'environnement virtuel, installe les dépendances et configure les hooks Git.
-* `make lint` : Lance l'analyse statique et le formatage.
-* `make test` : Exécute la suite de tests automatisés avec rapport de couverture.
-* `make dev` : Demarre le serveur de développement local.
-* `make clean` : Purge les caches Python (`.pytest_cache`, `__pycache__`, `.mypy_cache`).
-
-#### F-04 : Endpoint de Propreté (Healthcheck)
-
-* L'application doit exposer une fonction ou un endpoint minimal `/health` retournant un payload JSON normé :
-  ```json
-  {
-    "status": "healthy",
-    "environment": "development",
-    "version": "0.1.0"
-  }
-  ```
-
----
-
-### 3. Spécifications Techniques & Configurations
-
-#### 3.1 Déclaration des Dépendances Centralisées (`pyproject.toml`)
-
-Toute la configuration des outils doit résider dans le fichier unique `pyproject.toml` pour éviter la multiplication des fichiers de config (`.flake8`, `pytest.ini`, etc.).
-
-```toml
-[tool.poetry]
-name = "ai-product-engineer-kit"
-version = "0.1.0"
-description = "Industrial-grade AI Product Engineering Stack"
-authors = ["Your Team <team@domain.com>"]
-readme = "README.md"
-packages = [{include = "src"}]
-
-[tool.poetry.dependencies]
-python = "^3.11"
-pydantic = "^2.6"
-fastapi = "^0.110"
-uvicorn = "^0.28"
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^8.0"
-pytest-asyncio = "^0.23"
-ruff = "^0.3"
-mypy = "^1.8"
-pre-commit = "^3.6"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.ruff]
-target-version = "py311"
-line-length = 88
-select = ["E", "F", "I", "B"] # Errors, Pyflakes, Isort, Bugbear
-
-[tool.mypy]
-python_version = "3.11"
-strict = true
-ignore_missing_imports = true
-```
-
-#### 3.2 Recette de Conteneurisation Optimisée (`Dockerfile`)
-
-Mise en place d'un build multi-stage pour ne pas embarquer le compilateur et les outils dev dans l'image finale :
-
-```dockerfile
-# Stage 1: Build & Dependencies
-FROM python:3.11-slim AS builder
-
-WORKDIR /app
-RUN pip install poetry==1.7.1
-
-ENV POETRY_NO_INTERACTION=1 \
-    POETRY_VIRTUALENVS_IN_PROJECT=1 \
-    POETRY_VIRTUALENVS_CREATE=1
-
-COPY pyproject.toml poetry.lock ./
-RUN poetry install --only main --no-root
-
-# Stage 2: Runtime Minimal
-FROM python:3.11-slim AS runtime
-
-WORKDIR /app
-ENV VIRTUAL_ENV=/app/.venv \
-    PATH="/app/.venv/bin:$PATH"
-
-COPY --from=builder /app/.venv /app/.venv
-COPY src/ /app/src
-
-EXPOSE 8000
-CMD ["python", "-m", "src.main"]
-```
-
----
-
-### 4. Matrice des Livrables
-
-| Livrable | Emplacement | Critère de Validation |
-| --- | --- | --- |
-| **Manifeste de dépendances** | `/pyproject.toml` | `poetry lock` génère un fichier valide sans conflit. |
-| **Pipeline CI Local** | `/.pre-commit-config.yaml` | Bloque un commit contenant `API_KEY = "sk-proj-12345"`. |
-| **Configuration IDE** | `/.vscode/settings.json` | L'enregistrement d'un fichier déclenche le formatage par Ruff. |
-| **Suite de Test Vierge** | `/tests/test_main.py` | `pytest` s'exécute avec un taux de réussite de 100%. |
-| **Automation CLI** | `/Makefile` | Toutes les commandes cibles s'exécutent sans erreur sous Linux/macOS/WSL. |
+Souhaitez-vous que nous passions à la génération du **squelette de code initial** du projet, incluant la configuration du fichier `pyproject.toml` et l'architecture complète des premiers modules Python ?

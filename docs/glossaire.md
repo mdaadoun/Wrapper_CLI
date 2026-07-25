@@ -1,163 +1,49 @@
-# 📖 Glossaire Technique : Blueprint AI Product Engineering
+# 📖 Glossaire Technique : Wrapper CLI de Veille IA
 
-Ce glossaire définit les concepts clés de l'ingénierie logicielle et du DevOps appliqués à l'industrialisation des projets d'intelligence artificielle dans ce framework.
-
----
-
-## 🛠️ Outillage & Environnements
-
-### Poetry
-Outil moderne de gestion des dépendances et d'empaquetage en Python. Contrairement à `pip` et `requirements.txt`, **Poetry** résout de manière déterministe les arbres de dépendances complexes et verrouille les versions exactes dans un fichier `poetry.lock`. Cela garantit que tous les développeurs et serveurs de CI exécutent exactement le même code.
-
-### Environnement Virtuel (`.venv`)
-Dossier isolé contenant l'exécutable Python et les bibliothèques installées spécifiquement pour le projet. Dans ce framework, l'environnement virtuel est configuré localement à la racine (`.venv/`) pour simplifier la détection et l'intégration par l'IDE (comme VSCode ou PyCharm).
-
-### Makefile
-Fichier de configuration de l'utilitaire système `make` (standard POSIX). Il permet de définir des alias de commandes standardisées (`make install`, `make test`, `make lint`) afin d'offrir une interface unifiée aux développeurs, facilitant l'onboarding et l'intégration continue.
-
-### Cibles Phony (`.PHONY`)
-Directive dans un Makefile spécifiant que les cibles listées ne correspondent pas à des fichiers physiques sur le disque. Cela évite les conflits de noms si un dossier ou un fichier portant le même nom venait à être créé (par exemple, un dossier `test/`).
-
-### Zero-Setup Friction
-Indicateur de performance (KPI) mesurant l'effort nécessaire à l'installation d'un environnement de développement complet. L'objectif est de permettre à un nouveau venu d'être pleinement opérationnel en une seule commande standard (`make install`) en moins de 5 minutes.
+Ce glossaire définit les concepts d'ingénierie logicielle, d'IA et de FinOps manipulés dans le cadre du **Projet 3 : Wrapper CLI**.
 
 ---
 
-## 🔍 Qualité & Analyse Statique
+## 🛠️ Concepts d'Ingénierie Logicielle & CLI
 
-### Ruff
-Linter et formateur de code Python ultra-rapide écrit en Rust. Il remplace avantageusement des outils plus anciens comme Flake8, Black, isort et autoflake. Ruff permet d'analyser le code et d'appliquer le formatage en moins d'une seconde, accélérant la boucle de feedback locale.
+### CLI (Command Line Interface)
+Interface en ligne de commande permettant à l'utilisateur d'interagir avec une application en saisissant des lignes de texte dans un terminal.
 
-### Mypy
-Vérificateur de typage statique pour Python. Bien que Python soit un langage à typage dynamique, l'utilisation d'annotations de type validées par Mypy (en mode strict) élimine toute une classe d'erreurs en production avant même que le code ne soit exécuté (ex. passage de types invalides, manipulation d'éléments `None`).
+### Typer
+Framework Python moderne basé sur Click et les annotations de type Python (Type Hints) pour créer des applications CLI autodocumentées avec validation automatique.
 
-### Analyse Statique de Type (Type Hinting - PEP 484)
-Annotation explicite des types de données pour les arguments de fonctions, variables et valeurs de retour. Validée en phase de build (par Mypy), elle sert de documentation vivante et prévient les bugs d'exécution sans imposer de surcharge de performances à l'exécution.
+### Rich
+Bibliothèque Python permettant un rendu visuel riche dans le terminal (panneaux colorés, syntaxe Markdown, tableaux, barres de progression, spinners).
 
-### Pre-commit Hooks
-Mécanisme Git permettant d'exécuter des scripts automatiquement au moment de la commande `git commit`. Si l'un des scripts échoue (code mal formaté, erreurs de typage ou faille de sécurité), le commit est bloqué localement, protégeant ainsi l'intégrité du dépôt partagé.
-
----
-
-## 🔒 Sécurité & DevOps
-
-### detect-secrets
-Outil d'analyse statique conçu pour détecter les clés d'API (OpenAI, Gemini), les mots de passe et les jetons d'accès codés en dur dans le code source. Configuré en hook pre-commit, il intercepte instantanément les tentatives de commit de clés privées.
-
-### Baseline de secrets (`.secrets.baseline`)
-Fichier JSON généré à la racine du dépôt contenant les empreintes (hashes) des secrets ou des faux secrets de test identifiés et approuvés. Ce fichier sert de référence à `detect-secrets` pour ne signaler que les *nouveaux* secrets accidentellement ajoutés, évitant de bloquer le pipeline à cause de mocks existants.
-
-### Docker Multi-Stage Build
-Technique de build Docker permettant d'utiliser plusieurs instructions `FROM` temporaires dans un même `Dockerfile`. Elle permet d'installer les compilateurs et les dépendances lourdes dans un premier conteneur (stage `builder`), puis de copier uniquement le résultat compilé dans le conteneur final (stage `runtime`), réduisant ainsi le poids de l'image de 80% et limitant la surface d'attaque.
-
-### Hardening Non-Root
-Pratique de sécurité consistant à forcer l'exécution de l'application dans le conteneur Docker sous un utilisateur système non-privilégié (`appuser`) plutôt que sous l'utilisateur `root`. En cas de compromission de l'application, l'attaquant n'obtient pas les droits super-utilisateur sur la machine hôte.
-
-### Dockerfile
-Fichier texte contenant une série d'instructions ordonnées (`FROM`, `COPY`, `RUN`, `CMD`) décrivant comment assembler une image Docker couche par couche. Chaque instruction crée une nouvelle couche immuable dans l'image, empilée sur la précédente. Le Dockerfile est le « plan de construction » de l'environnement d'exécution de l'application.
-
-### Couche Docker (Layer) et cache de build
-Chaque instruction d'un Dockerfile (`RUN`, `COPY`, etc.) produit une couche (layer) immuable. Docker met en cache ces couches et les réutilise si les fichiers d'entrée n'ont pas changé. C'est pourquoi l'ordre des instructions est stratégique : copier les fichiers de dépendances (`pyproject.toml`, `poetry.lock`) *avant* le code source permet de réutiliser la couche d'installation des paquets lors des modifications de code, accélérant les rebuilds de plusieurs minutes à quelques secondes.
-
-### Contexte de build Docker (Build Context)
-Ensemble de tous les fichiers et dossiers envoyés au démon Docker au moment du `docker build`. Par défaut, c'est l'intégralité du répertoire courant. Un contexte trop volumineux (contenant `.venv`, `.git`, `node_modules`) ralentit le transfert et risque d'inclure des fichiers sensibles dans l'image. Le fichier `.dockerignore` sert à filtrer ce contexte.
-
-### .dockerignore
-Fichier de configuration fonctionnant comme `.gitignore`, mais pour Docker. Il spécifie les fichiers et dossiers à exclure du contexte de build. Les exclusions typiques incluent l'environnement virtuel local (`.venv`), l'historique Git (`.git`), les tests, la documentation et les caches de développement. Un `.dockerignore` bien configuré peut réduire le contexte de build de plusieurs centaines de Mo à quelques Ko.
-
-### COPY --from (Copie inter-stages)
-Instruction Docker spécifique au pattern multi-stage build permettant de copier sélectivement des fichiers depuis un stage précédent vers le stage courant. La syntaxe `COPY --from=builder /app/.venv /app/.venv` copie uniquement l'environnement virtuel compilé depuis le stage `builder` vers l'image finale, sans embarquer les outils de compilation qui ont servi à le créer.
-
-### Principe de moindre privilège (Least Privilege)
-Principe fondamental de sécurité informatique stipulant qu'un processus, un utilisateur ou un programme ne doit disposer que des permissions strictement nécessaires à l'accomplissement de sa tâche. Dans le contexte Docker, cela signifie exécuter l'application sous un utilisateur système non-privilégié (`appuser`) plutôt que sous `root` (UID 0). En cas de compromission, l'attaquant hérite uniquement des droits limités de cet utilisateur, sans pouvoir installer de paquets, modifier les fichiers système ou s'échapper du conteneur.
-
-### Directive USER (Dockerfile)
-Instruction Dockerfile qui bascule définitivement l'identité sous laquelle s'exécutent toutes les commandes suivantes (`RUN`, `CMD`, `ENTRYPOINT`). Placée après la création de l'utilisateur et la copie des fichiers, elle constitue le verrou final du hardening : le processus principal du conteneur (PID 1) démarre avec les privilèges limités de l'utilisateur spécifié, et non ceux du super-utilisateur `root`.
-
-### COPY --chown (Transfert de propriété Docker)
-Option de l'instruction `COPY` dans un Dockerfile permettant de transférer la propriété des fichiers copiés à un utilisateur et un groupe spécifiques en une seule opération atomique. La syntaxe `COPY --chown=appuser:appgroup` évite de recourir à une instruction `RUN chown -R` séparée, ce qui économise une couche Docker supplémentaire et le temps de parcours récursif de l'arborescence de fichiers.
-
-### Port privilégié vs non-privilégié
-Sur les systèmes Linux, les ports réseau inférieurs à 1024 (comme le port 80 HTTP ou 443 HTTPS) sont dits « privilégiés » et ne peuvent être ouverts que par un processus exécuté en tant que `root`. Les ports supérieurs à 1024 (comme le port 8000 utilisé par Uvicorn) sont « non-privilégiés » et accessibles à tout utilisateur du système. Le choix d'un port non-privilégié est donc un prérequis technique pour l'exécution de l'application sous un utilisateur non-root dans un conteneur Docker.
-
-### Directive HEALTHCHECK (Dockerfile)
-Instruction du Dockerfile qui configure une sonde de surveillance native au sein du conteneur. Elle indique au moteur Docker la commande à exécuter périodiquement (ex: `curl -f http://localhost:8000/health`) et les seuils de tolérance (`--interval`, `--timeout`, `--retries`) pour déterminer si l'application est opérationnelle (`healthy`) ou défaillante (`unhealthy`).
-
-### Statut de santé d'un conteneur (Healthy / Unhealthy / Starting)
-État de santé d'un conteneur géré dynamiquement par le démon Docker à partir des résultats de la directive `HEALTHCHECK`. Au démarrage, le conteneur est en état `starting` (pendant la période de grâce `--start-period`). Si la sonde répond avec succès, l'état devient `healthy`. En cas d'échecs consécutifs dépassant le seuil `--retries`, l'état bascule à `unhealthy`, déclenchant des actions correctives au niveau de l'orchestrateur.
-
-### Option `curl -f` (Fail Fast HTTP)
-Drapeau `-f` (ou `--fail`) de l'outil `curl` qui force la commande à renvoyer immédiatement un code de sortie d'erreur (non-zéro) lorsque le serveur HTTP répond avec un code d'erreur 4xx ou 5xx. Sans ce drapeau, `curl` considérerait la requête comme réussie tant qu'une réponse HTTP est reçue, même si cette réponse est une erreur `500 Internal Server Error`.
+### Façade Pattern
+Patron de conception (Design Pattern) structurant qui fournit une interface simplifiée et unifiée devant un ensemble complexe de classes ou sous-systèmes (ex: orchestrateur d'extraction multi-sources).
 
 ---
 
-## 🌐 Architecture Web & Microservices
+## 🤖 Concepts d'Intelligence Artificielle
 
-### FastAPI
-Framework web moderne, rapide et performant pour concevoir des API en Python. Il s'appuie sur le typage statique standard et Pydantic pour automatiser la validation à l'exécution et générer de manière interactive la documentation OpenAPI (/docs).
+### Structured Output
+Technique permettant de contraindre un LLM à retourner une réponse strictement conforme à un schéma prédéfini (JSON Schema ou modèle Pydantic), éliminant l'imprévisibilité du texte libre.
 
-### ASGI (Asynchronous Server Gateway Interface)
-Standard moderne de serveurs web Python succédant à WSGI. Il gère l'asynchronisme de manière native (async/await), ce qui est indispensable pour des cas d'usage à forte concurrence (comme les connexions WebSocket ou le streaming de réponses d'agents d'IA).
+### Prompt System (System Prompt)
+Instruction initiale de haut niveau donnée au modèle pour lui assigner un rôle (ex: *Analyste Senior IA*), un contexte et des contraintes de comportement avant de lui transmettre le contenu utilisateur.
 
-### Pydantic
-Bibliothèque de validation de données s'appuyant sur les indices de types de Python. Utilisée par FastAPI, elle parse, valide et convertit les types à l'entrée et à la sortie des routes d'API, garantissant un typage strict et une détection précoce des données mal formées.
-
-### APIRouter
-Composant de FastAPI servant à modulariser les points d'accès (endpoints) de l'API. Il permet de regrouper et d'isoler des ensembles cohérents de routes (ex: toutes les routes liées à la santé `/health`, au RAG, ou aux agents d'IA) dans des fichiers dédiés pour éviter d'encombrer le point d'entrée central `main.py`.
-
-### Séparation des préoccupations (Separation of Concerns - SoC)
-Principe d'architecture logicielle stipulant que le code doit être scindé en sections distinctes, chacune gérant une responsabilité unique. Dans ce framework, cela se traduit par le découpage en configurations (`core`), modèles de données (`schemas`), routes (`api/routes`), et logique d'initialisation (`main.py`).
-
-### Pattern Settings
-Pratique d'ingénierie consistant à centraliser toutes les variables de configuration et métadonnées d'une application dans un objet ou une classe unique (souvent couplée à des variables d'environnement). Cela facilite la portabilité et le déploiement du code sur différents environnements (développement, staging, production) sans modifier le code métier.
-
-### Contrat d'interface
-Spécification technique rigoureuse qui décrit la structure, les types de données, les codes de statut HTTP et le comportement d'un point d'accès d'une API. Le respect strict de ce contrat garantit la compatibilité et la communication entre les différents services d'un système distribué (ex: microservices, applications frontales).
-
-### Observabilité
-Capacité à mesurer et à déduire l'état interne d'un système à partir de ses sorties externes (journaux, métriques, traces et endpoints de santé). Une observabilité minimale permet aux systèmes d'orchestration ou de surveillance de s'assurer du fonctionnement correct et continu de l'application.
-
-### Sonde de santé (Healthcheck Probe)
-Mécanisme automatique de test périodique effectuant des requêtes sur un conteneur ou un service (souvent sur la route `/health`) pour surveiller son état de disponibilité et de fonctionnement. Ces sondes sont utilisées par les orchestrateurs (Docker, Kubernetes) pour piloter le routage du trafic et gérer le cycle de vie des conteneurs.
-
-### Test d'intégration
-Technique de test consistant à valider le fonctionnement conjoint de plusieurs composants ou modules d'une application (ex: le serveur d'API, le middleware, les configurations et la sérialisation des schémas), par opposition aux tests unitaires qui vérifient des isolats de fonctions logiques.
-
-### Couverture de code (Code Coverage)
-Mesure statistique (exprimée en pourcentage) qui comptabilise le taux de lignes de code exécutées lors du lancement de la suite de tests. Imposer un taux minimal strict (ex: 100% via fail-under) garantit qu'aucune modification de code n'est poussée en production sans validation automatique associée.
-
-### TestClient
-Utilitaire fourni par la bibliothèque Starlette qui permet d'exécuter des tests d'intégration HTTP rapides sur une application FastAPI en simulant des requêtes (GET, POST, etc.) en boucle locale fermée, éliminant ainsi le besoin de démarrer un serveur réseau réel.
+### Temperature & Top_P
+Paramètres de contrôle du déterminisme du LLM. Une température basse (0.0 – 0.3) réduit la variabilité et favorise la fidélité factuelle, indispensable pour l'analyse technique.
 
 ---
 
-## 🖥️ IDE & Expérience Développeur
+## 💰 Concepts FinOps & Observabilité
 
-### Format-on-Save (Formatage à la Sauvegarde)
-Fonctionnalité de l'éditeur de code (VSCode, PyCharm, etc.) qui déclenche automatiquement le formateur configuré à chaque sauvegarde de fichier (`Ctrl+S`). Dans ce framework, le formateur Ruff reformate le code Python à la sauvegarde, reproduisant exactement le même résultat que le hook pre-commit ou la commande `make lint`, mais de manière instantanée et sans attendre le commit Git.
+### FinOps (Financial Operations)
+Pratique de gestion financière appliquée aux ressources cloud et API d'IA visant à mesurer, suivre et optimiser les coûts d'inférence au jeton près.
 
-### JSONC (JSON with Comments)
-Variante du format JSON standard qui autorise les commentaires (`//` et `/* */`). C'est le format utilisé par VSCode pour ses fichiers de configuration (`.vscode/settings.json`, `.vscode/extensions.json`). Le JSON classique défini par la spécification RFC 8259 interdit strictement les commentaires, ce qui rend les fichiers de configuration difficiles à documenter.
+### Prompt Tokens vs Completion Tokens
+- **Prompt Tokens** : Nombre de jetons envoyés au modèle (instructions système + contenu source).
+- **Completion Tokens** : Nombre de jetons générés par le modèle dans sa réponse.
 
-### Code Actions on Save
-Mécanisme avancé de VSCode permettant d'exécuter des « actions de code » automatiquement au moment de la sauvegarde. Contrairement au simple formatage (qui n'ajuste que l'indentation et les sauts de ligne), les Code Actions peuvent corriger le code lui-même : supprimer les imports inutilisés (`source.fixAll`), réorganiser les imports selon PEP 8 (`source.organizeImports`), et appliquer des quick-fixes proposés par le linter.
+### Hash SHA-256 & Idempotence
+Technique de hachage permettant d'identifier de manière unique un contenu d'entrée. Si la même empreinte est soumise, le système renvoie le résultat en cache sans refaire d'appel API payant (propriété d'idempotence).
 
-### Workspace Recommendations (extensions.json)
-Fichier `.vscode/extensions.json` versionné dans Git qui déclare les extensions indispensables au projet. Lorsqu'un développeur ouvre le dossier du projet, VSCode affiche automatiquement une notification proposant d'installer les extensions manquantes. Cela garantit l'uniformité de l'outillage dans l'équipe sans documentation supplémentaire.
-
-### Alignement IDE / CI (DX Consistency)
-Principe d'ingénierie consistant à garantir que l'environnement de développement local (IDE, éditeur) applique exactement les mêmes règles de formatage, de linting et de validation que la chaîne d'intégration continue (CI). Dans ce framework, l'alignement est assuré par le triptyque : `.vscode/settings.json` (temps réel dans l'éditeur) → `.pre-commit-config.yaml` (au moment du commit) → `Makefile` (exécution manuelle ou CI).
-
----
-
-## 🧪 Validation & Onboarding
-
-### Smoke Test (Test de fumée)
-Test de validation minimale qui vérifie qu'un système démarre et répond sans erreur fatale, sans entrer dans le détail des fonctionnalités. L'analogie vient de l'électronique : on branche le circuit et on vérifie qu'il n'y a pas de fumée. Dans ce framework, le smoke test interroge l'endpoint `/health` de l'API FastAPI pour confirmer que le serveur est opérationnel après installation.
-
-### Test de complétude structurelle
-Catégorie de test qui ne vérifie pas le comportement du code mais la présence et la cohérence de tous les fichiers nécessaires au bon fonctionnement du projet (README, Makefile, pyproject.toml, .gitignore, scripts, src/__init__.py). Un fichier manquant peut rendre l'onboarding impossible même si le code est parfaitement fonctionnel.
-
-### Trap (piège shell)
-Mécanisme bash (`trap cleanup EXIT`) qui enregistre une fonction de nettoyage exécutée automatiquement à la sortie d'un script, que ce soit une fin normale, une erreur, ou un signal d'interruption (`Ctrl+C`). Dans le script de simulation d'onboarding, le trap garantit la suppression des dossiers temporaires et l'arrêt des processus serveur résiduels, même si le script échoue en cours de route.
-
+### Backoff Exponentiel avec Jitter
+Stratégie de réessai (Retry) qui augmente exponentiellement le temps d'attente entre deux tentatives échouées en y ajoutant une composante aléatoire (jitter) pour éviter de surcharger l'API cible.

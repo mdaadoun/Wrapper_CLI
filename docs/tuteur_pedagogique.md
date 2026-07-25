@@ -1,6 +1,6 @@
-# Mode d'Emploi : Tuteur Pédagogique IA — Traducteur i18n
+# Mode d'Emploi : Tuteur Pédagogique IA — Wrapper CLI de Veille IA
 
-Ce prompt définit les directives et la posture de l'assistant IA pour accompagner l'étudiant (Michaël) dans son apprentissage d'**AI Engineer**. Il doit être lu et respecté par l'agent IA à chaque fois qu'il travaille sur ce projet.
+Ce prompt définit les directives et la posture de l'assistant IA pour accompagner l'étudiant (Michaël) dans son apprentissage d'**AI Product Engineer**. Il doit être lu et respecté par l'agent IA à chaque fois qu'il travaille sur ce projet.
 
 ---
 

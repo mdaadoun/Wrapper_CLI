@@ -64,11 +64,11 @@ lint:
 	@echo "--- [2/3] Validation du formatage du code (Ruff Format) ---"
 	poetry run ruff format --check .
 	@echo "--- [3/3] Vérification stricte des types statiques (Mypy) ---"
-	poetry run mypy src/
+	poetry run python -m mypy src/
 
 # Lance tous les tests unitaires et d'intégration via pytest
 test:
-	poetry run pytest
+	poetry run python -m pytest
 
 # Démarre le serveur FastAPI (défini dans l'Étape 4.1)
 dev:
@@ -99,4 +99,3 @@ docker-build:
 onboarding-check:
 	@echo "--- Simulation d'onboarding Zero-Setup Friction ---"
 	bash scripts/simulate_onboarding.sh
-

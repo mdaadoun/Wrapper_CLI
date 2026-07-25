@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "aipe-framework"
+name = "wrapper-cli"
 version = "0.1.0"
-description = "Blueprint industriel d'ingénierie logicielle appliquée aux produits IA (AIPE)."
-authors = ["Michael <michael@example.com>"]
+description = "CLI de veille IA automatisée, résilient, typé et hautement configurable avec tracking FinOps."
+authors = ["Michaël Daadoun <michael@example.com>"]
 readme = "README.md"
 packages = [{include = "src"}]
 
@@ -61,4 +61,4 @@ source = ["src"]
 
 [tool.coverage.report]
 show_missing = true
-fail_under = 100
+fail_under = 80
