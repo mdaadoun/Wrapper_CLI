@@ -1,21 +1,7 @@
 {
-    // ==========================================================================
-    // Extensions VSCode Recommandées pour AIPE_Framework
-    // ==========================================================================
-    // Lorsqu'un développeur ouvre ce projet, VSCode affiche automatiquement une
-    // notification proposant d'installer ces extensions. Cela élimine le risque
-    // qu'un membre de l'équipe travaille sans le formateur Ruff configuré,
-    // provoquant des commits mal formatés et des conflits Git inutiles.
-    // ==========================================================================
-
+    // Recommended VSCode Extensions for AIPE_Framework
     "recommendations": [
-        // Extension officielle Ruff (Astral) : fournit le linter et le formateur
-        // Python ultra-rapide utilisé dans ce projet. Sans cette extension, les
-        // paramètres de formatage automatique dans settings.json n'ont aucun effet.
         "charliermarsh.ruff",
-
-        // Extension Python officielle (Microsoft) : fournit l'auto-complétion,
-        // le débogage, la résolution de l'interpréteur et l'intégration pytest.
         "ms-python.python"
     ]
 }

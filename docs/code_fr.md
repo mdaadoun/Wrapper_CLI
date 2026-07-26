@@ -37,3 +37,12 @@ Ce document présente une explication détaillée de l'architecture du projet `W
 ## 🚀 6. Simulation d'Onboarding : `scripts/simulate_onboarding.sh`
 
 - **Rôle :** Script de validation automatisé E2E qui valide le scénario Zero-Setup Friction en moins de 300 secondes.
+
+---
+
+## ⚙️ 7. Configuration de l'Espace de Travail IDE : `.vscode/`
+
+- **Rôle :** Configure l'espace de travail VSCode (`.vscode/settings.json`) et les recommandations d'extensions (`.vscode/extensions.json`).
+- **Concepts Clés :**
+  - **`extensions.json` :** Propose automatiquement l'installation des extensions officielles `charliermarsh.ruff` (linter/formateur) et `ms-python.python` dès l'ouverture du projet.
+  - **`settings.json` :** Aligne le comportement de l'IDE local sur la CI/CD en activant le formatage automatique à la sauvegarde via Ruff (`editor.formatOnSave`: `true`), la correction automatique des erreurs et imports (`source.fixAll`, `source.organizeImports`) et les règles de nettoyage de fin de ligne.

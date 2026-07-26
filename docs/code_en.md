@@ -37,3 +37,12 @@ This document provides a detailed breakdown of the `Wrapper_CLI` architecture, m
 ## 🚀 6. Onboarding Automation: `scripts/simulate_onboarding.sh`
 
 - **Purpose:** Automated E2E verification script that validates zero-setup friction onboarding in under 300 seconds.
+
+---
+
+## ⚙️ 7. IDE Workspace & Extension Recommendations: `.vscode/`
+
+- **Purpose:** Configures workspace settings (`.vscode/settings.json`) and extension recommendations (`.vscode/extensions.json`).
+- **Key Concepts:**
+  - **`extensions.json`:** Automatically prompts developers opening the workspace to install `charliermarsh.ruff` (linter/formatter) and `ms-python.python` (interpreter & debugging).
+  - **`settings.json`:** Aligns local IDE behavior with CI/CD checks by enabling format-on-save via Ruff (`editor.formatOnSave`: `true`), auto-fixing lint errors and imports on save (`source.fixAll`, `source.organizeImports`), and setting `files.insertFinalNewline` & `files.trimTrailingWhitespace`.

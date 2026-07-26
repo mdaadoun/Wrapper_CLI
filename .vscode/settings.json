@@ -1,67 +1,20 @@
 {
-    // ==========================================================================
-    // Configuration VSCode pour AIPE_Framework
-    // ==========================================================================
-    // Ce fichier est versionné dans Git et partagé entre tous les développeurs
-    // du projet. Il configure le formatage et l'analyse automatiques à la
-    // sauvegarde, alignant l'expérience de développement locale avec les
-    // vérifications de la CI (pre-commit hooks + Makefile).
-    //
-    // Prérequis : L'extension officielle "charliermarsh.ruff" doit être
-    // installée dans VSCode (recommandée automatiquement via extensions.json).
-    // ==========================================================================
-
-    // --- 1. INTERPRÉTEUR PYTHON ---
-    // Pointe VSCode vers l'environnement virtuel local créé par Poetry.
-    // Cela garantit que l'auto-complétion, le linting et les types résolvent
-    // les mêmes paquets que ceux installés via `poetry install`.
+    // VSCode workspace configuration
     "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
 
-    // --- 2. FORMATEUR PAR DÉFAUT ---
-    // Désigne Ruff comme formateur exclusif pour les fichiers Python.
-    // Ruff remplace ici Black/autopep8/yapf avec un formateur 100x plus rapide
-    // écrit en Rust, produisant un résultat compatible Black.
     "[python]": {
         "editor.defaultFormatter": "charliermarsh.ruff",
         "editor.formatOnSave": true,
-
-        // Exécute les "Code Actions" (corrections automatiques) à chaque
-        // sauvegarde. Ici, on active :
-        //   - "source.fixAll" : applique toutes les corrections Ruff (imports
-        //     inutilisés, style, etc.) — équivalent de `ruff check --fix`.
-        //   - "source.organizeImports" : trie et regroupe les imports selon
-        //     la convention PEP 8 — équivalent de `ruff check --select I --fix`.
         "editor.codeActionsOnSave": {
             "source.fixAll": "explicit",
             "source.organizeImports": "explicit"
         }
     },
 
-    // --- 3. CONFIGURATION DU SERVEUR RUFF (EXTENSION) ---
-    // Ces paramètres sont lus par l'extension Ruff pour VSCode et alignent
-    // son comportement sur la configuration définie dans pyproject.toml.
-
-    // Longueur de ligne maximale (doit correspondre à [tool.ruff] line-length)
     "ruff.lineLength": 88,
-
-    // Active le linter intégré de Ruff directement dans l'éditeur.
-    // Les erreurs de style (E), de logique (F), de tri des imports (I) et de
-    // bonnes pratiques (B) s'affichent comme des soulignements en temps réel.
     "ruff.lint.enable": true,
-
-    // --- 4. DÉSACTIVATION DES OUTILS CONCURRENTS ---
-    // Empêche les conflits entre les anciens outils Python de VSCode et Ruff.
-    // Sans ces réglages, VSCode pourrait exécuter Pylint ou Flake8 en
-    // parallèle de Ruff, produisant des doublons d'avertissements ou des
-    // corrections contradictoires à la sauvegarde.
     "python.linting.enabled": false,
 
-    // --- 5. CONFORT DE DÉVELOPPEMENT ---
-    // Insère automatiquement une ligne vide à la fin de chaque fichier
-    // sauvegardé (conforme au hook pre-commit `end-of-file-fixer`).
     "files.insertFinalNewline": true,
-
-    // Supprime les espaces invisibles en fin de ligne à chaque sauvegarde
-    // (conforme au hook pre-commit `trailing-whitespace`).
     "files.trimTrailingWhitespace": true
 }
