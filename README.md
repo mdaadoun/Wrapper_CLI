@@ -1,31 +1,59 @@
-# 🚀 Wrapper CLI de Veille IA Automatisée
+# 🚀 Automated AI Watcher CLI (Wrapper_CLI)
 
-Outil en ligne de commande (CLI) industriel, résilient, typé et hautement configurable en Python pour automatiser la veille technologique IA, l'analyse d'impact et la mesure FinOps des requêtes LLM.
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![Poetry](https://img.shields.io/badge/poetry-1.7+-60A5FA?style=flat-square&logo=poetry&logoColor=white)](https://python-poetry.org/)
+[![FastAPI 0.110+](https://img.shields.io/badge/FastAPI-0.110+-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Docker Multi-Stage](https://img.shields.io/badge/docker-Multi--Stage-2496ED?style=flat-square&logo=docker&logoColor=white)](https://www.docker.com/)
+[![Ruff](https://img.shields.io/badge/linter-Ruff-009688?style=flat-square)](https://github.com/astral-sh/ruff)
+[![Mypy strict](https://img.shields.io/badge/typing-Mypy%20strict-blue?style=flat-square)](https://mypy-lang.org/)
 
-## 🛠️ Stack Technique
+[🇫🇷 Version Française disponible ici](README_fr.md)
 
-- **Langage & Isolation** : Python 3.10+, Poetry
-- **Interface CLI & UI** : Typer / Click, Rich
-- **Validation & Schémas** : Pydantic v2
-- **Scraping & Reseau** : HTTPX, BeautifulSoup4
-- **Qualité & CI/CD** : Ruff, Mypy (strict), Pytest, Pre-commit (detect-secrets)
-- **Conteneurisation** : Docker Multi-stage (non-root)
+**Wrapper_CLI** is an industrial, resilient, typed, and highly configurable Python CLI application for automating AI technological surveillance, impact analysis, and FinOps tracking of LLM requests.
 
-## 📋 Démarrage Rapide
+---
 
-```bash
-# Configuration de l'environnement
-make install
+## 🎯 Key Features & Specifications
 
-# Exécuter les vérifications de qualité
-make lint
+* **Zero-Setup Friction:** Onboarding under 5 minutes (`make install` $\to$ ready to develop).
+* **Strict Type Safety:** 100% Mypy strict mode coverage in `src/`.
+* **Automated Quality Gatekeeping:** Pre-commit hooks (`detect-secrets`, `ruff`, `mypy`).
+* **Hardened Containerization:** Non-root multi-stage Docker build (< 250 MB).
 
-# Lancer la suite de tests
-make test
+---
+
+## 📂 Repository Structure
+
+```text
+Wrapper_CLI/
+│
+├── README.md                   # English main presentation & Quickstart guide
+├── README_fr.md                # French version of presentation
+│
+├── docs/                       # Architectural specifications & technical documentation
+    ├── specifications_en.md   # Functional & Technical Requirements Specification
+    ├── roadmap_en.md          # Chronological step-by-step 6-phase roadmap
+    ├── glossary_en.md         # Technical glossary of key CLI concepts
+    ├── questions_en.md        # Technical interview FAQ
+    ├── code_en.md             # Source code architecture reference guide
+    └── journal_en.md          # Architecture Decision Records (ADR) & development logbook
 ```
 
-## 📚 Documentation
+---
 
-- [Cahier des charges (CDCF)](file:///home/michael/Code/ai-engineering/projets/3_Wrapper_CLI/docs/cahier_charges.md)
-- [Feuille de route (Roadmap)](file:///home/michael/Code/ai-engineering/projets/3_Wrapper_CLI/docs/roadmap_details.md)
-- [Journal d'apprentissage](file:///home/michael/Code/ai-engineering/projets/3_Wrapper_CLI/docs/journal_apprentissage.md)
+## 🚀 Quickstart Guide
+
+### 1. Initialize project (Onboarding)
+```bash
+make install
+```
+
+### 2. Run Quality Checks (Ruff + Strict Mypy)
+```bash
+make lint
+```
+
+### 3. Run Test Suite
+```bash
+make test
+```
