@@ -1,18 +1,18 @@
-# Isolation de l'environnement virtuel Poetry local
+# Python virtual environment
 .venv/
 
-# Caches d'exécution Python
+# Python bytecode & cache
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 
-# Caches des outils de test et d'analyse statique
+# QA & test caches
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
 
-# Rapports de couverture des tests
+# Coverage reports
 .coverage
 htmlcov/
 coverage.xml

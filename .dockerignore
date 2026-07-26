@@ -1,45 +1,36 @@
-# ==============================================================================
-# .dockerignore — Filtrage des fichiers exclus du contexte de build Docker
-# ==============================================================================
-# Ce fichier fonctionne exactement comme .gitignore, mais pour Docker.
-# Lorsque Docker exécute un 'docker build', il envoie tout le contenu du
-# répertoire courant (le "contexte de build") au démon Docker. Exclure les
-# fichiers inutiles accélère le transfert et réduit la taille du contexte.
-# ==============================================================================
+# Docker build context exclusions
 
-# Environnement virtuel local (sera recréé dans le conteneur par Poetry)
+# Local virtual environment
 .venv/
 
-# Répertoires de cache des outils de développement
+# QA & test caches
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
 __pycache__/
 
-# Fichiers de couverture et rapports de test
+# Coverage reports
 .coverage
 htmlcov/
 coverage.xml
 
-# Répertoire Git (historique, hooks, configuration locale)
+# Git metadata
 .git/
 .gitignore
 
-# Dashboard local Flask (non déployé en production)
+# Local tracking dashboard
 dashboard/
 
-# Documentation et journaux d'apprentissage (non nécessaires dans l'image)
+# Documentation & tests
 docs/
-
-# Tests unitaires (non exécutés dans le conteneur de production)
 tests/
 
-# Fichiers de configuration de développement local
+# Development configuration
 .pre-commit-config.yaml
 .secrets.baseline
 Makefile
 
-# Fichiers Python compilés
+# Compiled Python files
 *.pyc
 *.pyo
 *.pyd
