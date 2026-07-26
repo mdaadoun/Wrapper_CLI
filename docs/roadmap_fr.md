@@ -45,7 +45,7 @@ Phase 1 : Adaptation Socle ──> Phase 2 : CLI Squelette ──> Phase 3 : Ing
 *   **Critère de validation :** Tous les fichiers `__init__.py` sont créés, `make lint` passe sur la structure vide, et l'import `from src.ai_watcher import main` fonctionne.
 
 ### Étape 1.4 : Configuration des secrets et variables d'environnement — ⏳ À faire
-*   **Description :** Créer le fichier `.env.example` à la racine avec les variables attendues (`OPENAI_API_KEY`, `MODEL_NAME`, `MAX_TOKENS`). Implémenter `config.py` avec `pydantic-settings` ou `python-dotenv` pour charger et valider ces variables. S'assurer que `.env` est dans `.gitignore`.
+*   **Description :** Créer le fichier `.env.example` à la racine avec les variables attendues (`GEMINI_API_KEY`, `MODEL_NAME`, `MAX_TOKENS`). Implémenter `config.py` avec `pydantic-settings` ou `python-dotenv` pour charger et valider ces variables. S'assurer que `.env` est dans `.gitignore`.
 *   **Concept clé :** Séparation stricte configuration/code (12-Factor App) et prévention des fuites de secrets.
 *   **Critère de validation :** Lancer l'application sans fichier `.env` lève une erreur explicite. Le hook `detect-secrets` bloque toute tentative de commit d'une clé en dur.
 

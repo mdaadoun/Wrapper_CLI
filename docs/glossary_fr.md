@@ -9,6 +9,9 @@ Ce glossaire définit les concepts d'ingénierie logicielle, d'IA et de FinOps m
 ### Engineering Blueprint Reuse
 Pratique consistant à réutiliser un socle d'infrastructure éprouvé (fichiers de configuration, linting, CI/CD) comme point de départ standardisé pour de nouveaux projets, évitant ainsi de recréer la "plomberie" initiale.
 
+### Single Responsibility Principle (SRP)
+Principe de conception logicielle (le "S" de SOLID) stipulant qu'une classe, un module ou un fichier ne doit avoir qu'une seule et unique raison de changer, favorisant la modularité et la testabilité du code.
+
 ### Gestion Déclarative des Dépendances (Declarative Dependency Management)
 Paradigme dans lequel le développeur déclare l'état désiré du système (ex. : `typer` version `^0.12.0` dans `pyproject.toml`) et confie à un outil (comme Poetry) la résolution et l'installation de l'arbre de dépendances, créant ainsi une source de vérité unique et déterministe.
 

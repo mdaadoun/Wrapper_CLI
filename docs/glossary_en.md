@@ -9,6 +9,9 @@ This glossary defines key software engineering, AI, and FinOps concepts used thr
 ### Engineering Blueprint Reuse
 The practice of reusing a proven infrastructure baseline (configuration files, linting, CI/CD) as a standardized starting point for new projects, thus avoiding the need to recreate the initial setup.
 
+### Single Responsibility Principle (SRP)
+A software design principle (the "S" in SOLID) stating that a class, module, or file should have only one reason to change, promoting code modularity and testability.
+
 ### Declarative Dependency Management
 A paradigm where the developer declares the desired state of the system (e.g., `typer` version `^0.12.0` in `pyproject.toml`) and trusts a tool (like Poetry) to resolve and install the dependency tree, creating a single, deterministic source of truth.
 

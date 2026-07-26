@@ -45,7 +45,7 @@ Phase 1: Baseline Setup ──> Phase 2: CLI Skeleton ──> Phase 3: Ingestion
 * **Validation Criterion:** All `__init__.py` files created, `make lint` passes on empty structure, and `from src.ai_watcher import main` succeeds.
 
 ### Step 1.4: Secrets & Environment Configuration — ⏳ Pending
-* **Description:** Create `.env.example` at root with expected variables (`OPENAI_API_KEY`, `MODEL_NAME`, `MAX_TOKENS`). Implement `config.py` with `pydantic-settings` or `python-dotenv` to load and validate these variables. Ensure `.env` is in `.gitignore`.
+* **Description:** Create `.env.example` at root with expected variables (`GEMINI_API_KEY`, `MODEL_NAME`, `MAX_TOKENS`). Implement `config.py` with `pydantic-settings` or `python-dotenv` to load and validate these variables. Ensure `.env` is in `.gitignore`.
 * **Key Concept:** Strict code/configuration separation (12-Factor App) and secret leak prevention.
 * **Validation Criterion:** Launching application without `.env` raises explicit error; `detect-secrets` pre-commit hook blocks hardcoded keys.
 

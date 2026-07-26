@@ -35,6 +35,6 @@ repos:
     hooks:
       - id: mypy
         name: Mypy (strict static type check)
-        additional_dependencies: [fastapi, pydantic, uvicorn]
+        additional_dependencies: [typer, pydantic, pydantic-settings, rich, httpx, tenacity, beautifulsoup4, python-dotenv]
         args: [--strict]
         files: ^src/

@@ -27,3 +27,6 @@ Questions-réponses clés pour défendre l'architecture et les choix d'ingénier
 
 ### Q6 : Pourquoi avez-vous démarré ce projet en nettoyant le code d'un projet précédent plutôt qu'en créant un dépôt vierge ?
 **Réponse :** C'est une application du principe "Engineering Blueprint Reuse". Repartir d'un socle d'ingénierie approuvé permet de bénéficier instantanément de l'infrastructure de qualité et de sécurité (Poetry, Ruff, Mypy, pre-commit avec detect-secrets, Makefile, Dockerfile) sans perdre de temps à tout reconfigurer. Cela garantit un pipeline CI robuste dès la première ligne de code métier.
+
+### Q7 : Pourquoi utiliser une structure de répertoires aussi découpée (`core/`, `clients/`, `utils/`, `formatters/`) au lieu d'un seul fichier `main.py` pour un outil CLI ?
+**Réponse :** Cette architecture respecte le principe de responsabilité unique (SRP). Dans un fichier monolithique, la logique de formatage, l'extraction et l'appel API sont fortement couplés, rendant le code difficile à tester et à maintenir. En séparant chaque responsabilité, les modules deviennent testables unitairement (ex. on peut tester le formateur sans appeler l'API réseau) et le projet peut évoluer ou être repris par d'autres développeurs de façon claire.

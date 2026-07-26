@@ -4,9 +4,16 @@ Ce document présente une explication détaillée de l'architecture du projet `W
 
 ---
 
-## 🛠️ 1. Point d'Entrée Principal : `src/ai_watcher/__init__.py`
+## 🛠️ 1. Architecture Modulaire : `src/ai_watcher/`
 
-- **Rôle :** Point d'entrée du paquet principal de l'outil CLI d'analyse et de veille IA.
+L'application repose sur le **Single Responsibility Principle (SRP)**. Le code est organisé en modules clairs :
+- **`main.py` :** Point d'entrée principal (CLI Typer). Gère uniquement les commandes et le routage des arguments.
+- **`config.py` :** Chargement de la configuration et des variables d'environnement (via `pydantic-settings`).
+- **`exceptions.py` :** Définition des erreurs personnalisées du domaine (ex: `AIWatcherError`).
+- **`core/` :** Logique métier (extraction de texte, flux d'analyse métier).
+- **`clients/` :** Encapsulation du client LLM (ex: `httpx` + appels API).
+- **`utils/` :** Utilitaires transverses (calculateur de coûts, mise en cache).
+- **`formatters/` :** Composants de rendu (terminal avec Rich, export Markdown).
 
 ---
 

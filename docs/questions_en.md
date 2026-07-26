@@ -27,3 +27,6 @@ Targeted questions and answers covering architecture design choices and engineer
 
 ### Q6: Why did you start this project by cleaning up a previous project's code instead of creating a blank repository?
 **Answer:** This applies the "Engineering Blueprint Reuse" principle. Starting from an approved engineering baseline provides immediate access to high-quality security and infrastructure (Poetry, Ruff, Mypy, pre-commit with detect-secrets, Makefile, Dockerfile) without wasting time reconfiguring everything. This ensures a robust CI pipeline from the very first line of business code.
+
+### Q7: Why use such a granular directory structure (`core/`, `clients/`, `utils/`, `formatters/`) instead of a single `main.py` file for a CLI tool?
+**Answer:** This architecture strictly adheres to the Single Responsibility Principle (SRP). In a monolithic file, formatting logic, extraction, and API calls are tightly coupled, making the code hard to test and maintain. By separating each responsibility, the modules become independently unit-testable (e.g., testing the formatter without making network calls), and the project can scale or be handed over to other developers cleanly.

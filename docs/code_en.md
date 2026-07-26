@@ -4,9 +4,16 @@ This document provides a detailed breakdown of the `Wrapper_CLI` architecture, m
 
 ---
 
-## 🛠️ 1. Main CLI Entrypoint: `src/ai_watcher/__init__.py`
+## 🛠️ 1. Modular Architecture: `src/ai_watcher/`
 
-- **Purpose:** Primary application package entrypoint for the AI Watcher CLI utility.
+The application adheres to the **Single Responsibility Principle (SRP)**. The code is organized into clear modules:
+- **`main.py`:** Primary entry point (Typer CLI). Handles only commands and argument routing.
+- **`config.py`:** Configuration and environment variable loading (via `pydantic-settings`).
+- **`exceptions.py`:** Definition of custom domain errors (e.g., `AIWatcherError`).
+- **`core/`:** Business logic (text extraction, analysis workflows).
+- **`clients/`:** LLM client encapsulation (e.g., `httpx` + API calls).
+- **`utils/`:** Cross-cutting utilities (cost calculator, caching).
+- **`formatters/`:** Rendering components (Rich terminal output, Markdown export).
 
 ---
 
