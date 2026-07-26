@@ -17,9 +17,10 @@ L'application repose sur le **Single Responsibility Principle (SRP)**. Le code e
 
 ---
 
-## 📦 2. Manifeste & Environnement Projet : `pyproject.toml`
+## 📦 2. Manifeste & Environnement Projet : `pyproject.toml` et `.env.example`
 
-- **Rôle :** Déclaration centralisée du projet via Poetry. Définit les dépendances du CLI, l'outillage de qualité (`pytest`, `ruff`, `mypy`, `pre-commit`, `detect-secrets`) et les paramètres des linters.
+- **`pyproject.toml` :** Déclaration centralisée du projet via Poetry. Définit les dépendances du CLI, l'outillage de qualité (`pytest`, `ruff`, `mypy`, `pre-commit`, `detect-secrets`) et les paramètres des linters.
+- **`.env.example` :** Modèle de configuration détaillant les variables requises (comme `GEMINI_API_KEY`) selon la méthodologie 12-Factor App.
 
 ---
 

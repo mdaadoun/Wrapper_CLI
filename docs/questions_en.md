@@ -30,3 +30,6 @@ Targeted questions and answers covering architecture design choices and engineer
 
 ### Q7: Why use such a granular directory structure (`core/`, `clients/`, `utils/`, `formatters/`) instead of a single `main.py` file for a CLI tool?
 **Answer:** This architecture strictly adheres to the Single Responsibility Principle (SRP). In a monolithic file, formatting logic, extraction, and API calls are tightly coupled, making the code hard to test and maintain. By separating each responsibility, the modules become independently unit-testable (e.g., testing the formatter without making network calls), and the project can scale or be handed over to other developers cleanly.
+
+### Q8: Why load configuration via Pydantic (`pydantic-settings`) rather than simple `os.environ.get()` calls?
+**Answer:** Pydantic provides three major benefits over `os.environ`: strong typing (automatically casting values, e.g., string to int), centralized validation, and the ability to "Fail Fast". If a required API key is missing from `.env`, the application crashes explicitly at startup with a clear message, rather than silently failing later during an HTTP call. The `SecretStr` type also masks the value in logs.

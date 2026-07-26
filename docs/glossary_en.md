@@ -12,6 +12,12 @@ The practice of reusing a proven infrastructure baseline (configuration files, l
 ### Single Responsibility Principle (SRP)
 A software design principle (the "S" in SOLID) stating that a class, module, or file should have only one reason to change, promoting code modularity and testability.
 
+### 12-Factor App (Methodology)
+A set of 12 best practices for building modern web or CLI applications. The rule regarding configuration requires strict separation between source code and configuration (which varies across environments), with the latter being stored in environment variables.
+
+### detect-secrets
+A security tool (often used as a pre-commit hook) developed by Yelp. It uses heuristics and entropy to scan source code before committing, blocking the accidental insertion of plaintext passwords, tokens, or API keys into a Git repository.
+
 ### Declarative Dependency Management
 A paradigm where the developer declares the desired state of the system (e.g., `typer` version `^0.12.0` in `pyproject.toml`) and trusts a tool (like Poetry) to resolve and install the dependency tree, creating a single, deterministic source of truth.
 

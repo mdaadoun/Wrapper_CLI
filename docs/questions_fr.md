@@ -30,3 +30,6 @@ Questions-réponses clés pour défendre l'architecture et les choix d'ingénier
 
 ### Q7 : Pourquoi utiliser une structure de répertoires aussi découpée (`core/`, `clients/`, `utils/`, `formatters/`) au lieu d'un seul fichier `main.py` pour un outil CLI ?
 **Réponse :** Cette architecture respecte le principe de responsabilité unique (SRP). Dans un fichier monolithique, la logique de formatage, l'extraction et l'appel API sont fortement couplés, rendant le code difficile à tester et à maintenir. En séparant chaque responsabilité, les modules deviennent testables unitairement (ex. on peut tester le formateur sans appeler l'API réseau) et le projet peut évoluer ou être repris par d'autres développeurs de façon claire.
+
+### Q8 : Pourquoi charger la configuration via Pydantic (`pydantic-settings`) plutôt qu'avec de simples appels à `os.environ.get()` ?
+**Réponse :** Pydantic apporte trois avantages majeurs par rapport à `os.environ` : le typage fort (il convertit automatiquement les valeurs, par ex. de string à int), la validation centralisée, et la capacité d'échouer rapidement ("Fail Fast"). Si une clé d'API requise est absente de `.env`, l'application plante explicitement dès son démarrage avec un message clair, plutôt que de planter silencieusement plus loin dans l'exécution lors de l'appel HTTP. Le type `SecretStr` masque également la valeur dans les logs.
