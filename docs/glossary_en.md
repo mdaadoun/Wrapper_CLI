@@ -6,6 +6,12 @@ This glossary defines key software engineering, AI, and FinOps concepts used thr
 
 ## 🛠️ Software Engineering & CLI Concepts
 
+### Engineering Blueprint Reuse
+The practice of reusing a proven infrastructure baseline (configuration files, linting, CI/CD) as a standardized starting point for new projects, thus avoiding the need to recreate the initial setup.
+
+### Declarative Dependency Management
+A paradigm where the developer declares the desired state of the system (e.g., `typer` version `^0.12.0` in `pyproject.toml`) and trusts a tool (like Poetry) to resolve and install the dependency tree, creating a single, deterministic source of truth.
+
 ### CLI (Command Line Interface)
 Text-based user interface allowing users to interact with applications by typing commands into a terminal.
 

@@ -6,6 +6,12 @@ Ce glossaire définit les concepts d'ingénierie logicielle, d'IA et de FinOps m
 
 ## 🛠️ Concepts d'Ingénierie Logicielle & CLI
 
+### Engineering Blueprint Reuse
+Pratique consistant à réutiliser un socle d'infrastructure éprouvé (fichiers de configuration, linting, CI/CD) comme point de départ standardisé pour de nouveaux projets, évitant ainsi de recréer la "plomberie" initiale.
+
+### Gestion Déclarative des Dépendances (Declarative Dependency Management)
+Paradigme dans lequel le développeur déclare l'état désiré du système (ex. : `typer` version `^0.12.0` dans `pyproject.toml`) et confie à un outil (comme Poetry) la résolution et l'installation de l'arbre de dépendances, créant ainsi une source de vérité unique et déterministe.
+
 ### CLI (Command Line Interface)
 Interface en ligne de commande permettant à l'utilisateur d'interagir avec une application en saisissant des lignes de texte dans un terminal.
 

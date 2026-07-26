@@ -46,3 +46,10 @@ Ce document présente une explication détaillée de l'architecture du projet `W
 - **Concepts Clés :**
   - **`extensions.json` :** Propose automatiquement l'installation des extensions officielles `charliermarsh.ruff` (linter/formateur) et `ms-python.python` dès l'ouverture du projet.
   - **`settings.json` :** Aligne le comportement de l'IDE local sur la CI/CD en activant le formatage automatique à la sauvegarde via Ruff (`editor.formatOnSave`: `true`), la correction automatique des erreurs et imports (`source.fixAll`, `source.organizeImports`) et les règles de nettoyage de fin de ligne.
+
+---
+
+## 🧪 8. Validation Initiale : `tests/test_core.py`
+
+- **Rôle :** Un module de test de base permettant à `pytest` de s'exécuter avec succès sur une base de code nouvellement initialisée (ou nettoyée).
+- **Concept :** Évite les erreurs "no tests ran" (code de sortie 5) lors des appels automatiques du `Makefile` pendant le setup initial.

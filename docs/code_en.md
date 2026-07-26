@@ -46,3 +46,10 @@ This document provides a detailed breakdown of the `Wrapper_CLI` architecture, m
 - **Key Concepts:**
   - **`extensions.json`:** Automatically prompts developers opening the workspace to install `charliermarsh.ruff` (linter/formatter) and `ms-python.python` (interpreter & debugging).
   - **`settings.json`:** Aligns local IDE behavior with CI/CD checks by enabling format-on-save via Ruff (`editor.formatOnSave`: `true`), auto-fixing lint errors and imports on save (`source.fixAll`, `source.organizeImports`), and setting `files.insertFinalNewline` & `files.trimTrailingWhitespace`.
+
+---
+
+## 🧪 8. Initial Validation: `tests/test_core.py`
+
+- **Purpose:** A baseline test module allowing `pytest` to execute successfully on a newly initialized (or cleaned up) codebase.
+- **Concept:** Prevents "no tests ran" errors (exit code 5) during automated `Makefile` checks in the initial setup phase.

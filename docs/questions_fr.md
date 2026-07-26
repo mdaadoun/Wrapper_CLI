@@ -24,3 +24,6 @@ Questions-réponses clés pour défendre l'architecture et les choix d'ingénier
 
 ### Q5 : Pourquoi utiliser un build Docker multi-stage non-root pour un outil CLI ?
 **Réponse :** Le build multi-stage sépare la phase d'installation des outils de compilation (Poetry, pip) du runtime final, réduisant le poids de l'image (de ~600 Mo à < 250 Mo). L'exécution sous un utilisateur non-privilégié `appuser` (UID 1000) respecte le principe de moindre privilège pour une utilisation sécurisée en conteneur CI/CD.
+
+### Q6 : Pourquoi avez-vous démarré ce projet en nettoyant le code d'un projet précédent plutôt qu'en créant un dépôt vierge ?
+**Réponse :** C'est une application du principe "Engineering Blueprint Reuse". Repartir d'un socle d'ingénierie approuvé permet de bénéficier instantanément de l'infrastructure de qualité et de sécurité (Poetry, Ruff, Mypy, pre-commit avec detect-secrets, Makefile, Dockerfile) sans perdre de temps à tout reconfigurer. Cela garantit un pipeline CI robuste dès la première ligne de code métier.

@@ -24,3 +24,6 @@ Targeted questions and answers covering architecture design choices and engineer
 
 ### Q5: Why use a non-root multi-stage Docker build for a CLI tool?
 **Answer:** Multi-stage builds separate build tools (Poetry, pip) from final runtime image, shrinking image size (from ~600 MB to < 250 MB). Running as non-privileged user `appuser` (UID 1000) adheres to the principle of least privilege for secure execution in CI/CD container environments.
+
+### Q6: Why did you start this project by cleaning up a previous project's code instead of creating a blank repository?
+**Answer:** This applies the "Engineering Blueprint Reuse" principle. Starting from an approved engineering baseline provides immediate access to high-quality security and infrastructure (Poetry, Ruff, Mypy, pre-commit with detect-secrets, Makefile, Dockerfile) without wasting time reconfiguring everything. This ensures a robust CI pipeline from the very first line of business code.
