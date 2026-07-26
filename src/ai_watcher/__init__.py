@@ -1,6 +1,6 @@
-"""Module principal pour le Wrapper CLI AI Watcher."""
+"""AI Watcher CLI core package."""
 
 
 def main() -> None:
-    """Point d'entrée principal du CLI."""
+    """Main CLI entrypoint."""
     pass

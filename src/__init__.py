@@ -1,1 +1,1 @@
-# AI Product Engineering (AIPE) Framework source package
+# Wrapper_CLI source package

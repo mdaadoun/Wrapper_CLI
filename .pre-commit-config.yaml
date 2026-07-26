@@ -1,24 +1,23 @@
-# Configuration pre-commit pour AIPE_Framework
-# Ces scripts s'exécutent automatiquement à chaque commit Git local pour assurer la qualité et la sécurité.
+# Pre-commit configuration for AIPE_Framework
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:
       - id: trailing-whitespace
-        name: Nettoyage des espaces de fin de ligne
+        name: Trim trailing whitespace
       - id: end-of-file-fixer
-        name: Correction de fin de fichier (nouvelle ligne)
+        name: Fix end of files
       - id: check-yaml
-        name: Validation de la syntaxe des fichiers YAML
+        name: Validate YAML syntax
       - id: check-added-large-files
-        name: Blocage des fichiers volumineux (> 500 Ko)
+        name: Block large files (> 500 KB)
 
   - repo: https://github.com/Yelp/detect-secrets
     rev: v1.5.0
     hooks:
       - id: detect-secrets
-        name: Détection passive des secrets et clés d'API
+        name: Detect secrets and API keys
         args: ['--baseline', '.secrets.baseline']
         exclude: poetry.lock
 
@@ -26,16 +25,16 @@ repos:
     rev: v0.3.3
     hooks:
       - id: ruff
-        name: Ruff Linter (analyse statique & correction)
+        name: Ruff Linter (static analysis & fix)
         args: [--fix]
       - id: ruff-format
-        name: Ruff Formatter (formatage de code)
+        name: Ruff Formatter
 
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.9.0
     hooks:
       - id: mypy
-        name: Mypy (vérification statique des types strict)
+        name: Mypy (strict static type check)
         additional_dependencies: [fastapi, pydantic, uvicorn]
         args: [--strict]
         files: ^src/
