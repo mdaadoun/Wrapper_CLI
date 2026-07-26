@@ -1,49 +1,29 @@
-# 📖 Glossaire Technique : Wrapper CLI de Veille IA
+# 📖 Technical Glossary: AI Watcher CLI Wrapper
 
-Ce glossaire définit les concepts d'ingénierie logicielle, d'IA et de FinOps manipulés dans le cadre du **Projet 3 : Wrapper CLI**.
+This glossary defines key software engineering, AI, and FinOps concepts used throughout **Project 3: Wrapper CLI**.
 
 ---
 
-## 🛠️ Concepts d'Ingénierie Logicielle & CLI
+## 🛠️ Software Engineering & CLI Concepts
 
 ### CLI (Command Line Interface)
-Interface en ligne de commande permettant à l'utilisateur d'interagir avec une application en saisissant des lignes de texte dans un terminal.
+Text-based user interface allowing users to interact with applications by typing commands into a terminal.
 
 ### Typer
-Framework Python moderne basé sur Click et les annotations de type Python (Type Hints) pour créer des applications CLI autodocumentées avec validation automatique.
+Modern Python CLI framework powered by Type Hints and Click for building self-documenting CLI tools with automatic parameter validation.
 
 ### Rich
-Bibliothèque Python permettant un rendu visuel riche dans le terminal (panneaux colorés, syntaxe Markdown, tableaux, barres de progression, spinners).
+Python library for rich terminal rendering (styled panels, syntax highlighting, Markdown, tables, progress bars, spinners).
 
-### Façade Pattern
-Patron de conception (Design Pattern) structurant qui fournit une interface simplifiée et unifiée devant un ensemble complexe de classes ou sous-systèmes (ex: orchestrateur d'extraction multi-sources).
+### Facade Pattern
+Structural design pattern providing a simplified, unified interface in front of complex subsystems (e.g., multi-source extraction orchestrator).
 
 ---
 
-## 🤖 Concepts d'Intelligence Artificielle
+## 🤖 Artificial Intelligence & LLM Concepts
 
 ### Structured Output
-Technique permettant de contraindre un LLM à retourner une réponse strictement conforme à un schéma prédéfini (JSON Schema ou modèle Pydantic), éliminant l'imprévisibilité du texte libre.
-
-### Prompt System (System Prompt)
-Instruction initiale de haut niveau donnée au modèle pour lui assigner un rôle (ex: *Analyste Senior IA*), un contexte et des contraintes de comportement avant de lui transmettre le contenu utilisateur.
-
-### Temperature & Top_P
-Paramètres de contrôle du déterminisme du LLM. Une température basse (0.0 – 0.3) réduit la variabilité et favorise la fidélité factuelle, indispensable pour l'analyse technique.
-
----
-
-## 💰 Concepts FinOps & Observabilité
+Technique forcing an LLM to return data conforming strictly to a JSON schema or Pydantic model instead of unstructured free text.
 
 ### FinOps (Financial Operations)
-Pratique de gestion financière appliquée aux ressources cloud et API d'IA visant à mesurer, suivre et optimiser les coûts d'inférence au jeton près.
-
-### Prompt Tokens vs Completion Tokens
-- **Prompt Tokens** : Nombre de jetons envoyés au modèle (instructions système + contenu source).
-- **Completion Tokens** : Nombre de jetons générés par le modèle dans sa réponse.
-
-### Hash SHA-256 & Idempotence
-Technique de hachage permettant d'identifier de manière unique un contenu d'entrée. Si la même empreinte est soumise, le système renvoie le résultat en cache sans refaire d'appel API payant (propriété d'idempotence).
-
-### Backoff Exponentiel avec Jitter
-Stratégie de réessai (Retry) qui augmente exponentiellement le temps d'attente entre deux tentatives échouées en y ajoutant une composante aléatoire (jitter) pour éviter de surcharger l'API cible.
+Discipline uniting engineering, finance, and product teams to optimize cloud and API costs (e.g., token usage tracking, cost per million tokens).
