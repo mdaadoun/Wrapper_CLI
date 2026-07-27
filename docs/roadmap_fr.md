@@ -15,20 +15,20 @@ Phase 1 : Adaptation Socle ──> Phase 2 : CLI Squelette ──> Phase 3 : Ing
 
 ---
 
-## Phase 1 : Adaptation du Socle Technique — ⏳ À faire
+## Phase 1 : Adaptation du Socle Technique — ✅ Complété
 *Objectif : Transformer le blueprint AIPE hérité en projet CLI autonome avec les bonnes dépendances.*
 
-### Étape 1.1 : Nettoyage du code hérité — ⏳ À faire
+### Étape 1.1 : Nettoyage du code hérité — ✅ Complété
 *   **Description :** Supprimer le code spécifique au projet 2 (routes FastAPI dans `src/`, tests liés au framework AIPE, dashboard Flask). Conserver uniquement la structure de base : `pyproject.toml`, `.pre-commit-config.yaml`, `Makefile`, `Dockerfile`, `.gitignore`, `.vscode/`.
 *   **Concept clé :** Réutilisation d'un blueprint d'ingénierie — on ne repart pas de zéro, on adapte un socle éprouvé.
 *   **Critère de validation :** Le dossier `src/` est vide (hormis `__init__.py`), le dossier `tests/` est vide, et `make lint` s'exécute sans erreur sur le projet vide.
 
-### Étape 1.2 : Mise à jour des dépendances Poetry — ⏳ À faire
+### Étape 1.2 : Mise à jour des dépendances Poetry — ✅ Complété
 *   **Description :** Adapter `pyproject.toml` : remplacer les dépendances de production (FastAPI, Uvicorn) par celles du CLI (`typer[all]`, `rich`, `httpx`, `beautifulsoup4`, `tenacity`, `python-dotenv`). Conserver Pydantic V2 (déjà présent). Régénérer le `poetry.lock` via `poetry lock && poetry install`.
 *   **Concept clé :** Gestion déclarative des dépendances — le fichier `pyproject.toml` est la seule source de vérité.
 *   **Critère de validation :** La commande `poetry install` s'exécute sans erreur et `poetry run python -c "import typer; import rich; import httpx"` réussit.
 
-### Étape 1.3 : Création de l'arborescence modulaire — ⏳ À faire
+### Étape 1.3 : Création de l'arborescence modulaire — ✅ Complété
 *   **Description :** Mettre en place la structure de paquets définie dans le cahier des charges (ST-03) :
     ```
     src/ai_watcher/
@@ -44,12 +44,12 @@ Phase 1 : Adaptation Socle ──> Phase 2 : CLI Squelette ──> Phase 3 : Ing
 *   **Concept clé :** Architecture modulaire à responsabilité unique — chaque dossier a un rôle précis et testable indépendamment.
 *   **Critère de validation :** Tous les fichiers `__init__.py` sont créés, `make lint` passe sur la structure vide, et l'import `from src.ai_watcher import main` fonctionne.
 
-### Étape 1.4 : Configuration des secrets et variables d'environnement — ⏳ À faire
+### Étape 1.4 : Configuration des secrets et variables d'environnement — ✅ Complété
 *   **Description :** Créer le fichier `.env.example` à la racine avec les variables attendues (`GEMINI_API_KEY`, `MODEL_NAME`, `MAX_TOKENS`). Implémenter `config.py` avec `pydantic-settings` ou `python-dotenv` pour charger et valider ces variables. S'assurer que `.env` est dans `.gitignore`.
 *   **Concept clé :** Séparation stricte configuration/code (12-Factor App) et prévention des fuites de secrets.
 *   **Critère de validation :** Lancer l'application sans fichier `.env` lève une erreur explicite. Le hook `detect-secrets` bloque toute tentative de commit d'une clé en dur.
 
-### Étape 1.5 : Adaptation du Makefile — ⏳ À faire
+### Étape 1.5 : Adaptation du Makefile — ✅ Complété
 *   **Description :** Mettre à jour les cibles du Makefile pour le contexte CLI : remplacer `make dev` (qui lançait Uvicorn) par `make run` (qui exécute la commande CLI principale). Ajouter `make run ARGS="--help"` comme raccourci de démonstration.
 *   **Concept clé :** Interface de commande unifiée — le Makefile reste le point d'entrée unique pour tout développeur.
 *   **Critère de validation :** `make run ARGS="--help"` affiche l'aide Typer du CLI sans erreur.

@@ -9,6 +9,9 @@ Ce glossaire définit les concepts d'ingénierie logicielle, d'IA et de FinOps m
 ### Engineering Blueprint Reuse
 Pratique consistant à réutiliser un socle d'infrastructure éprouvé (fichiers de configuration, linting, CI/CD) comme point de départ standardisé pour de nouveaux projets, évitant ainsi de recréer la "plomberie" initiale.
 
+### Unified Command Interface (Interface de Commande Unifiée)
+Modèle de conception d'automatisation logicielle dans lequel un fichier central (Makefile) sert de point d'entrée unique et homogène pour l'ensemble des tâches de développement, de test et de déploiement.
+
 ### Single Responsibility Principle (SRP)
 Principe de conception logicielle (le "S" de SOLID) stipulant qu'une classe, un module ou un fichier ne doit avoir qu'une seule et unique raison de changer, favorisant la modularité et la testabilité du code.
 

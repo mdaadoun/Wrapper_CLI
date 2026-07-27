@@ -33,3 +33,8 @@ Questions-réponses clés pour défendre l'architecture et les choix d'ingénier
 
 ### Q8 : Pourquoi charger la configuration via Pydantic (`pydantic-settings`) plutôt qu'avec de simples appels à `os.environ.get()` ?
 **Réponse :** Pydantic apporte trois avantages majeurs par rapport à `os.environ` : le typage fort (il convertit automatiquement les valeurs, par ex. de string à int), la validation centralisée, et la capacité d'échouer rapidement ("Fail Fast"). Si une clé d'API requise est absente de `.env`, l'application plante explicitement dès son démarrage avec un message clair, plutôt que de planter silencieusement plus loin dans l'exécution lors de l'appel HTTP. Le type `SecretStr` masque également la valeur dans les logs.
+
+### 5. Transition vers le CLI & Automatisation (Makefile)
+
+**Q : Pourquoi avoir structuré le point d'entrée de ce projet avec Typer plutôt qu'un serveur classique comme Uvicorn ?**
+*Réponse attendue :* L'application (Wrapper_CLI) est un outil asynchrone destiné à l'extraction de contenu ponctuelle et automatisée. Un CLI (Command Line Interface) s'exécute à la demande et s'éteint, ce qui est parfait pour une automatisation CI/CD ou des cron jobs. Typer permet de générer des CLI typés très rapidement avec une génération d'aide automatique (`--help`), là où Uvicorn est conçu pour des daemons/serveurs web écoutant en continu. Le Makefile a été adapté en conséquence avec `make run` pour faciliter l'injection d'arguments.

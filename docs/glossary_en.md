@@ -9,6 +9,9 @@ This glossary defines key software engineering, AI, and FinOps concepts used thr
 ### Engineering Blueprint Reuse
 The practice of reusing a proven infrastructure baseline (configuration files, linting, CI/CD) as a standardized starting point for new projects, thus avoiding the need to recreate the initial setup.
 
+### Unified Command Interface
+Automation design pattern where a single central file (Makefile) acts as the unified entrypoint for all operational tasks (build, lint, test, run, docker), abstracting away toolchain specifics.
+
 ### Single Responsibility Principle (SRP)
 A software design principle (the "S" in SOLID) stating that a class, module, or file should have only one reason to change, promoting code modularity and testability.
 

@@ -10,25 +10,25 @@ This roadmap outlines the chronological implementation steps for **Project 3: Au
 
 ```text
 Phase 1: Baseline Setup ──> Phase 2: CLI Skeleton ──> Phase 3: Ingestion ──> Phase 4: LLM Client ──> Phase 5: FinOps ──> Phase 6: Rich UI ──> Phase 7: Cache ──> Phase 8: Resilience ──> Phase 9: Testing ──> Phase 10: Docker & Release
-     (⏳ Pending)                (⏳ Pending)            (⏳ Pending)          (⏳ Pending)         (⏳ Pending)      (⏳ Pending)       (⏳ Pending)      (⏳ Pending)        (⏳ Pending)       (⏳ Pending)
+     (✅ Completed)                (⏳ Pending)            (⏳ Pending)          (⏳ Pending)         (⏳ Pending)      (⏳ Pending)       (⏳ Pending)      (⏳ Pending)        (⏳ Pending)       (⏳ Pending)
 ```
 
 ---
 
-## Phase 1: Technical Baseline Adaptation — ⏳ Pending
-*Goal: Adapt inherited AIPE blueprint into a standalone CLI project with required dependencies.*
+## Phase 1: Technical Baseline Adaptation — ✅ Completed
+*Objective: Transform inherited AIPE blueprint into a standalone CLI project with correct dependencies.*
 
-### Step 1.1: Inherited Code Cleanup — ⏳ Pending
+### Step 1.1: Inherited Code Cleanup — ✅ Completed
 * **Description:** Remove Project 2 specific code (FastAPI routes in `src/`, AIPE framework tests, Flask dashboard). Keep core infrastructure: `pyproject.toml`, `.pre-commit-config.yaml`, `Makefile`, `Dockerfile`, `.gitignore`, `.vscode/`.
 * **Key Concept:** Engineering blueprint reuse — adapt proven baseline rather than starting from scratch.
 * **Validation Criterion:** `src/` empty (except `__init__.py`), `tests/` empty, `make lint` executes cleanly.
 
-### Step 1.2: Poetry Dependencies Update — ⏳ Pending
+### Step 1.2: Poetry Dependencies Update — ✅ Completed
 * **Description:** Update `pyproject.toml`: replace production web dependencies (FastAPI, Uvicorn) with CLI tools (`typer[all]`, `rich`, `httpx`, `beautifulsoup4`, `tenacity`, `python-dotenv`). Keep Pydantic V2. Regenerate lockfile via `poetry lock && poetry install`.
 * **Key Concept:** Declarative dependency management — single source of truth in `pyproject.toml`.
 * **Validation Criterion:** `poetry install` succeeds and `poetry run python -c "import typer; import rich; import httpx"` passes.
 
-### Step 1.3: Modular Directory Structure — ⏳ Pending
+### Step 1.3: Modular Directory Structure — ✅ Completed
 * **Description:** Establish package structure matching specifications (ST-03):
     ```text
     src/ai_watcher/
@@ -44,12 +44,12 @@ Phase 1: Baseline Setup ──> Phase 2: CLI Skeleton ──> Phase 3: Ingestion
 * **Key Concept:** Single Responsibility Principle (SRP) modular architecture — each directory has a clear role and is independently testable.
 * **Validation Criterion:** All `__init__.py` files created, `make lint` passes on empty structure, and `from src.ai_watcher import main` succeeds.
 
-### Step 1.4: Secrets & Environment Configuration — ⏳ Pending
+### Step 1.4: Secrets & Environment Configuration — ✅ Completed
 * **Description:** Create `.env.example` at root with expected variables (`GEMINI_API_KEY`, `MODEL_NAME`, `MAX_TOKENS`). Implement `config.py` with `pydantic-settings` or `python-dotenv` to load and validate these variables. Ensure `.env` is in `.gitignore`.
 * **Key Concept:** Strict code/configuration separation (12-Factor App) and secret leak prevention.
 * **Validation Criterion:** Launching application without `.env` raises explicit error; `detect-secrets` pre-commit hook blocks hardcoded keys.
 
-### Step 1.5: Makefile Adaptation — ⏳ Pending
+### Step 1.5: Makefile Adaptation — ✅ Completed
 * **Description:** Update Makefile targets for CLI context: replace `make dev` (which launched Uvicorn) with `make run` (executing main CLI command). Add `make run ARGS="--help"` shortcut demonstration.
 * **Key Concept:** Unified command interface — Makefile remains single entrypoint for developers.
 * **Validation Criterion:** `make run ARGS="--help"` renders Typer help menu without errors.
