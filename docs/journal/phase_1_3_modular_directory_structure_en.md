@@ -8,7 +8,7 @@ The goal of this session is to establish a clean and modular Python package stru
 ### 1. 🎓 New Concepts Introduced
 
 *   **Single Responsibility Principle (SRP):** A software design principle (the "S" in SOLID) stating that every class, module, or function should have only one reason to change. Here, the formatting logic is separated from the extraction logic, which is itself separated from the API client management.
-*   **Domain Exceptions:** The practice of defining custom exception classes (e.g., `AIWatcherError`, `ExtractionError`) specific to the application's business domain, rather than raising generic Python errors (`ValueError` or `Exception`).
+*   **Domain Exceptions:** The practice of defining custom exception classes (e.g., `WatcherError`, `ExtractionError`) specific to the application's business domain, rather than raising generic Python errors (`ValueError` or `Exception`).
 
 ---
 

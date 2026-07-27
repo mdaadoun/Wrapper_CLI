@@ -53,7 +53,7 @@ Exception handling in `src/ai_watcher/main.py`:
 try:
     source_type = detect_source_type(source, text, file, url)
     typer.echo(f"Scanning source [{source_type.value} mode]: {source}")
-except AIWatcherError as err:
+except WatcherError as err:
     typer.secho(f"Error: {err}", fg=typer.colors.RED, err=True)
     raise typer.Exit(code=1) from err
 ```

@@ -69,7 +69,7 @@ Phase 1 : Adaptation Socle ──> Phase 2 : CLI Squelette ──> Phase 3 : Ing
 *   **Concept clé :** Ergonomie utilisateur — la détection automatique élimine le besoin de drapeaux explicites dans le cas courant.
 *   **Critère de validation :** Le CLI identifie correctement les 3 types de sources et affiche le type détecté. Une source vide (`""`) produit un code de retour `1` avec un message d'erreur explicite.
 
-### Étape 2.3 : Module d'exceptions personnalisées — ⏳ À faire
+### Étape 2.3 : Module d'exceptions personnalisées — ✅ Terminé
 *   **Description :** Créer `exceptions.py` avec les classes d'exceptions métier : `EmptySourceError`, `ExtractionError`, `LLMClientError`, `ConfigurationError`. Chaque exception hérite d'une classe de base `WatcherError`.
 *   **Concept clé :** Hiérarchie d'exceptions — permet un traitement d'erreur granulaire et des messages utilisateur ciblés sans crash de l'interpréteur.
 *   **Critère de validation :** Chaque exception peut être levée et attrapée individuellement. `make lint` (Mypy strict) valide le typage de la hiérarchie.

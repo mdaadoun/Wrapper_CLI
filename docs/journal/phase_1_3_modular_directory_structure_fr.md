@@ -8,7 +8,7 @@ Le but de cette séance est de mettre en place une structure de paquet Python pr
 ### 1. 🎓 Nouveaux Concepts Introduits
 
 *   **Single Responsibility Principle (SRP) :** Principe de conception logicielle (le "S" de SOLID) stipulant que chaque classe, module ou fonction ne doit avoir qu'une seule raison de changer. Ici, la logique de formatage est séparée de la logique d'extraction, elle-même séparée de la gestion du client API.
-*   **Domain Exceptions :** Pratique consistant à définir des classes d'exceptions personnalisées (ex. `AIWatcherError`, `ExtractionError`) spécifiques au domaine métier de l'application, plutôt que de lever des erreurs génériques Python (`ValueError` ou `Exception`).
+*   **Domain Exceptions :** Pratique consistant à définir des classes d'exceptions personnalisées (ex. `WatcherError`, `ExtractionError`) spécifiques au domaine métier de l'application, plutôt que de lever des erreurs génériques Python (`ValueError` ou `Exception`).
 
 ---
 

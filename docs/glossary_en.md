@@ -78,3 +78,6 @@ Hashing technique uniquely identifying input content. Submitting identical conte
 
 ### Exponential Backoff with Jitter
 Retry strategy increasing wait time exponentially between failed attempts, adding random jitter to prevent overwhelming target APIs.
+
+### Exception Hierarchy
+An architecture pattern where custom exception classes inherit from a common base class. This enables granular error handling and targeted feedback without generic interpreter crashes.

@@ -48,3 +48,8 @@ Targeted questions and answers covering architecture design choices and engineer
 
 **Q: How do you design an automatic CLI input detection heuristic without creating false positives or side effects?**
 *Expected Answer:* An effective CLI detection heuristic must be strictly ordered and deterministic. First, explicit URL prefixes (`http://` or `https://`) are evaluated, followed by physical filesystem path resolution (`Path.exists() & Path.is_file()`). All other string inputs fall back to raw text. To guarantee flexibility, explicit boolean flags (`-t`, `-f`, `-u`) allow users to manually override the detection when ambiguities arise. Empty or whitespace-only inputs immediately raise a dedicated domain exception (`EmptySourceError`) following the Fail-Fast principle.
+
+### 8. Granular Exception Handling (Step 2.3)
+
+**Q: Why use a custom Exception Hierarchy instead of just raising generic exceptions?**
+*Expected Answer:* A custom exception hierarchy (like a base `WatcherError` with subclasses `ExtractionError`, `ConfigurationError`) allows developers to catch specific domain errors without masking unrelated system exceptions. It empowers the main application to handle expected failures gracefully (e.g., printing a clean terminal message and returning code 1) rather than crashing with an ugly stack trace.

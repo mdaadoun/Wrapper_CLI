@@ -78,3 +78,6 @@ Technique de hachage permettant d'identifier de manière unique un contenu d'ent
 
 ### Backoff Exponentiel avec Jitter
 Stratégie de réessai (Retry) qui augmente exponentiellement le temps d'attente entre deux tentatives échouées en y ajoutant une composante aléatoire (jitter) pour éviter de surcharger l'API cible.
+
+### Hiérarchie d exceptions
+Un modèle d architecture où des classes d exceptions personnalisées héritent d une classe de base commune. Cela permet une gestion granulaire des erreurs et des retours ciblés sans plantages génériques de l interpréteur.

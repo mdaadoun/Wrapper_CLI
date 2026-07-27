@@ -6,7 +6,7 @@ Optimized for token usage and readability.
 import typer
 
 from src.ai_watcher.core.detector import detect_source_type
-from src.ai_watcher.exceptions import AIWatcherError
+from src.ai_watcher.exceptions import WatcherError
 
 app = typer.Typer(help="AI Watcher CLI: Automated content extraction and AI analysis.")
 
@@ -45,7 +45,7 @@ def scan(
             force_url=url,
         )
         typer.echo(f"Scanning source [{source_type.value} mode]: {source}")
-    except AIWatcherError as err:
+    except WatcherError as err:
         typer.secho(f"Error: {err}", fg=typer.colors.RED, err=True)
         raise typer.Exit(code=1) from err
 

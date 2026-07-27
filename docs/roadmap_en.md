@@ -69,7 +69,7 @@ Phase 1: Baseline Setup ──> Phase 2: CLI Skeleton ──> Phase 3: Ingestion
 * **Key Concept:** User Ergonomics — automatic detection removes need for explicit flags in common use cases.
 * **Validation Criterion:** CLI correctly identifies all 3 source types. Empty source (`""`) returns exit code `1` with explicit error message.
 
-### Step 2.3: Custom Exceptions Module — ⏳ Pending
+### Step 2.3: Custom Exceptions Module — ✅ Completed
 * **Description:** Create `exceptions.py` with domain exception classes: `EmptySourceError`, `ExtractionError`, `LLMClientError`, `ConfigurationError`. All inherit from base `WatcherError`.
 * **Key Concept:** Exception Hierarchy — enables granular error handling and targeted user messages without interpreter crashes.
 * **Validation Criterion:** Each exception can be raised and caught individually. Strict Mypy validates type hierarchy.

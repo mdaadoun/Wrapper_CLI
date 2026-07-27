@@ -10,7 +10,7 @@ The application adheres to the **Single Responsibility Principle (SRP)**. The co
 - **`main.py`:** Primary entry point (Typer CLI). Handles subcommand routing (e.g., `scan`), positional argument validation (`source`), and mode flags (`--text/-t`, `--file/-f`, `--url/-u`).
   - *`scan()` function:* Receives input source, resolves evaluation mode (auto by default or overridden by flag), and routes payload to the ingestion pipeline.
 - **`config.py`:** Configuration and environment variable loading (via `pydantic-settings`).
-- **`exceptions.py`:** Definition of custom domain errors (e.g., `AIWatcherError`).
+- **`exceptions.py`:** Definition of custom domain errors built on a granular **Exception Hierarchy** (`WatcherError` as base, extended by `EmptySourceError`, `ExtractionError`, `LLMClientError`, `ConfigurationError`). This allows for targeted error handling and user-friendly messages without crashing the interpreter.
 - **`core/`:** Business logic components.
   - **`detector.py`:** Deterministic source type inference (`SourceType.URL`, `SourceType.FILE`, `SourceType.TEXT`) and `EmptySourceError` validation.
 - **`clients/`:** LLM client encapsulation (e.g., `httpx` + API calls).

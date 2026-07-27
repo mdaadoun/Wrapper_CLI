@@ -1,33 +1,34 @@
 """
-Custom domain exceptions for AI Watcher CLI.
+Custom domain exceptions for Wrapper CLI.
+Provides a granular Exception Hierarchy for targeted error handling.
 """
 
 
-class AIWatcherError(Exception):
-    """Base exception for all AI Watcher errors."""
+class WatcherError(Exception):
+    """Base exception for all Watcher CLI domain errors."""
 
     pass
 
 
-class EmptySourceError(AIWatcherError):
+class EmptySourceError(WatcherError):
     """Raised when the input source is empty or whitespace-only."""
 
     pass
 
 
-class ConfigurationError(AIWatcherError):
+class ConfigurationError(WatcherError):
     """Raised when environment variables or config is missing/invalid."""
 
     pass
 
 
-class ExtractionError(AIWatcherError):
+class ExtractionError(WatcherError):
     """Raised when content extraction fails."""
 
     pass
 
 
-class LLMAPIError(AIWatcherError):
+class LLMClientError(WatcherError):
     """Raised when the LLM API returns an error or times out."""
 
     pass

@@ -48,3 +48,8 @@ Questions-réponses clés pour défendre l'architecture et les choix d'ingénier
 
 **Q : Comment concevoir une heuristique de détection automatique des entrées CLI sans créer de faux positifs ou d'effets de bord ?**
 *Réponse attendue :* Une heuristique de détection CLI efficace doit être strictement ordonnée et déterministe. On valide en premier lieu les préfixes explicites (ex: `http://` ou `https://` pour les URL), puis l'existence physique du fichier sur le système de fichiers (`Path.exists() & Path.is_file()`). Tout autre contenu est traité par défaut comme du texte brut. Pour garantir la sécurité et la flexibilité, des fanions d'invalidation explicites (`-t`, `-f`, `-u`) permettent à l'utilisateur de surcharger manuellement la détection si une ambiguïté se présente. Les entrées vides doivent lever immédiatement une exception dédiée (`EmptySourceError`) selon le principe du Fail-Fast.
+
+### 8. Gestion Granulaire des Exceptions (Étape 2.3)
+
+**Q: Pourquoi utiliser une Hiérarchie d Exceptions personnalisée plutôt que de lever des exceptions génériques ?**
+*Expected Answer:* Une hiérarchie personnalisée (comme une base `WatcherError` avec des sous-classes `ExtractionError`, `ConfigurationError`) permet de capturer des erreurs de domaine spécifiques sans masquer les exceptions système sans rapport. Cela permet à l application principale de gérer les échecs prévus proprement (ex: afficher un message clair et quitter avec un code 1) au lieu de planter brutalement.
