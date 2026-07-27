@@ -11,7 +11,8 @@ L'application repose sur le **Single Responsibility Principle (SRP)**. Le code e
   - *Fonction `scan()` :* Reçoit la source utilisateur, résout le mode d'évaluation (auto par défaut, ou surchargé par drapeau) et transmet l'entrée au pipeline d'ingestion.
 - **`config.py` :** Chargement de la configuration et des variables d'environnement (via `pydantic-settings`).
 - **`exceptions.py` :** Définition des erreurs personnalisées du domaine (ex: `AIWatcherError`).
-- **`core/` :** Logique métier (extraction de texte, flux d'analyse métier).
+- **`core/` :** Logique métier.
+  - **`detector.py` :** Inférence déterministe du type de source (`SourceType.URL`, `SourceType.FILE`, `SourceType.TEXT`) et levée de `EmptySourceError` si la chaîne est vide.
 - **`clients/` :** Encapsulation du client LLM (ex: `httpx` + appels API).
 - **`utils/` :** Utilitaires transverses (calculateur de coûts, mise en cache).
 - **`formatters/` :** Composants de rendu (terminal avec Rich, export Markdown).

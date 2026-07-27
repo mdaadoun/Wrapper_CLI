@@ -64,7 +64,7 @@ Phase 1: Baseline Setup ──> Phase 2: CLI Skeleton ──> Phase 3: Ingestion
 * **Key Concept:** Declarative CLI Framework — Typer automatically infers help, type validation, and error messages from Python annotations.
 * **Validation Criterion:** `poetry run python -m src.ai_watcher.main scan "Hello World"` prints confirmation without crashing. `--help` documents all options.
 
-### Step 2.2: Automatic Source Type Detection — ⏳ Pending
+### Step 2.2: Automatic Source Type Detection — ✅ Completed
 * **Description:** Implement detection logic in `main.py`: URLs start with `http://` or `https://`; existing local paths are files; otherwise raw text. Raise `EmptySourceError` if input is empty or whitespace-only.
 * **Key Concept:** User Ergonomics — automatic detection removes need for explicit flags in common use cases.
 * **Validation Criterion:** CLI correctly identifies all 3 source types. Empty source (`""`) returns exit code `1` with explicit error message.

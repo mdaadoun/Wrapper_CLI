@@ -33,6 +33,12 @@ Modern Python CLI framework powered by Type Hints and Click for building self-do
 ### Declarative CLI Framework
 Software engineering pattern where CLI interface structure (arguments, options, types, help menus) is declared directly via function signatures and Python Type Hints.
 
+### Automatic Source Type Detection
+CLI UX pattern where the application inspects input payload values to infer target type (`URL`, `FILE`, or `TEXT`) automatically without forcing explicit CLI flags in common scenarios.
+
+### Fail-Fast Validation
+Engineering design rule dictating that input validation occurs at the system edge, raising domain exceptions immediately before invoking resource-heavy pipelines.
+
 ### Positional Argument vs CLI Option
 - **Positional Argument**: Mandatory CLI parameter identified by its relative position in the command invocation (e.g., `source` in `scan <source>`).
 - **CLI Option (Flag)**: Optional parameter prefixed with one or two dashes (e.g., `-t` or `--text`), overriding or altering command execution behavior.

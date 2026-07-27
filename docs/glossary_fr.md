@@ -33,6 +33,12 @@ Framework Python moderne basé sur Click et les annotations de type Python (Type
 ### Declarative CLI Framework (Framework CLI Déclaratif)
 Approche d'ingénierie logicielle dans laquelle la structure de l'interface en ligne de commande (arguments, options, types, messages d'aide) est définie de manière déclarative par les signatures de fonctions et leurs annotations de type.
 
+### Détection Automatique du Type de Source (Automatic Source Type Detection)
+Pattern d'ergonomie CLI dans lequel le système inspecte la valeur saisie par l'utilisateur pour déterminer automatiquement son type (`URL`, `FILE` ou `TEXT`) sans exiger l'ajout de fanions explicites dans les cas courants.
+
+### Fail-Fast Validation
+Principe d'ingénierie consistant à vérifier immédiatement la validité des données d'entrée dès le point d'entrée de l'application et à lever une erreur explicite avant d'allouer des ressources ou d'exécuter un traitement coûteux.
+
 ### Positional Argument vs CLI Option
 - **Argument positionnel** : Paramètre obligatoire d'une commande CLI identifié par sa position dans la ligne de commande (ex: `source` dans `scan <source>`).
 - **Option CLI (Fanion / Flag)** : Paramètre facultatif préfixé par un ou deux tirets (ex: `-t` ou `--text`), modifiant le comportement de la commande.

@@ -64,7 +64,7 @@ Phase 1 : Adaptation Socle ──> Phase 2 : CLI Squelette ──> Phase 3 : Ing
 *   **Concept clé :** Framework CLI déclaratif — Typer infère automatiquement l'aide, la validation des types et les messages d'erreur à partir des annotations Python.
 *   **Critère de validation :** `poetry run python -m src.ai_watcher.main scan "Hello World"` affiche un message de confirmation sans crash. `--help` documente correctement toutes les options.
 
-### Étape 2.2 : Détection automatique du type de source — ⏳ À faire
+### Étape 2.2 : Détection automatique du type de source — ✅ Complété
 *   **Description :** Implémenter dans `main.py` une logique de détection : si la source commence par `http://` ou `https://`, c'est une URL ; si elle correspond à un chemin de fichier existant, c'est un fichier ; sinon, c'est du texte brut. Lever une exception propre `EmptySourceError` si la source est vide ou constituée uniquement d'espaces.
 *   **Concept clé :** Ergonomie utilisateur — la détection automatique élimine le besoin de drapeaux explicites dans le cas courant.
 *   **Critère de validation :** Le CLI identifie correctement les 3 types de sources et affiche le type détecté. Une source vide (`""`) produit un code de retour `1` avec un message d'erreur explicite.

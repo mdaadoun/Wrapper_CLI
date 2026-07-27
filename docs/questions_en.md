@@ -43,3 +43,8 @@ Targeted questions and answers covering architecture design choices and engineer
 
 **Q: Why combine positional arguments with short boolean flags (like `-t`, `-f`, `-u`) in a production CLI?**
 *Expected Answer:* The mandatory positional argument (`source`) streamlines regular usage by allowing users to pass input directly without extra flags. Optional boolean flags (`--text / -t`, `--file / -f`, `--url / -u`) allow developers to explicitly disambiguate input when automatic detection is not desired (e.g. if a text string closely resembles a URL). Typer enables declaring these flags cleanly and strictly typed via `typer.Option`.
+
+### 7. Automatic Source Detection & Intent Inference (Step 2.2)
+
+**Q: How do you design an automatic CLI input detection heuristic without creating false positives or side effects?**
+*Expected Answer:* An effective CLI detection heuristic must be strictly ordered and deterministic. First, explicit URL prefixes (`http://` or `https://`) are evaluated, followed by physical filesystem path resolution (`Path.exists() & Path.is_file()`). All other string inputs fall back to raw text. To guarantee flexibility, explicit boolean flags (`-t`, `-f`, `-u`) allow users to manually override the detection when ambiguities arise. Empty or whitespace-only inputs immediately raise a dedicated domain exception (`EmptySourceError`) following the Fail-Fast principle.

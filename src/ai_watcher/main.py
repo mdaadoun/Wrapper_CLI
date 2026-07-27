@@ -5,6 +5,9 @@ Optimized for token usage and readability.
 
 import typer
 
+from src.ai_watcher.core.detector import detect_source_type
+from src.ai_watcher.exceptions import AIWatcherError
+
 app = typer.Typer(help="AI Watcher CLI: Automated content extraction and AI analysis.")
 
 
@@ -34,15 +37,17 @@ def scan(
     """
     Scan and analyze tech content from text, file, or URL.
     """
-    mode = "auto"
-    if text:
-        mode = "text"
-    elif file:
-        mode = "file"
-    elif url:
-        mode = "url"
-
-    typer.echo(f"Scanning source [{mode} mode]: {source}")
+    try:
+        source_type = detect_source_type(
+            source=source,
+            force_text=text,
+            force_file=file,
+            force_url=url,
+        )
+        typer.echo(f"Scanning source [{source_type.value} mode]: {source}")
+    except AIWatcherError as err:
+        typer.secho(f"Error: {err}", fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=1) from err
 
 
 if __name__ == "__main__":

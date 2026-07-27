@@ -43,3 +43,8 @@ Questions-réponses clés pour défendre l'architecture et les choix d'ingénier
 
 **Q : Pourquoi utiliser des arguments positionnels combinés à des drapeaux booléens courts (comme `-t`, `-f`, `-u`) dans un CLI de production ?**
 *Réponse attendue :* L'argument positionnel obligatoire (`source`) simplifie l'usage courant en permettant de fournir directement une chaîne de caractères sans saisir de drapeaux superflus. Les drapeaux booléens optionnels (`--text / -t`, `--file / -f`, `--url / -u`) permettent de résoudre les ambiguïtés manuellement lorsque la détection automatique n'est pas souhaitée (par exemple si une chaîne de texte ressemble à une URL). Typer permet de déclarer ces drapeaux de façon propre et typée via `typer.Option`.
+
+### 7. Détection Automatique de Source & Inférence d'Intention (Étape 2.2)
+
+**Q : Comment concevoir une heuristique de détection automatique des entrées CLI sans créer de faux positifs ou d'effets de bord ?**
+*Réponse attendue :* Une heuristique de détection CLI efficace doit être strictement ordonnée et déterministe. On valide en premier lieu les préfixes explicites (ex: `http://` ou `https://` pour les URL), puis l'existence physique du fichier sur le système de fichiers (`Path.exists() & Path.is_file()`). Tout autre contenu est traité par défaut comme du texte brut. Pour garantir la sécurité et la flexibilité, des fanions d'invalidation explicites (`-t`, `-f`, `-u`) permettent à l'utilisateur de surcharger manuellement la détection si une ambiguïté se présente. Les entrées vides doivent lever immédiatement une exception dédiée (`EmptySourceError`) selon le principe du Fail-Fast.

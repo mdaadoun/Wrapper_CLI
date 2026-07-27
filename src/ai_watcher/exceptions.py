@@ -9,6 +9,12 @@ class AIWatcherError(Exception):
     pass
 
 
+class EmptySourceError(AIWatcherError):
+    """Raised when the input source is empty or whitespace-only."""
+
+    pass
+
+
 class ConfigurationError(AIWatcherError):
     """Raised when environment variables or config is missing/invalid."""
 
