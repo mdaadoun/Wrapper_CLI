@@ -1,3 +1,7 @@
+import runpy
+import sys
+
+import pytest
 from typer.testing import CliRunner
 
 from src.ai_watcher.main import app
@@ -64,3 +68,10 @@ def test_scan_empty_source_exit_code():
     result = runner.invoke(app, ["scan", "   "])
     assert result.exit_code == 1
     assert "Error: Source cannot be empty or whitespace-only." in result.stderr
+
+
+def test_main_module_execution(monkeypatch):
+    monkeypatch.setattr(sys, "argv", ["main.py", "--help"])
+    with pytest.raises(SystemExit) as exc_info:
+        runpy.run_module("src.ai_watcher.main", run_name="__main__")
+    assert exc_info.value.code == 0

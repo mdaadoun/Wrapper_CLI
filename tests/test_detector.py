@@ -20,6 +20,11 @@ def test_detect_raw_text():
     assert detect_source_type("non_existent_file.txt") == SourceType.TEXT
 
 
+def test_detect_invalid_path_exception():
+    # Null byte causes Path(...) to raise ValueError/OSError, exercising line 47-48
+    assert detect_source_type("invalid\0file.txt") == SourceType.TEXT
+
+
 def test_detect_forced_flags(tmp_path):
     test_file = tmp_path / "sample.txt"
     test_file.write_text("hello")
