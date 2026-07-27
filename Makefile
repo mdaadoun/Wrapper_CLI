@@ -12,7 +12,7 @@ help:
 	@echo "  make clean        - Maintenance: Purge cache & temporary artifacts."
 	@echo "  make lint         - Quality: Run Ruff linter/formatter & strict Mypy."
 	@echo "  make test         - QA: Run full pytest test suite."
-	@echo "  make dashboard    - Interface: Start Flask interactive dashboard."
+	@echo "  make dashboard    - Interface: Start Next.js interactive dashboard."
 	@echo "  make run          - CLI: Execute main CLI command."
 	@echo "                      Example: make run ARGS=\"--help\""
 	@echo "  make docker-build - Docker: Build multi-stage image (< 250 MB target)."
@@ -44,7 +44,7 @@ run:
 	poetry run python -m src.ai_watcher.main $(ARGS)
 
 dashboard:
-	poetry run python dashboard/app.py
+	npm --prefix dashboard run dev
 
 docker-build:
 	@echo "--- Building production multi-stage Docker image ---"
