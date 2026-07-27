@@ -183,7 +183,7 @@ export function parseRoadmapToHtml(lang: string = "en"): string {
     htmlOut.push('  <div class="roadmap-header-section">');
     htmlOut.push('    <h2 class="roadmap-main-title">🗺️ Roadmap & Tracking</h2>');
     htmlOut.push(
-      '    <p class="roadmap-main-subtitle">Chronological tracking of AIPE_Framework construction</p>'
+      '    <p class="roadmap-main-subtitle">Chronological tracking of project progress</p>'
     );
     htmlOut.push("  </div>");
 
@@ -215,7 +215,8 @@ export function parseRoadmapToHtml(lang: string = "en"): string {
       if (
         statusPart.includes("✅") ||
         statusPart.includes("Validé") ||
-        statusPart.includes("Completed")
+        statusPart.includes("Completed") ||
+        statusPart.includes("Complété")
       ) {
         statusClass = "completed";
         badgeText = lang === "en" ? "Completed" : "Validé";
@@ -242,19 +243,21 @@ export function parseRoadmapToHtml(lang: string = "en"): string {
       stepHtml.push('  <div class="step-details">');
 
       for (let i = 1; i < currentStepLines.length; i++) {
-        let lineStr = currentStepLines[i].trim();
-        if (!lineStr) continue;
-        if (lineStr.startsWith("* ") || lineStr.startsWith("- ")) {
-          lineStr = lineStr.substring(2).trim();
-        }
+        let rawLine = currentStepLines[i].trim();
+        if (!rawLine) continue;
+
+        // Strip leading list bullet symbols (*, -, 1.) and surrounding whitespace
+        let lineStr = rawLine.replace(/^[*\-\d.\s]+/, "").trim();
 
         if (
           lineStr.startsWith("**Description :**") ||
-          lineStr.startsWith("**Description:**")
+          lineStr.startsWith("**Description:**") ||
+          lineStr.startsWith("Description :") ||
+          lineStr.startsWith("Description:")
         ) {
           const descText = lineStr
-            .replace("**Description :**", "")
-            .replace("**Description:**", "")
+            .replace(/\*\*Description\s*:?\s*\*\*:?/i, "")
+            .replace(/Description\s*:?/i, "")
             .trim();
           const label = lang === "en" ? "Description:" : "Description :";
           stepHtml.push(
@@ -264,15 +267,15 @@ export function parseRoadmapToHtml(lang: string = "en"): string {
           lineStr.startsWith("**Concept clé :**") ||
           lineStr.startsWith("**Concept clé:**") ||
           lineStr.startsWith("**Concept clef :**") ||
+          lineStr.startsWith("**Concept clef:**") ||
           lineStr.startsWith("**Key Concept:**") ||
-          lineStr.startsWith("**Key Concept :**")
+          lineStr.startsWith("**Key Concept :**") ||
+          lineStr.startsWith("Concept clé :") ||
+          lineStr.startsWith("Key Concept:")
         ) {
           const conceptText = lineStr
-            .replace("**Concept clé :**", "")
-            .replace("**Concept clé:**", "")
-            .replace("**Concept clef :**", "")
-            .replace("**Key Concept:**", "")
-            .replace("**Key Concept :**", "")
+            .replace(/\*\*(Concept cl[ée]f?|Key Concept)\s*:?\s*\*\*:?/i, "")
+            .replace(/(Concept cl[ée]f?|Key Concept)\s*:?/i, "")
             .trim();
           const label = lang === "en" ? "Key Concept:" : "Concept clé :";
           stepHtml.push(
@@ -282,13 +285,13 @@ export function parseRoadmapToHtml(lang: string = "en"): string {
           lineStr.startsWith("**Critère de validation :**") ||
           lineStr.startsWith("**Critère de validation:**") ||
           lineStr.startsWith("**Validation Criterion:**") ||
-          lineStr.startsWith("**Validation Criterion :**")
+          lineStr.startsWith("**Validation Criterion :**") ||
+          lineStr.startsWith("Critère de validation :") ||
+          lineStr.startsWith("Validation Criterion:")
         ) {
           const validationText = lineStr
-            .replace("**Critère de validation :**", "")
-            .replace("**Critère de validation:**", "")
-            .replace("**Validation Criterion:**", "")
-            .replace("**Validation Criterion :**", "")
+            .replace(/\*\*(Critère de validation|Validation Criterion)\s*:?\s*\*\*:?/i, "")
+            .replace(/(Critère de validation|Validation Criterion)\s*:?/i, "")
             .trim();
           const label =
             lang === "en" ? "Validation Criterion:" : "Critère de validation :";
@@ -362,7 +365,8 @@ export function parseRoadmapToHtml(lang: string = "en"): string {
         if (
           statusPart.includes("✅") ||
           statusPart.includes("Validé") ||
-          statusPart.includes("Completed")
+          statusPart.includes("Completed") ||
+          statusPart.includes("Complété")
         ) {
           statusClass = "completed";
           statusText = lang === "en" ? "Completed" : "Validé";
@@ -386,17 +390,23 @@ export function parseRoadmapToHtml(lang: string = "en"): string {
         );
         htmlOut.push("    </div>");
       } else if (
-        lineStr.startsWith("*Objectif") ||
-        lineStr.startsWith("*Objective")
+        lineStr.toLowerCase().includes("objectif") ||
+        lineStr.toLowerCase().includes("objective")
       ) {
-        const objText = lineStr.replace(/\*/g, "").trim();
+        const objText = lineStr.replace(/[*_#]/g, "").trim();
         htmlOut.push(`    <p class="phase-objective"><em>${objText}</em></p>`);
-        htmlOut.push('    <div class="steps-grid">');
-        inStepsGrid = true;
+        if (!inStepsGrid) {
+          htmlOut.push('    <div class="steps-grid">');
+          inStepsGrid = true;
+        }
       } else if (lineStr.startsWith("### Étape") || lineStr.startsWith("### Step")) {
         if (currentStepLines.length > 0) {
           htmlOut.push(flushStep());
           currentStepLines = [];
+        }
+        if (!inStepsGrid) {
+          htmlOut.push('    <div class="steps-grid">');
+          inStepsGrid = true;
         }
         currentStepLines.push(lineStr);
       } else if (currentStepLines.length > 0) {
