@@ -1,6 +1,7 @@
 """Unit tests for Wrapper_CLI Dashboard documentation integrity and Next.js build."""
 
 import json
+import os
 import subprocess
 from pathlib import Path
 
@@ -45,9 +46,13 @@ def test_nextjs_dashboard_package_json() -> None:
 def test_nextjs_dashboard_build() -> None:
     """Verify Next.js dashboard compiles cleanly without build errors."""
     next_dir = PROJECT_DIR / "dashboard"
+    env = os.environ.copy()
+    env["NODE_ENV"] = "production"
+
     result = subprocess.run(
         ["npm", "run", "build"],
         cwd=str(next_dir),
+        env=env,
         capture_output=True,
         text=True,
     )

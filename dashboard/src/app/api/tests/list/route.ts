@@ -15,7 +15,7 @@ export async function GET() {
         id: "all",
         name: "🧪 Full Test Suite (pytest)",
         file: "all",
-        docstring: "Executes full unit and integration test suite across all 10 test modules.",
+        docstring: "Executes full unit and integration test suite across all test modules.",
         type: "suite",
       },
     ];
@@ -45,7 +45,7 @@ export async function GET() {
       const lines = fileContent.split("\n");
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
-        const funcMatch = line.match(/^def\s+(test_[a-zA-Z0-9_]+)\s*\([^)]*\)\s*->?\s*[^:]*:/);
+        const funcMatch = line.match(/^def\s+(test_[a-zA-Z0-9_]+)\s*\(/);
         if (funcMatch) {
           const funcName = funcMatch[1];
           const testId = `${relPath}::${funcName}`;

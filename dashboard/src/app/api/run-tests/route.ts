@@ -47,11 +47,13 @@ export async function POST(request: Request) {
       });
     }
 
+    const cleanEnv: NodeJS.ProcessEnv = { ...process.env, NODE_ENV: "production" };
+
     return new Promise<NextResponse>((resolve) => {
       execFile(
         pythonExec,
         args,
-        { cwd: PROJECT_DIR, timeout: 30000 },
+        { cwd: PROJECT_DIR, timeout: 30000, env: cleanEnv },
         (error, stdout, stderr) => {
           if (error && error.killed) {
             resolve(
