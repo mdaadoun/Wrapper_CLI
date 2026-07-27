@@ -1,8 +1,14 @@
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
+import httpx
 import pytest
 
-from src.ai_watcher.core.extractor import extract_from_file, extract_from_text
+from src.ai_watcher.core.extractor import (
+    extract_from_file,
+    extract_from_text,
+    extract_from_url,
+)
 from src.ai_watcher.exceptions import ExtractionError
 
 
@@ -52,3 +58,51 @@ def test_extract_from_file_directory(tmp_path: Path) -> None:
     """Ensure ExtractionError is raised when path is a directory."""
     with pytest.raises(ExtractionError, match="Path is not a regular file"):
         extract_from_file(tmp_path)
+
+
+def test_extract_from_url_success() -> None:
+    """Ensure a valid URL returns clean text stripped of noisy tags."""
+    html_content = """
+    <html>
+      <head><title>Test</title></head>
+      <body>
+        <nav>Ignore this</nav>
+        <header>Header noise</header>
+        <main>
+            <h1>Main Title</h1>
+            <p>This is  some   useful text.</p>
+            <script>console.log("no!");</script>
+        </main>
+        <footer>Footer noise</footer>
+      </body>
+    </html>
+    """
+    mock_response = MagicMock()
+    mock_response.text = html_content
+    mock_response.raise_for_status = MagicMock()
+
+    with patch("httpx.get", return_value=mock_response):
+        result = extract_from_url("https://example.com")
+
+    expected = "Test\nMain Title\nThis is some useful text."
+    assert result == expected
+
+
+def test_extract_from_url_http_error() -> None:
+    """Ensure HTTP errors raise ExtractionError."""
+    mock_response = MagicMock()
+    mock_response.status_code = 404
+    mock_error = httpx.HTTPStatusError(
+        "404 Not Found", request=MagicMock(), response=mock_response
+    )
+
+    with patch("httpx.get", side_effect=mock_error):
+        with pytest.raises(ExtractionError, match="HTTP Error 404"):
+            extract_from_url("https://example.com/404")
+
+
+def test_extract_from_url_network_error() -> None:
+    """Ensure network errors raise ExtractionError."""
+    with patch("httpx.get", side_effect=httpx.RequestError("Timeout")):
+        with pytest.raises(ExtractionError, match="Network error"):
+            extract_from_url("https://example.com/timeout")

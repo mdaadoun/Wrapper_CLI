@@ -84,7 +84,7 @@ Phase 1: Baseline Setup ──> Phase 2: CLI Skeleton ──> Phase 3: Ingestion
 * **Key Concept:** Pure functions and I/O separation — predictable input/output testable without side effects.
 * **Validation Criterion:** Existing `.md` file returns cleaned text. Non-existent file raises `ExtractionError`. Strict Mypy type-checks cleanly.
 
-### Step 3.2: HTML Web Scraping for URLs — ⏳ Pending
+### Step 3.2: HTML Web Scraping for URLs — ✅ Completed
 * **Description:** Implement `extract_from_url(url: str) -> str` using HTTPX for HTTP request and BeautifulSoup4 to extract visible body text (stripping `<script>`, `<style>`, `<nav>`, `<footer>` tags and collapsing redundant whitespace).
 * **Key Concept:** HTML Cleaning Pipeline — converting raw HTML into LLM-friendly clean text to minimize noise and token consumption.
 * **Validation Criterion:** URL `https://example.com` returns clean text stripped of HTML tags. Invalid URL (timeout, 404) raises `ExtractionError` with explicit message.

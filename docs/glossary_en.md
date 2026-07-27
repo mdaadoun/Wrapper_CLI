@@ -84,3 +84,6 @@ An architecture pattern where custom exception classes inherit from a common bas
 
 ### Pure Functions & I/O Separation
 An architectural practice separating side-effect-heavy I/O operations (like reading files) from deterministic pure functions (like text normalization), enabling highly predictable and instantaneous unit tests.
+
+### HTML Cleaning Pipeline
+A sequence of operations designed to parse raw HTML, remove non-content noisy tags (like script, style, nav, footer), and extract human-readable text to minimize token consumption for the LLM.

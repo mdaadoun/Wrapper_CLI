@@ -13,7 +13,7 @@ L'application repose sur le **Single Responsibility Principle (SRP)**. Le code e
 - **`exceptions.py`:** Définition des erreurs personnalisées du domaine via une **Hiérarchie d'Exceptions** granulaire (`WatcherError` comme base, étendue par `EmptySourceError`, `ExtractionError`, `LLMClientError`, `ConfigurationError`). Cela permet une gestion d'erreur ciblée et des messages utilisateur clairs sans faire planter l'interpréteur.
 - **`core/` :** Logique métier.
   - **`detector.py` :** Inférence déterministe du type de source
-  - **`extractor.py` :** Fonctions pures pour normaliser les textes bruts et lire les fichiers `.txt`/`.md` avec une séparation claire des entrées/sorties. (`SourceType.URL`, `SourceType.FILE`, `SourceType.TEXT`) et levée de `EmptySourceError` si la chaîne est vide.
+  - **`extractor.py` :** Fonctions pures pour normaliser les textes bruts, lire les fichiers `.txt`/`.md`, et scraper/nettoyer les URLs via `httpx` et `BeautifulSoup4`. (`SourceType.URL`, `SourceType.FILE`, `SourceType.TEXT`) et levée de `EmptySourceError` si la chaîne est vide.
 - **`clients/` :** Encapsulation du client LLM (ex: `httpx` + appels API).
 - **`utils/` :** Utilitaires transverses (calculateur de coûts, mise en cache).
 - **`formatters/` :** Composants de rendu (terminal avec Rich, export Markdown).

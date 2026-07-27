@@ -84,3 +84,6 @@ Un modèle d architecture où des classes d exceptions personnalisées héritent
 
 ### Fonctions Pures & Séparation des I/O
 Une pratique architecturale séparant les opérations I/O génératrices d effets de bord (comme lire des fichiers) des fonctions pures déterministes (comme la normalisation de texte), permettant des tests unitaires très prévisibles et instantanés.
+
+### Pipeline de Nettoyage HTML
+Une séquence d opérations conçue pour analyser le HTML brut, supprimer les balises bruyantes non liées au contenu principal (comme script, style, nav, footer), et extraire le texte lisible pour minimiser la consommation de tokens pour le LLM.

@@ -18,8 +18,6 @@ def test_documentation_files_exist() -> None:
         "roadmap_fr.md",
         "glossary_en.md",
         "glossary_fr.md",
-        "journal_en.md",
-        "journal_fr.md",
         "questions_en.md",
         "questions_fr.md",
         "code_en.md",

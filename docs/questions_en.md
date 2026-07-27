@@ -58,3 +58,8 @@ Targeted questions and answers covering architecture design choices and engineer
 
 **Q: Why separate text normalization into a pure function instead of doing it inline while reading the file?**
 *Expected Answer:* Separating business logic (text normalization) from I/O operations (file reading) follows the principle of pure functions. It allows developers to test all text edge cases (empty strings, weird tabs, etc.) instantly without ever touching the disk. I/O testing then only focuses on file existence, permissions, and encoding, significantly reducing test complexity and increasing reliability.
+
+### 10. Web Scraping and Token Optimization (Step 3.2)
+
+**Q: Why do we use BeautifulSoup4 to strip specific HTML tags before sending the text to the LLM?**
+*Expected Answer:* Tags like `<script>`, `<style>`, `<nav>`, and `<footer>` contain boilerplate code or navigation links that do not contribute to the main content. Stripping them reduces "noise", which directly minimizes token usage (saving costs) and helps the LLM focus purely on the relevant business context, improving response accuracy.

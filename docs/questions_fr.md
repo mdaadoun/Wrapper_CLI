@@ -58,3 +58,8 @@ Questions-réponses clés pour défendre l'architecture et les choix d'ingénier
 
 **Q: Pourquoi séparer la normalisation de texte dans une fonction pure plutôt que de le faire à la volée pendant la lecture du fichier ?**
 *Expected Answer:* Séparer la logique métier (normalisation) des opérations d entrées/sorties (lecture) suit le principe des fonctions pures. Cela permet aux développeurs de tester tous les cas particuliers du texte (chaîne vide, tabulations bizarres) instantanément sans toucher au disque. Les tests d I/O se concentrent ensuite uniquement sur l existence du fichier et ses permissions, réduisant la complexité des tests.
+
+### 10. Scraping Web et Optimisation des Tokens (Étape 3.2)
+
+**Q: Pourquoi utilisons-nous BeautifulSoup4 pour supprimer certaines balises HTML avant d envoyer le texte au LLM ?**
+*Expected Answer:* Les balises comme `<script>`, `<style>`, `<nav>`, et `<footer>` contiennent du code générique ou des liens de navigation qui n apportent rien au contenu principal. Les supprimer réduit le "bruit", ce qui minimise directement la consommation de tokens (réduisant les coûts) et aide le LLM à se concentrer uniquement sur le contexte métier pertinent, améliorant la précision des réponses.

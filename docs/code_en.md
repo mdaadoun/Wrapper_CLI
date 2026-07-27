@@ -13,7 +13,7 @@ The application adheres to the **Single Responsibility Principle (SRP)**. The co
 - **`exceptions.py`:** Definition of custom domain errors built on a granular **Exception Hierarchy** (`WatcherError` as base, extended by `EmptySourceError`, `ExtractionError`, `LLMClientError`, `ConfigurationError`). This allows for targeted error handling and user-friendly messages without crashing the interpreter.
 - **`core/`:** Business logic components.
   - **`detector.py`:** Deterministic source type inference
-  - **`extractor.py`:** Pure functions for parsing and normalizing raw strings or reading strictly validated `.txt`/`.md` files, separating I/O from logic. (`SourceType.URL`, `SourceType.FILE`, `SourceType.TEXT`) and `EmptySourceError` validation.
+  - **`extractor.py`:** Pure functions for parsing and normalizing raw strings, reading strictly validated `.txt`/`.md` files, and scraping/cleaning URLs with `httpx` and `BeautifulSoup4`. (`SourceType.URL`, `SourceType.FILE`, `SourceType.TEXT`) and `EmptySourceError` validation.
 - **`clients/`:** LLM client encapsulation (e.g., `httpx` + API calls).
 - **`utils/`:** Cross-cutting utilities (cost calculator, caching).
 - **`formatters/`:** Rendering components (Rich terminal output, Markdown export).
