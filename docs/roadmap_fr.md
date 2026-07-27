@@ -56,10 +56,10 @@ Phase 1 : Adaptation Socle ──> Phase 2 : CLI Squelette ──> Phase 3 : Ing
 
 ---
 
-## Phase 2 : Squelette CLI avec Typer — ⏳ À faire
+## Phase 2 : Squelette CLI avec Typer — ⏳ En cours
 *Objectif : Créer le point d'entrée CLI fonctionnel avec le routage des arguments et options.*
 
-### Étape 2.1 : Commande principale `scan` — ⏳ À faire
+### Étape 2.1 : Commande principale `scan` — ✅ Complété
 *   **Description :** Implémenter dans `main.py` une application Typer avec une commande `scan` acceptant un argument positionnel `source` (le texte, chemin de fichier ou URL à analyser). Ajouter les options `--text / -t`, `--file / -f`, `--url / -u` pour le mode explicite de saisie.
 *   **Concept clé :** Framework CLI déclaratif — Typer infère automatiquement l'aide, la validation des types et les messages d'erreur à partir des annotations Python.
 *   **Critère de validation :** `poetry run python -m src.ai_watcher.main scan "Hello World"` affiche un message de confirmation sans crash. `--help` documente correctement toutes les options.

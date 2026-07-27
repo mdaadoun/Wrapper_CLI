@@ -38,3 +38,8 @@ Questions-réponses clés pour défendre l'architecture et les choix d'ingénier
 
 **Q : Pourquoi avoir structuré le point d'entrée de ce projet avec Typer plutôt qu'un serveur classique comme Uvicorn ?**
 *Réponse attendue :* L'application (Wrapper_CLI) est un outil asynchrone destiné à l'extraction de contenu ponctuelle et automatisée. Un CLI (Command Line Interface) s'exécute à la demande et s'éteint, ce qui est parfait pour une automatisation CI/CD ou des cron jobs. Typer permet de générer des CLI typés très rapidement avec une génération d'aide automatique (`--help`), là où Uvicorn est conçu pour des daemons/serveurs web écoutant en continu. Le Makefile a été adapté en conséquence avec `make run` pour faciliter l'injection d'arguments.
+
+### 6. Routage CLI & Options Typer (Étape 2.1)
+
+**Q : Pourquoi utiliser des arguments positionnels combinés à des drapeaux booléens courts (comme `-t`, `-f`, `-u`) dans un CLI de production ?**
+*Réponse attendue :* L'argument positionnel obligatoire (`source`) simplifie l'usage courant en permettant de fournir directement une chaîne de caractères sans saisir de drapeaux superflus. Les drapeaux booléens optionnels (`--text / -t`, `--file / -f`, `--url / -u`) permettent de résoudre les ambiguïtés manuellement lorsque la détection automatique n'est pas souhaitée (par exemple si une chaîne de texte ressemble à une URL). Typer permet de déclarer ces drapeaux de façon propre et typée via `typer.Option`.

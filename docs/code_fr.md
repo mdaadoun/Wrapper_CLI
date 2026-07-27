@@ -7,7 +7,8 @@ Ce document présente une explication détaillée de l'architecture du projet `W
 ## 🛠️ 1. Architecture Modulaire : `src/ai_watcher/`
 
 L'application repose sur le **Single Responsibility Principle (SRP)**. Le code est organisé en modules clairs :
-- **`main.py` :** Point d'entrée principal (CLI Typer). Gère uniquement les commandes et le routage des arguments.
+- **`main.py` :** Point d'entrée principal (CLI Typer). Gère le routage des sous-commandes (ex: `scan`), la validation des arguments positionnels (`source`) et les fanions de mode (`--text/-t`, `--file/-f`, `--url/-u`).
+  - *Fonction `scan()` :* Reçoit la source utilisateur, résout le mode d'évaluation (auto par défaut, ou surchargé par drapeau) et transmet l'entrée au pipeline d'ingestion.
 - **`config.py` :** Chargement de la configuration et des variables d'environnement (via `pydantic-settings`).
 - **`exceptions.py` :** Définition des erreurs personnalisées du domaine (ex: `AIWatcherError`).
 - **`core/` :** Logique métier (extraction de texte, flux d'analyse métier).

@@ -7,7 +7,8 @@ This document provides a detailed breakdown of the `Wrapper_CLI` architecture, m
 ## 🛠️ 1. Modular Architecture: `src/ai_watcher/`
 
 The application adheres to the **Single Responsibility Principle (SRP)**. The code is organized into clear modules:
-- **`main.py`:** Primary entry point (Typer CLI). Handles only commands and argument routing.
+- **`main.py`:** Primary entry point (Typer CLI). Handles subcommand routing (e.g., `scan`), positional argument validation (`source`), and mode flags (`--text/-t`, `--file/-f`, `--url/-u`).
+  - *`scan()` function:* Receives input source, resolves evaluation mode (auto by default or overridden by flag), and routes payload to the ingestion pipeline.
 - **`config.py`:** Configuration and environment variable loading (via `pydantic-settings`).
 - **`exceptions.py`:** Definition of custom domain errors (e.g., `AIWatcherError`).
 - **`core/`:** Business logic (text extraction, analysis workflows).

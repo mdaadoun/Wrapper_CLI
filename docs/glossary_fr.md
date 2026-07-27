@@ -30,6 +30,13 @@ Interface en ligne de commande permettant à l'utilisateur d'interagir avec une 
 ### Typer
 Framework Python moderne basé sur Click et les annotations de type Python (Type Hints) pour créer des applications CLI autodocumentées avec validation automatique.
 
+### Declarative CLI Framework (Framework CLI Déclaratif)
+Approche d'ingénierie logicielle dans laquelle la structure de l'interface en ligne de commande (arguments, options, types, messages d'aide) est définie de manière déclarative par les signatures de fonctions et leurs annotations de type.
+
+### Positional Argument vs CLI Option
+- **Argument positionnel** : Paramètre obligatoire d'une commande CLI identifié par sa position dans la ligne de commande (ex: `source` dans `scan <source>`).
+- **Option CLI (Fanion / Flag)** : Paramètre facultatif préfixé par un ou deux tirets (ex: `-t` ou `--text`), modifiant le comportement de la commande.
+
 ### Rich
 Bibliothèque Python permettant un rendu visuel riche dans le terminal (panneaux colorés, syntaxe Markdown, tableaux, barres de progression, spinners).
 

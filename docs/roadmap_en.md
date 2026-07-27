@@ -56,10 +56,10 @@ Phase 1: Baseline Setup ──> Phase 2: CLI Skeleton ──> Phase 3: Ingestion
 
 ---
 
-## Phase 2: CLI Skeleton with Typer — ⏳ Pending
-*Goal: Create functional CLI entrypoint with argument parsing and routing.*
+## Phase 2: CLI Skeleton with Typer — ⏳ In Progress
+*Objective: Build functional CLI entrypoint with argument and option routing.*
 
-### Step 2.1: Main `scan` Command — ⏳ Pending
+### Step 2.1: Main `scan` Command — ✅ Completed
 * **Description:** Implement Typer application in `main.py` with a `scan` command accepting a positional `source` argument (raw text, file path, or URL). Add `--text / -t`, `--file / -f`, `--url / -u` options for explicit input modes.
 * **Key Concept:** Declarative CLI Framework — Typer automatically infers help, type validation, and error messages from Python annotations.
 * **Validation Criterion:** `poetry run python -m src.ai_watcher.main scan "Hello World"` prints confirmation without crashing. `--help` documents all options.

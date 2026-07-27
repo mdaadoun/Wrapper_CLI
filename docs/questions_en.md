@@ -38,3 +38,8 @@ Targeted questions and answers covering architecture design choices and engineer
 
 **Q: Why structure the entry point of this project using Typer instead of a standard server like Uvicorn?**
 *Expected Answer:* The application (Wrapper_CLI) is an asynchronous tool designed for targeted, on-demand content extraction. A CLI (Command Line Interface) runs on demand and terminates, which is perfect for CI/CD automation or cron jobs. Typer allows for very rapid creation of strongly-typed CLIs with automatic help generation (`--help`), whereas Uvicorn is designed for long-running web servers/daemons. The Makefile was adapted accordingly with `make run` to easily inject CLI arguments.
+
+### 6. CLI Routing & Typer Options (Step 2.1)
+
+**Q: Why combine positional arguments with short boolean flags (like `-t`, `-f`, `-u`) in a production CLI?**
+*Expected Answer:* The mandatory positional argument (`source`) streamlines regular usage by allowing users to pass input directly without extra flags. Optional boolean flags (`--text / -t`, `--file / -f`, `--url / -u`) allow developers to explicitly disambiguate input when automatic detection is not desired (e.g. if a text string closely resembles a URL). Typer enables declaring these flags cleanly and strictly typed via `typer.Option`.

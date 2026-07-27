@@ -30,6 +30,13 @@ Text-based user interface allowing users to interact with applications by typing
 ### Typer
 Modern Python CLI framework powered by Type Hints and Click for building self-documenting CLI tools with automatic parameter validation.
 
+### Declarative CLI Framework
+Software engineering pattern where CLI interface structure (arguments, options, types, help menus) is declared directly via function signatures and Python Type Hints.
+
+### Positional Argument vs CLI Option
+- **Positional Argument**: Mandatory CLI parameter identified by its relative position in the command invocation (e.g., `source` in `scan <source>`).
+- **CLI Option (Flag)**: Optional parameter prefixed with one or two dashes (e.g., `-t` or `--text`), overriding or altering command execution behavior.
+
 ### Rich
 Python library for rich terminal rendering (styled panels, syntax highlighting, Markdown, tables, progress bars, spinners).
 
