@@ -388,14 +388,21 @@ export default function DashboardPage() {
     }
   }, [selectedFilePath, activeTab]);
 
-  // Trigger Prism syntax highlighting when code content changes
+  // Trigger Prism syntax highlighting when any rendered content changes
   useEffect(() => {
-    if (activeTab === "code" && !selectedFilePath.endsWith(".md")) {
-      setTimeout(() => {
-        Prism.highlightAll();
-      }, 50);
-    }
-  }, [codeContent, selectedFilePath, activeTab]);
+    const timer = setTimeout(() => {
+      Prism.highlightAll();
+    }, 60);
+    return () => clearTimeout(timer);
+  }, [
+    activeTab,
+    journalHtml,
+    presentationHtml,
+    answerHtml,
+    conceptHtml,
+    codeContent,
+    selectedFilePath,
+  ]);
 
   const handleRunTest = async () => {
     setRunningTest(true);

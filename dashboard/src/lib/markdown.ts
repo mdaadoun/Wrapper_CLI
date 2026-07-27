@@ -33,9 +33,10 @@ export function markdownToHtml(mdText: string): string {
           ? `<div style='font-size: 0.68rem; font-family: var(--font-fira), monospace; color: var(--secondary); background: rgba(139, 92, 246, 0.15); padding: 2px 10px; border-radius: 4px 4px 0 0; display: inline-block; font-weight: bold; border: 1px solid rgba(139, 92, 246, 0.2); border-bottom: none;'>${codeLang}</div>`
           : "";
         const borderRadius = codeLang ? "0 6px 6px 6px" : "6px";
+        const codeClass = codeLang ? `class="language-${codeLang}"` : 'class="language-bash"';
 
         htmlLines.push(
-          `<div style='margin: 14px 0;'>${langBadge}<pre style='background: rgba(10, 15, 30, 0.75); border: 1px solid rgba(255,255,255,0.1); padding: 12px 14px; border-radius: ${borderRadius}; overflow-x: auto; color: #d8b4fe; font-family: var(--font-fira), monospace; font-size: 0.8rem; margin: 0; line-height: 1.45;'><code>${codeText}</code></pre></div>`
+          `<div style='margin: 14px 0;'>${langBadge}<pre style='background: rgba(10, 15, 30, 0.75); border: 1px solid rgba(255,255,255,0.1); padding: 12px 14px; border-radius: ${borderRadius}; overflow-x: auto; color: #d8b4fe; font-family: var(--font-fira), monospace; font-size: 0.8rem; margin: 0; line-height: 1.45;'><code ${codeClass}>${codeText}</code></pre></div>`
         );
         inCodeBlock = false;
         codeLines = [];
@@ -181,8 +182,9 @@ export function markdownToHtml(mdText: string): string {
   if (inQuote) htmlLines.push("</blockquote>");
   if (inCodeBlock) {
     const codeText = escapeHtml(codeLines.join("\n"));
+    const codeClass = codeLang ? `class="language-${codeLang}"` : 'class="language-bash"';
     htmlLines.push(
-      `<pre style='background: rgba(10, 15, 30, 0.75); padding: 12px; border-radius: 6px; color: #d8b4fe; font-family: monospace;'><code>${codeText}</code></pre>`
+      `<pre style='background: rgba(10, 15, 30, 0.75); padding: 12px; border-radius: 6px; color: #d8b4fe; font-family: monospace;'><code ${codeClass}>${codeText}</code></pre>`
     );
   }
 
