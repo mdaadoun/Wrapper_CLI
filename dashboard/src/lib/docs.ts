@@ -51,18 +51,59 @@ export function parseFaqQuestions(lang: string = "en"): QuestionItem[] {
   const content = fs.readFileSync(faqFile, "utf-8");
   const questions: QuestionItem[] = [];
 
-  const parts = content.split(/### Q\d+\.\s*/);
+  const parts = content.split(/^### /m);
   for (let i = 1; i < parts.length; i++) {
-    const lines = parts[i].trim().split("\n");
-    if (lines.length === 0) continue;
-    const title = lines[0].trim();
-    const body = lines.slice(1).join("\n").trim();
-    questions.push({
-      question: title,
-      answer_markdown: body,
-      answer_html: markdownToHtml(body),
-    });
+    const rawBlock = parts[i].trim();
+    if (!rawBlock) continue;
+
+    const lines = rawBlock.split("\n");
+    const heading = lines[0].trim();
+    const bodyLines = lines.slice(1);
+
+    if (/^Q\d+/i.test(heading)) {
+      const questionTitle = heading.replace(/^Q\d+\s*[:.]?\s*/i, "").trim();
+      const body = bodyLines.join("\n").trim();
+      questions.push({
+        question: questionTitle,
+        answer_markdown: body,
+        answer_html: markdownToHtml(body),
+      });
+    } else {
+      let currentQuestion = heading;
+      let currentBodyLines: string[] = [];
+
+      for (const bLine of bodyLines) {
+        const trimmed = bLine.trim();
+        if (trimmed.startsWith("**Q") && (trimmed.includes(":") || trimmed.includes("**"))) {
+          if (currentBodyLines.length > 0 && currentQuestion) {
+            const body = currentBodyLines.join("\n").trim();
+            questions.push({
+              question: currentQuestion,
+              answer_markdown: body,
+              answer_html: markdownToHtml(body),
+            });
+            currentBodyLines = [];
+          }
+          currentQuestion = trimmed
+            .replace(/^\*\*Q\s*:?\s*\*\*:?/i, "")
+            .replace(/^\*\*Q\d*[:.]?\s*\*\*/i, "")
+            .trim();
+        } else {
+          currentBodyLines.push(bLine);
+        }
+      }
+
+      if (currentQuestion && currentBodyLines.length > 0) {
+        const body = currentBodyLines.join("\n").trim();
+        questions.push({
+          question: currentQuestion,
+          answer_markdown: body,
+          answer_html: markdownToHtml(body),
+        });
+      }
+    }
   }
+
   return questions;
 }
 

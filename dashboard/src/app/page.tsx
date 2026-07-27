@@ -48,7 +48,6 @@ interface ConceptItem {
 interface JournalItem {
   id: string;
   title: string;
-  date: string;
 }
 
 interface TestItem {
@@ -266,6 +265,17 @@ export default function DashboardPage() {
   const [codeFiles, setCodeFiles] = useState<CodeFileItem[]>([]);
   const [selectedFilePath, setSelectedFilePath] = useState<string>("docs/code_en.md");
   const [codeContent, setCodeContent] = useState("");
+
+  // Switch doc language in Code browser when top language toggle changes
+  useEffect(() => {
+    if (selectedFilePath.endsWith("_en.md") && lang === "fr") {
+      const frPath = selectedFilePath.replace("_en.md", "_fr.md");
+      setSelectedFilePath(frPath);
+    } else if (selectedFilePath.endsWith("_fr.md") && lang === "en") {
+      const enPath = selectedFilePath.replace("_fr.md", "_en.md");
+      setSelectedFilePath(enPath);
+    }
+  }, [lang, selectedFilePath]);
 
   // Presentation tab
   useEffect(() => {
@@ -694,9 +704,6 @@ export default function DashboardPage() {
                     style={{ display: "flex", flexDirection: "column", gap: "4px" }}
                   >
                     <div style={{ fontWeight: 600, color: "#ffffff" }}>{item.title}</div>
-                    <div style={{ fontSize: "0.82rem", color: "var(--text-muted)", fontFamily: "var(--font-inter)" }}>
-                      📅 {item.date}
-                    </div>
                   </button>
                 ))}
               </div>
@@ -879,7 +886,7 @@ export default function DashboardPage() {
                 <p style={{ maxWidth: "600px", margin: "12px auto", color: "var(--text-muted)", fontSize: "1rem" }}>
                   {lang === "en"
                     ? "Wrapper_CLI (AI_Watcher) is a Typer command-line tool for automated content analysis and source detection."
-                    : "Wrapper_CLI (AI_Watcher) est un outil en ligne de commande basés sur Typer pour la détection automatique de sources et l'analyse IA."}
+                    : "Wrapper_CLI (AI_Watcher) est un outil en ligne de commande basé sur Typer pour la détection automatique de sources et l'analyse IA."}
                 </p>
               </div>
               <a
