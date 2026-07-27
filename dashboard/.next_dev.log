@@ -1,0 +1,25 @@
+
+> dashboard@0.1.0 dev
+> next dev
+
+⚠ Port 3000 is in use by an unknown process, using available port 3001 instead.
+▲ Next.js 16.2.12 (Turbopack)
+- Local:         http://localhost:3001
+- Network:       http://192.168.1.7:3001
+✓ Ready in 431ms
+⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of /home/michael/Code/ai-engineering/package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles:
+   * /home/michael/Code/ai-engineering/projets/3_Wrapper_CLI/dashboard/package-lock.json
+
+⨯ Another next dev server is already running.
+
+- Local:        http://localhost:3000
+- PID:          28082
+- Dir:          /home/michael/Code/ai-engineering/projets/3_Wrapper_CLI/dashboard
+- Log:          .next/dev/logs/next-development.log
+
+Run kill 28082 to stop it.
+[?25h

@@ -79,7 +79,7 @@ Phase 1: Baseline Setup ──> Phase 2: CLI Skeleton ──> Phase 3: Ingestion
 ## Phase 3: Multi-Source Ingestion Module — ⏳ Pending
 *Goal: Retrieve and clean textual content from 3 input source types (FS-01).*
 
-### Step 3.1: Direct Text and Local File Extraction — ⏳ Pending
+### Step 3.1: Direct Text and Local File Extraction — ✅ Completed
 * **Description:** Implement pure functions in `core/extractor.py`: `extract_from_text(raw: str) -> str` (whitespace normalization) and `extract_from_file(path: Path) -> str` (`.txt` and `.md` reader with existence and extension validation).
 * **Key Concept:** Pure functions and I/O separation — predictable input/output testable without side effects.
 * **Validation Criterion:** Existing `.md` file returns cleaned text. Non-existent file raises `ExtractionError`. Strict Mypy type-checks cleanly.

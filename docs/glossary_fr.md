@@ -81,3 +81,6 @@ Stratégie de réessai (Retry) qui augmente exponentiellement le temps d'attente
 
 ### Hiérarchie d exceptions
 Un modèle d architecture où des classes d exceptions personnalisées héritent d une classe de base commune. Cela permet une gestion granulaire des erreurs et des retours ciblés sans plantages génériques de l interpréteur.
+
+### Fonctions Pures & Séparation des I/O
+Une pratique architecturale séparant les opérations I/O génératrices d effets de bord (comme lire des fichiers) des fonctions pures déterministes (comme la normalisation de texte), permettant des tests unitaires très prévisibles et instantanés.

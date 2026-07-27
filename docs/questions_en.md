@@ -53,3 +53,8 @@ Targeted questions and answers covering architecture design choices and engineer
 
 **Q: Why use a custom Exception Hierarchy instead of just raising generic exceptions?**
 *Expected Answer:* A custom exception hierarchy (like a base `WatcherError` with subclasses `ExtractionError`, `ConfigurationError`) allows developers to catch specific domain errors without masking unrelated system exceptions. It empowers the main application to handle expected failures gracefully (e.g., printing a clean terminal message and returning code 1) rather than crashing with an ugly stack trace.
+
+### 9. Pure Functions and Architecture (Step 3.1)
+
+**Q: Why separate text normalization into a pure function instead of doing it inline while reading the file?**
+*Expected Answer:* Separating business logic (text normalization) from I/O operations (file reading) follows the principle of pure functions. It allows developers to test all text edge cases (empty strings, weird tabs, etc.) instantly without ever touching the disk. I/O testing then only focuses on file existence, permissions, and encoding, significantly reducing test complexity and increasing reliability.

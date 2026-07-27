@@ -81,3 +81,6 @@ Retry strategy increasing wait time exponentially between failed attempts, addin
 
 ### Exception Hierarchy
 An architecture pattern where custom exception classes inherit from a common base class. This enables granular error handling and targeted feedback without generic interpreter crashes.
+
+### Pure Functions & I/O Separation
+An architectural practice separating side-effect-heavy I/O operations (like reading files) from deterministic pure functions (like text normalization), enabling highly predictable and instantaneous unit tests.

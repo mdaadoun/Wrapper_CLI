@@ -53,3 +53,8 @@ Questions-réponses clés pour défendre l'architecture et les choix d'ingénier
 
 **Q: Pourquoi utiliser une Hiérarchie d Exceptions personnalisée plutôt que de lever des exceptions génériques ?**
 *Expected Answer:* Une hiérarchie personnalisée (comme une base `WatcherError` avec des sous-classes `ExtractionError`, `ConfigurationError`) permet de capturer des erreurs de domaine spécifiques sans masquer les exceptions système sans rapport. Cela permet à l application principale de gérer les échecs prévus proprement (ex: afficher un message clair et quitter avec un code 1) au lieu de planter brutalement.
+
+### 9. Fonctions Pures et Architecture (Étape 3.1)
+
+**Q: Pourquoi séparer la normalisation de texte dans une fonction pure plutôt que de le faire à la volée pendant la lecture du fichier ?**
+*Expected Answer:* Séparer la logique métier (normalisation) des opérations d entrées/sorties (lecture) suit le principe des fonctions pures. Cela permet aux développeurs de tester tous les cas particuliers du texte (chaîne vide, tabulations bizarres) instantanément sans toucher au disque. Les tests d I/O se concentrent ensuite uniquement sur l existence du fichier et ses permissions, réduisant la complexité des tests.
