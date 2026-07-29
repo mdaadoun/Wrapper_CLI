@@ -78,3 +78,13 @@ Targeted questions and answers covering architecture design choices and engineer
 
 **Q: Why raise `EmptySourceError` (not `ExtractionError`) when the cleaned output is empty?**
 *Expected Answer:* The two exceptions serve different semantic purposes: `ExtractionError` signals an I/O or technical failure (file not found, HTTP error, parsing crash). `EmptySourceError` signals a business-logic validation failure — the extraction succeeded technically but produced no usable content. Separating them allows callers to handle each case differently: an empty result might trigger a retry with a different source, while an extraction error indicates a system-level problem. Both inherit from `WatcherError`, so a catch-all handler still works.
+
+### 14. Pydantic V2 Output Data Modeling & Data Contracts (Step 4.1)
+
+**Q: Why use Pydantic V2 over standard dataclasses or TypedDict for modeling LLM JSON outputs?**
+*Expected Answer:* Pydantic V2 provides four key architectural advantages for LLM integrations: (1) Built-in JSON parsing via `model_validate_json()`, which handles type coercion, missing keys, and ISO-8601 datetime parsing natively. (2) Strong runtime validation enforcing strict boundary rules (e.g., non-negative tokens `ge=0`, valid string literals for priorities). (3) Zero-boilerplate schema generation via `model_json_schema()`, which can be injected directly into LLM system prompts for Structured Outputs. (4) High performance thanks to the underlying Rust core (`pydantic-core`), minimizing CPU overhead during high-volume serialization.
+
+### 15. Immutable Domain Entities & FinOps Co-location (Step 4.1)
+
+**Q: Why model `AnalysisReport` as an immutable entity (`frozen=True`) and co-locate FinOps telemetry fields inside it?**
+*Expected Answer:* (1) Immutability (`ConfigDict(frozen=True)`) guarantees thread safety and prevents accidental attribute mutation as the report travels through formatting, caching, and export layers. (2) Co-locating FinOps telemetry (`prompt_tokens`, `completion_tokens`, `total_tokens`, `estimated_cost_usd`, `execution_time_seconds`) alongside domain data deliverables creates a single, self-contained report entity. This ensures financial observability data is never lost or decoupled from the analysis results when persisted, rendered in terminal panels, or exported to downstream systems.

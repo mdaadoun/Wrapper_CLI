@@ -19,9 +19,12 @@ The application adheres to the **Single Responsibility Principle (SRP)**. The co
     - **`extract_from_url(url: str) -> str`:** I/O function — fetches via HTTPX, strips noisy HTML tags (script, style, nav, footer, header, aside) via BeautifulSoup4, normalizes whitespace.
     - **`ExtractedContent` (Pydantic model):** Validates output with `Field(min_length=1)` on `text`, `ge=1` on `char_count`. Classmethod `from_text()` raises `EmptySourceError` if cleaned content is empty.
     - **`extract(source: str, source_type: SourceType) -> str` (Facade):** Dispatches to the correct extractor based on `SourceType` enum, then validates output through `ExtractedContent.from_text()`. This is the single public entry point for the ingestion pipeline, used by `main.py` and test mocks.
+- **`schemas/`:** Strictly typed data contracts for domain entities and LLM structured outputs.
+  - **`report.py` (`AnalysisReport`):** Pydantic V2 immutable data model (`ConfigDict(frozen=True)`). Defines context (`source`, `analyzed_at`, `model_used`), analysis deliverables (`title`, `summary`, `key_points`, `impact_technical`, `impact_business`, `impact_regulatory`, `recommendation`, `priority`), and FinOps telemetry (`prompt_tokens`, `completion_tokens`, `total_tokens`, `estimated_cost_usd`, `execution_time_seconds`, `is_cached`). Includes `@model_validator(mode="before")` for auto-calculating `total_tokens`.
 - **`clients/`:** LLM client encapsulation (e.g., `httpx` + API calls).
 - **`utils/`:** Cross-cutting utilities (cost calculator, caching).
 - **`formatters/`:** Rendering components (Rich terminal output, Markdown export).
+
 
 ---
 

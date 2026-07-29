@@ -99,7 +99,7 @@ Phase 1 : Adaptation Socle ──> Phase 2 : CLI Squelette ──> Phase 3 : Ing
 ## Phase 4 : Client LLM & Structured Outputs — ⏳ À faire
 *Objectif : Interroger les API LLM et garantir des réponses structurées conformes au schéma Pydantic (SF-02).*
 
-### Étape 4.1 : Modélisation des données de sortie (Pydantic V2) — ⏳ À faire
+### Étape 4.1 : Modélisation des données de sortie (Pydantic V2) — ✅ Terminé
 *   **Description :** Implémenter dans `schemas/report.py` le modèle `AnalysisReport` tel que défini dans le cahier des charges (ST-02) : `title`, `summary`, `key_points`, `impact_technical`, `impact_business`, `impact_regulatory`, `recommendation`, `priority`, et les champs FinOps (`prompt_tokens`, `completion_tokens`, `estimated_cost_usd`, `execution_time_seconds`).
 *   **Concept clé :** Structured Outputs & Contrat de données — Pydantic V2 valide automatiquement le JSON renvoyé par le LLM et lève une erreur si le format est non-conforme.
 *   **Critère de validation :** Instancier un `AnalysisReport` avec des données valides réussit. Instancier avec un champ manquant (`key_points` absent) lève `ValidationError`. Mypy strict valide la totalité du modèle.

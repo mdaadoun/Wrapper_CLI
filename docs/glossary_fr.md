@@ -87,3 +87,12 @@ Une pratique architecturale séparant les opérations I/O génératrices d effet
 
 ### Pipeline de Nettoyage HTML
 Une séquence d opérations conçue pour analyser le HTML brut, supprimer les balises bruyantes non liées au contenu principal (comme script, style, nav, footer), et extraire le texte lisible pour minimiser la consommation de tokens pour le LLM.
+
+### Contrat de Données Pydantic V2
+Patron de validation aux frontières de l'architecture utilisant des modèles Pydantic V2 pour parser et imposer des contrats de type stricts, des valeurs par défaut et des contraintes de valeurs sur les sorties JSON du LLM.
+
+### Entité Immuable (`frozen=True`)
+Patron de modélisation de domaine imposant des objets de données en lecture seule après instanciation (`ConfigDict(frozen=True)`), évitant les mutations d'état accidentelles.
+
+### Schéma de Télémétrie FinOps
+Patron de conception de schéma intégrant les métriques de coût opérationnel (`prompt_tokens`, `completion_tokens`, `estimated_cost_usd`, `execution_time_seconds`) aux côtés des livrables métier au sein d'une entité unique.

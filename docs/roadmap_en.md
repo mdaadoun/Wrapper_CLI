@@ -99,10 +99,11 @@ Phase 1: Baseline Setup ──> Phase 2: CLI Skeleton ──> Phase 3: Ingestion
 ## Phase 4: LLM Client & Structured Outputs — ⏳ Pending
 *Goal: Query LLM APIs and guarantee structured output matching Pydantic schema (FS-02).*
 
-### Step 4.1: Output Data Modeling (Pydantic V2) — ⏳ Pending
+### Step 4.1: Output Data Modeling (Pydantic V2) — ✅ Completed
 * **Description:** Implement `AnalysisReport` model in `schemas/report.py` as defined in ST-02: `title`, `summary`, `key_points`, `impact_technical`, `impact_business`, `impact_regulatory`, `recommendation`, `priority`, alongside FinOps fields (`prompt_tokens`, `completion_tokens`, `estimated_cost_usd`, `execution_time_seconds`).
 * **Key Concept:** Structured Outputs & Data Contract — Pydantic V2 validates LLM JSON response and raises error on schema mismatch.
 * **Validation Criterion:** Instantiating `AnalysisReport` with valid data succeeds. Missing required field (`key_points` missing) raises `ValidationError`. Strict Mypy passes.
+
 
 ### Step 4.2: System Prompt Engineering — ⏳ Pending
 * **Description:** Author system prompt in `clients/prompts.py` instructing LLM to act as a senior AI analyst. Defines role, format constraints (JSON matching `AnalysisReport` schema), conciseness bounds (max 200 words summary, 3-5 key points), and expected sample output.

@@ -92,3 +92,12 @@ An architectural practice separating side-effect-heavy I/O operations (like read
 
 ### HTML Cleaning Pipeline
 A sequence of operations designed to parse raw HTML, remove non-content noisy tags (like script, style, nav, footer), and extract human-readable text to minimize token consumption for the LLM.
+
+### Pydantic V2 Data Contract
+Architectural boundary validation pattern using Pydantic V2 models to parse and enforce strict type contracts, default factories, and value constraints on incoming LLM JSON outputs.
+
+### Immutable Data Entity (`frozen=True`)
+Domain modeling pattern enforcing read-only data objects post-instantiation (`ConfigDict(frozen=True)`), preventing accidental side-effect mutations across pipeline stages.
+
+### FinOps Telemetry Schema
+Schema design pattern embedding operational cost metrics (`prompt_tokens`, `completion_tokens`, `estimated_cost_usd`, `execution_time_seconds`) alongside domain deliverables within a single entity.

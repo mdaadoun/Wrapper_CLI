@@ -63,3 +63,18 @@ Questions-réponses clés pour défendre l'architecture et les choix d'ingénier
 
 **Q: Pourquoi utilisons-nous BeautifulSoup4 pour supprimer certaines balises HTML avant d envoyer le texte au LLM ?**
 *Expected Answer:* Les balises comme `<script>`, `<style>`, `<nav>`, et `<footer>` contiennent du code générique ou des liens de navigation qui n apportent rien au contenu principal. Les supprimer réduit le "bruit", ce qui minimise directement la consommation de tokens (réduisant les coûts) et aide le LLM à se concentrer uniquement sur le contexte métier pertinent, améliorant la précision des réponses.
+
+### 11. Patron Façade pour l Orchestration (Étape 3.3)
+
+**Q: Pourquoi utiliser le patron Façade pour la fonction `extract()` plutôt que de laisser les appelants utiliser directement les extracteurs individuels ?**
+*Expected Answer:* Le patron Façade offre trois avantages : (1) Centralisation du routage — les appelants n'ont pas besoin de connaître la logique de dispatch selon le `SourceType`. (2) Validation uniforme — tous les flux d'extraction passent par la validation Pydantic `ExtractedContent`, garantissant un résultat non vide. (3) Point d'import unique — le reste du code importe uniquement `extract` depuis `core/extractor`.
+
+### 12. Modélisation des Données avec Pydantic V2 (Étape 4.1)
+
+**Q: Pourquoi utiliser Pydantic V2 au lieu de dataclasses standard ou de TypedDict pour modéliser les sorties JSON du LLM ?**
+*Expected Answer:* Pydantic V2 offre quatre avantages majeurs : (1) Parsing JSON natif via `model_validate_json()`, gérant le typage, les champs manquants et le parsing datetime ISO 8601. (2) Validation stricte au moment de l'exécution (ex: jetons non négatifs `ge=0`, énumération stricte des priorités). (3) Génération automatique de schémas JSON via `model_json_schema()` réinjectable directement dans les prompts système pour les sorties structurées. (4) Performances élevées grâce au cœur en Rust (`pydantic-core`).
+
+### 13. Entités Immuables et Métriques FinOps (Étape 4.1)
+
+**Q: Pourquoi modéliser `AnalysisReport` comme une entité immuable (`frozen=True`) et y intégrer directement la télémétrie FinOps ?**
+*Expected Answer:* (1) L'immuabilité (`ConfigDict(frozen=True)`) garantit la sécurité multi-thread et évite toute modification accidentelle lors du passage dans les couches d'affichage et de mise en cache. (2) L'intégration de la télémétrie FinOps (`prompt_tokens`, `completion_tokens`, `estimated_cost_usd`, `execution_time_seconds`) dans le rapport garantit que les métriques d'observabilité financière restent indissociables des résultats d'analyse.
