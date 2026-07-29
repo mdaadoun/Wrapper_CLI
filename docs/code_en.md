@@ -14,6 +14,11 @@ The application adheres to the **Single Responsibility Principle (SRP)**. The co
 - **`core/`:** Business logic components.
   - **`detector.py`:** Deterministic source type inference
   - **`extractor.py`:** Pure functions for parsing and normalizing raw strings, reading strictly validated `.txt`/`.md` files, and scraping/cleaning URLs with `httpx` and `BeautifulSoup4`. (`SourceType.URL`, `SourceType.FILE`, `SourceType.TEXT`) and `EmptySourceError` validation.
+    - **`extract_from_text(raw: str) -> str`:** Pure function — normalizes whitespace (collapses multiple spaces/tabs, strips empty lines).
+    - **`extract_from_file(path: Path) -> str`:** I/O function — validates file existence, extension (`.txt`/`.md`), reads content, delegates to `extract_from_text`.
+    - **`extract_from_url(url: str) -> str`:** I/O function — fetches via HTTPX, strips noisy HTML tags (script, style, nav, footer, header, aside) via BeautifulSoup4, normalizes whitespace.
+    - **`ExtractedContent` (Pydantic model):** Validates output with `Field(min_length=1)` on `text`, `ge=1` on `char_count`. Classmethod `from_text()` raises `EmptySourceError` if cleaned content is empty.
+    - **`extract(source: str, source_type: SourceType) -> str` (Facade):** Dispatches to the correct extractor based on `SourceType` enum, then validates output through `ExtractedContent.from_text()`. This is the single public entry point for the ingestion pipeline, used by `main.py` and test mocks.
 - **`clients/`:** LLM client encapsulation (e.g., `httpx` + API calls).
 - **`utils/`:** Cross-cutting utilities (cost calculator, caching).
 - **`formatters/`:** Rendering components (Rich terminal output, Markdown export).

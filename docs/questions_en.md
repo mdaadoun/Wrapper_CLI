@@ -63,3 +63,18 @@ Targeted questions and answers covering architecture design choices and engineer
 
 **Q: Why do we use BeautifulSoup4 to strip specific HTML tags before sending the text to the LLM?**
 *Expected Answer:* Tags like `<script>`, `<style>`, `<nav>`, and `<footer>` contain boilerplate code or navigation links that do not contribute to the main content. Stripping them reduces "noise", which directly minimizes token usage (saving costs) and helps the LLM focus purely on the relevant business context, improving response accuracy.
+
+### 11. Facade Pattern for Ingestion Orchestration (Step 3.3)
+
+**Q: Why use a Facade pattern for the `extract()` function rather than letting callers call the individual extractors directly?**
+*Expected Answer:* The Facade pattern provides three benefits: (1) Centralized dispatch logic — callers don't need to know which extractor to invoke or how to route based on `SourceType`. (2) Consistent validation enforcement — every extraction path goes through the same Pydantic `ExtractedContent` validation, guaranteeing non-empty output. (3) Single import point — the rest of the codebase only imports `extract` from `core/extractor`, not three separate functions. This reduces coupling and makes the ingestion pipeline easier to extend (e.g., adding a PDF extractor requires only modifying the facade).
+
+### 12. Pydantic Validation at System Boundaries (Step 3.3)
+
+**Q: Why use a Pydantic `BaseModel` with `Field(min_length=1)` instead of a simple `if not text: raise` check for validating extracted content?**
+*Expected Answer:* Using Pydantic provides three advantages over a raw conditional: (1) Declarative schema — the constraint is documented at the type level, not buried in imperative code. (2) Automatic metadata — `ExtractedContent` carries `source_type` and `char_count` alongside the text, making it self-documenting. (3) Consistency — the same validation mechanism (`BaseModel.model_validate()`) is used throughout the project (e.g., for `AnalysisReport`), creating a uniform validation pattern. The `from_text()` classmethod bridges the pure function output to the Pydantic model, keeping the interface clean.
+
+### 13. EmptySourceError vs. ExtractionError (Step 3.3)
+
+**Q: Why raise `EmptySourceError` (not `ExtractionError`) when the cleaned output is empty?**
+*Expected Answer:* The two exceptions serve different semantic purposes: `ExtractionError` signals an I/O or technical failure (file not found, HTTP error, parsing crash). `EmptySourceError` signals a business-logic validation failure — the extraction succeeded technically but produced no usable content. Separating them allows callers to handle each case differently: an empty result might trigger a retry with a different source, while an extraction error indicates a system-level problem. Both inherit from `WatcherError`, so a catch-all handler still works.

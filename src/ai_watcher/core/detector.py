@@ -40,7 +40,11 @@ def detect_source_type(
     if stripped.startswith(("http://", "https://")):
         return SourceType.URL
 
-    if Path(stripped).is_file():
-        return SourceType.FILE
+    try:
+        if Path(stripped).is_file():
+            return SourceType.FILE
+    except (ValueError, OSError):
+        # Invalid path characters (e.g., null bytes) → fall through to TEXT
+        pass
 
     return SourceType.TEXT

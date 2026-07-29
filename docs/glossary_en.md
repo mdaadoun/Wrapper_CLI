@@ -49,7 +49,12 @@ Python library for rich terminal rendering (styled panels, syntax highlighting, 
 ### Facade Pattern
 Structural design pattern providing a simplified, unified interface in front of complex subsystems (e.g., multi-source extraction orchestrator).
 
----
+### Pydantic Validation Layer
+Architectural pattern where Pydantic `BaseModel` with constrained fields (`Field(min_length=1)`) is placed at system boundaries to enforce business rules declaratively, catching invalid data before it propagates into core logic.
+
+### Factory-style Dispatch
+A lightweight routing pattern using an `if/elif/else` chain on an enum value to select the appropriate function or strategy, without requiring a formal registry or inversion-of-control container.
+
 
 ## 🤖 Artificial Intelligence & LLM Concepts
 

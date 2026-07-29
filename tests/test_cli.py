@@ -1,5 +1,11 @@
+"""
+CLI integration tests for AI Watcher.
+Tests the Typer CLI entrypoint through the CliRunner.
+"""
+
 import runpy
 import sys
+from unittest.mock import patch
 
 import pytest
 from typer.testing import CliRunner
@@ -30,20 +36,26 @@ def test_scan_auto_detection_text():
     result = runner.invoke(app, ["scan", "Hello World"])
     assert result.exit_code == 0
     assert "Scanning source [text mode]: Hello World" in result.stdout
+    assert "Extracted" in result.stdout
 
 
 def test_scan_auto_detection_url():
-    result = runner.invoke(app, ["scan", "https://example.com"])
+    """URL auto-detection works; extraction is mocked to avoid network I/O."""
+    with patch(
+        "src.ai_watcher.core.extractor.extract_from_url", return_value="content"
+    ):
+        result = runner.invoke(app, ["scan", "https://example.com"])
     assert result.exit_code == 0
     assert "Scanning source [url mode]: https://example.com" in result.stdout
 
 
 def test_scan_auto_detection_file(tmp_path):
     sample = tmp_path / "test.md"
-    sample.write_text("content")
+    sample.write_text("real content here")
     result = runner.invoke(app, ["scan", str(sample)])
     assert result.exit_code == 0
     assert f"Scanning source [file mode]: {sample}" in result.stdout
+    assert "Extracted" in result.stdout
 
 
 def test_scan_explicit_text_flag():
@@ -53,13 +65,18 @@ def test_scan_explicit_text_flag():
 
 
 def test_scan_explicit_file_flag():
+    """Force file mode on a non-existent file → exits 1 with clean error."""
     result = runner.invoke(app, ["scan", "--file", "document.md"])
-    assert result.exit_code == 0
-    assert "Scanning source [file mode]: document.md" in result.stdout
+    assert result.exit_code == 1
+    assert "Error:" in result.stderr
 
 
 def test_scan_explicit_url_flag():
-    result = runner.invoke(app, ["scan", "-u", "https://example.com"])
+    """Force URL mode; extraction is mocked to avoid network I/O."""
+    with patch(
+        "src.ai_watcher.core.extractor.extract_from_url", return_value="content"
+    ):
+        result = runner.invoke(app, ["scan", "-u", "https://example.com"])
     assert result.exit_code == 0
     assert "Scanning source [url mode]: https://example.com" in result.stdout
 

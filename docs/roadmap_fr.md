@@ -76,20 +76,20 @@ Phase 1 : Adaptation Socle ──> Phase 2 : CLI Squelette ──> Phase 3 : Ing
 
 ---
 
-## Phase 3 : Module d'Ingestion Multi-Sources — ⏳ À faire
+## Phase 3 : Module d'Ingestion Multi-Sources — ✅ Terminé
 *Objectif : Récupérer et nettoyer le contenu textuel des 3 types de sources d'entrée (SF-01 du CDCF).*
 
-### Étape 3.1 : Extraction de texte direct et fichiers locaux — ⏳ À faire
+### Étape 3.1 : Extraction de texte direct et fichiers locaux — ✅ Terminé
 *   **Description :** Implémenter dans `core/extractor.py` deux fonctions pures : `extract_from_text(raw: str) -> str` (nettoyage des espaces superflus) et `extract_from_file(path: Path) -> str` (lecture de fichiers `.txt` et `.md` avec validation d'existence et d'extension).
 *   **Concept clé :** Fonctions pures et séparation I/O — chaque extracteur a une entrée et une sortie prévisibles, testables sans effet de bord.
 *   **Critère de validation :** Passer un fichier `.md` existant renvoie son contenu nettoyé. Passer un fichier inexistant lève `ExtractionError`. Mypy valide le typage strict.
 
-### Étape 3.2 : Scraping HTML pour les URLs — ⏳ À faire
+### Étape 3.2 : Scraping HTML pour les URLs — ✅ Terminé
 *   **Description :** Ajouter `extract_from_url(url: str) -> str` utilisant HTTPX pour la requête HTTP et BeautifulSoup4 pour l'extraction du texte visible (suppression des balises `<script>`, `<style>`, `<nav>`, `<footer>`, nettoyage des espaces multiples).
 *   **Concept clé :** Pipeline de nettoyage HTML — transformer du HTML brut en texte exploitable par un LLM nécessite un nettoyage agressif pour réduire le bruit et le nombre de tokens consommés.
 *   **Critère de validation :** Passer l'URL `https://example.com` renvoie un texte propre sans balises. Une URL invalide (timeout, 404) lève `ExtractionError` avec un message explicite.
 
-### Étape 3.3 : Orchestrateur d'extraction — ⏳ À faire
+### Étape 3.3 : Orchestrateur d'extraction — ✅ Terminé
 *   **Description :** Créer dans `core/extractor.py` une fonction façade `extract(source: str, source_type: SourceType) -> str` qui dispatche vers le bon extracteur en fonction du type détecté en Phase 2.2. Ajouter la validation Pydantic de la longueur minimale du contenu extrait.
 *   **Concept clé :** Pattern Façade — exposer une interface unique et simple au reste du pipeline, masquant la complexité interne des 3 extracteurs.
 *   **Critère de validation :** La fonction `extract` traite correctement les 3 types de sources et lève `EmptySourceError` si le contenu extrait est vide après nettoyage.

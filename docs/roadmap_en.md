@@ -76,7 +76,7 @@ Phase 1: Baseline Setup ──> Phase 2: CLI Skeleton ──> Phase 3: Ingestion
 
 ---
 
-## Phase 3: Multi-Source Ingestion Module — ⏳ Pending
+## Phase 3: Multi-Source Ingestion Module — ✅ Completed
 *Goal: Retrieve and clean textual content from 3 input source types (FS-01).*
 
 ### Step 3.1: Direct Text and Local File Extraction — ✅ Completed
@@ -89,7 +89,7 @@ Phase 1: Baseline Setup ──> Phase 2: CLI Skeleton ──> Phase 3: Ingestion
 * **Key Concept:** HTML Cleaning Pipeline — converting raw HTML into LLM-friendly clean text to minimize noise and token consumption.
 * **Validation Criterion:** URL `https://example.com` returns clean text stripped of HTML tags. Invalid URL (timeout, 404) raises `ExtractionError` with explicit message.
 
-### Step 3.3: Ingestion Orchestrator — ⏳ Pending
+### Step 3.3: Ingestion Orchestrator — ✅ Completed
 * **Description:** Create facade function `extract(source: str, source_type: SourceType) -> str` in `core/extractor.py` dispatching to appropriate extractor based on detected source type. Add Pydantic validation for minimum extracted content length.
 * **Key Concept:** Facade Pattern — expose single simple interface hiding internal complexity of the 3 extractors.
 * **Validation Criterion:** `extract` handles all 3 source types and raises `EmptySourceError` if cleaned output is empty.
