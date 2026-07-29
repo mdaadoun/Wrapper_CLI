@@ -64,17 +64,27 @@ Questions-réponses clés pour défendre l'architecture et les choix d'ingénier
 **Q: Pourquoi utilisons-nous BeautifulSoup4 pour supprimer certaines balises HTML avant d envoyer le texte au LLM ?**
 *Expected Answer:* Les balises comme `<script>`, `<style>`, `<nav>`, et `<footer>` contiennent du code générique ou des liens de navigation qui n apportent rien au contenu principal. Les supprimer réduit le "bruit", ce qui minimise directement la consommation de tokens (réduisant les coûts) et aide le LLM à se concentrer uniquement sur le contexte métier pertinent, améliorant la précision des réponses.
 
-### 11. Patron Façade pour l Orchestration (Étape 3.3)
+### 11. Patron Façade pour l'Orchestration (Étape 3.3)
 
-**Q: Pourquoi utiliser le patron Façade pour la fonction `extract()` plutôt que de laisser les appelants utiliser directement les extracteurs individuels ?**
-*Expected Answer:* Le patron Façade offre trois avantages : (1) Centralisation du routage — les appelants n'ont pas besoin de connaître la logique de dispatch selon le `SourceType`. (2) Validation uniforme — tous les flux d'extraction passent par la validation Pydantic `ExtractedContent`, garantissant un résultat non vide. (3) Point d'import unique — le reste du code importe uniquement `extract` depuis `core/extractor`.
+**Q : Pourquoi utiliser le patron Façade pour la fonction `extract()` plutôt que de laisser les appelants utiliser directement les extracteurs individuels ?**
+*Réponse attendue :* Le patron Façade offre trois avantages : (1) Centralisation du routage — les appelants n'ont pas besoin de connaître la logique de dispatch selon le `SourceType`. (2) Validation uniforme — tous les flux d'extraction passent par la validation Pydantic `ExtractedContent`, garantissant un résultat non vide. (3) Point d'import unique — le reste du code importe uniquement `extract` depuis `core/extractor`, réduisant le couplage et facilitant l'ajout de nouveaux extracteurs (ex: un extracteur PDF nécessiterait seulement de modifier la façade).
 
-### 12. Modélisation des Données avec Pydantic V2 (Étape 4.1)
+### 12. Validation Pydantic aux Frontières du Système (Étape 3.3)
 
-**Q: Pourquoi utiliser Pydantic V2 au lieu de dataclasses standard ou de TypedDict pour modéliser les sorties JSON du LLM ?**
-*Expected Answer:* Pydantic V2 offre quatre avantages majeurs : (1) Parsing JSON natif via `model_validate_json()`, gérant le typage, les champs manquants et le parsing datetime ISO 8601. (2) Validation stricte au moment de l'exécution (ex: jetons non négatifs `ge=0`, énumération stricte des priorités). (3) Génération automatique de schémas JSON via `model_json_schema()` réinjectable directement dans les prompts système pour les sorties structurées. (4) Performances élevées grâce au cœur en Rust (`pydantic-core`).
+**Q : Pourquoi utiliser un modèle Pydantic `BaseModel` avec `Field(min_length=1)` plutôt qu'une simple vérification `if not text: raise` ?**
+*Réponse attendue :* L'utilisation de Pydantic apporte trois avantages par rapport à une condition brute : (1) Schéma déclaratif — la contrainte est documentée au niveau du type et non enfouie dans le code impératif. (2) Métadonnées automatiques — `ExtractedContent` transporte `source_type` et `char_count` aux côtés du texte, ce qui le rend auto-documenté. (3) Cohérence — le même mécanisme de validation (`BaseModel.model_validate()`) est réutilisé dans tout le projet (ex. pour `AnalysisReport`), créant un pattern de validation uniforme. La méthode de classe `from_text()` relie la sortie de la fonction pure au modèle Pydantic.
 
-### 13. Entités Immuables et Métriques FinOps (Étape 4.1)
+### 13. Distinguer EmptySourceError et ExtractionError (Étape 3.3)
 
-**Q: Pourquoi modéliser `AnalysisReport` comme une entité immuable (`frozen=True`) et y intégrer directement la télémétrie FinOps ?**
-*Expected Answer:* (1) L'immuabilité (`ConfigDict(frozen=True)`) garantit la sécurité multi-thread et évite toute modification accidentelle lors du passage dans les couches d'affichage et de mise en cache. (2) L'intégration de la télémétrie FinOps (`prompt_tokens`, `completion_tokens`, `estimated_cost_usd`, `execution_time_seconds`) dans le rapport garantit que les métriques d'observabilité financière restent indissociables des résultats d'analyse.
+**Q : Pourquoi lever `EmptySourceError` (et non `ExtractionError`) lorsque le contenu nettoyé est vide ?**
+*Réponse attendue :* Les deux exceptions ont des objectifs sémantiques distincts : `ExtractionError` signale un échec I/O ou technique (fichier introuvable, erreur HTTP, crash de parsing). `EmptySourceError` signale un échec de validation métier — l'extraction a réussi techniquement mais a produit un contenu inexploitable. Les séparer permet aux appelants de traiter chaque cas différemment : un résultat vide peut déclencher un re-essai avec une autre source, tandis qu'une erreur d'extraction indique un problème système. Les deux héritent de `WatcherError`, permettant à un gestionnaire global de capturer les deux.
+
+### 14. Modélisation des Données avec Pydantic V2 (Étape 4.1)
+
+**Q : Pourquoi utiliser Pydantic V2 au lieu de dataclasses standard ou de TypedDict pour modéliser les sorties JSON du LLM ?**
+*Réponse attendue :* Pydantic V2 offre quatre avantages majeurs : (1) Parsing JSON natif via `model_validate_json()`, gérant le typage, les champs manquants et le parsing datetime ISO 8601. (2) Validation stricte au moment de l'exécution (ex: jetons non négatifs `ge=0`, énumération stricte des priorités). (3) Génération automatique de schémas JSON via `model_json_schema()` réinjectable directement dans les prompts système pour les sorties structurées. (4) Performances élevées grâce au cœur en Rust (`pydantic-core`).
+
+### 15. Entités Immuables et Métriques FinOps (Étape 4.1)
+
+**Q : Pourquoi modéliser `AnalysisReport` comme une entité immuable (`frozen=True`) et y intégrer directement la télémétrie FinOps ?**
+*Réponse attendue :* (1) L'immuabilité (`ConfigDict(frozen=True)`) garantit la sécurité multi-thread et évite toute modification accidentelle lors du passage dans les couches d'affichage et de mise en cache. (2) L'intégration de la télémétrie FinOps (`prompt_tokens`, `completion_tokens`, `estimated_cost_usd`, `execution_time_seconds`) dans le rapport garantit que les métriques d'observabilité financière restent indissociables des résultats d'analyse.
