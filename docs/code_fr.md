@@ -16,9 +16,11 @@ L'application repose sur le **Single Responsibility Principle (SRP)**. Le code e
   - **`extractor.py` :** Fonctions pures pour normaliser les textes bruts, lire les fichiers `.txt`/`.md`, et scraper/nettoyer les URLs via `httpx` et `BeautifulSoup4`. (`SourceType.URL`, `SourceType.FILE`, `SourceType.TEXT`) et levée de `EmptySourceError` si la chaîne est vide.
 - **`schemas/` :** Contrats de données strictement typés pour les entités métier et les sorties structurées de l'LLM.
   - **`report.py` (`AnalysisReport`) :** Modèle de données immuable Pydantic V2 (`ConfigDict(frozen=True)`). Définit le contexte (`source`, `analyzed_at`, `model_used`), les livrables d'analyse (`title`, `summary`, `key_points`, `impact_technical`, `impact_business`, `impact_regulatory`, `recommendation`, `priority`), et la télémétrie FinOps (`prompt_tokens`, `completion_tokens`, `total_tokens`, `estimated_cost_usd`, `execution_time_seconds`, `is_cached`). Inclut `@model_validator(mode="before")` pour l'auto-calcul de `total_tokens`.
-- **`clients/` :** Encapsulation du client LLM (ex: `httpx` + appels API).
+- **`clients/` :** Encapsulation des clients LLM et prompt engineering.
+  - **`llm_client.py` (`LLMClient`) :** Client d'API LLM de base encapsulant les interactions REST HTTPX aux formats Google Gemini et OpenAI. La méthode `analyze(content: str, source: str) -> AnalysisReport` gère la construction du payload, la mesure du temps via `time.perf_counter()`, le nettoyage des balises markdown (`_clean_json_text()`), le parsing de la réponse (`_parse_response()`) et l'injection de la télémétrie FinOps avant de retourner un modèle `AnalysisReport` validé.
   - **`prompts.py` (`SYSTEM_PROMPT`, `SAMPLE_ANALYSIS_REPORT_JSON`) :** Module de prompt engineering systémique. Définit le persona d'analyste senior IA, les contraintes de formatage (JSON pur, résumé de max 200 mots, 3 à 5 points clés, énumération des priorités `"low"`|`"medium"`|`"high"`) et le schéma JSON `AnalysisReport`. Inclut une réponse exemple JSON validée et un helper `validate_sample_report()` encapsulant les erreurs dans `WatcherError`.
 - **`utils/` :** Utilitaires transverses (calculateur de coûts, mise en cache).
+  - **`cost.py` (`calculate_cost`) :** Fonction pure de calcul de coût FinOps évaluant la dépense financière en USD sur la base de la grille tarifaire des modèles (taux par 1 000 jetons de prompt et de complétion).
 - **`formatters/` :** Composants de rendu (terminal avec Rich, export Markdown).
 
 

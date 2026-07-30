@@ -1,6 +1,5 @@
 import pytest
-
-from src.ai_watcher.exceptions import (
+from ai_watcher.exceptions import (
     ConfigurationError,
     EmptySourceError,
     ExtractionError,

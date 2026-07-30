@@ -11,11 +11,10 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 import httpx
+from ai_watcher.core.detector import SourceType
+from ai_watcher.exceptions import EmptySourceError, ExtractionError
 from bs4 import BeautifulSoup
 from pydantic import BaseModel, Field
-
-from src.ai_watcher.core.detector import SourceType
-from src.ai_watcher.exceptions import EmptySourceError, ExtractionError
 
 
 # ── Pydantic validation model for extracted content ──────────────────────
@@ -132,7 +131,7 @@ class _SSRFSafeTransport(httpx.HTTPTransport):
             raise ExtractionError(f"DNS resolution failed for '{hostname}': {e}") from e
 
         for _family, _, _, _, sockaddr in addrinfo:
-            _validate_ip(sockaddr[0])
+            _validate_ip(str(sockaddr[0]))
 
         return super().handle_request(request)
 

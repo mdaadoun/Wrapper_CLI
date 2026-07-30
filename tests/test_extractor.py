@@ -10,9 +10,8 @@ from unittest.mock import patch
 
 import httpx
 import pytest
-
-from src.ai_watcher.core.detector import SourceType
-from src.ai_watcher.core.extractor import (
+from ai_watcher.core.detector import SourceType
+from ai_watcher.core.extractor import (
     _SSRFSafeTransport,
     _validate_ip,
     extract,
@@ -20,7 +19,7 @@ from src.ai_watcher.core.extractor import (
     extract_from_text,
     extract_from_url,
 )
-from src.ai_watcher.exceptions import EmptySourceError, ExtractionError
+from ai_watcher.exceptions import EmptySourceError, ExtractionError
 
 # ═══════════════════════════════════════════════════════════════════════════
 # extract_from_text

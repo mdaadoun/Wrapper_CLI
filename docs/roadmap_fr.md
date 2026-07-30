@@ -104,12 +104,12 @@ Phase 1 : Adaptation Socle ──> Phase 2 : CLI Squelette ──> Phase 3 : Ing
 *   **Concept clé :** Structured Outputs & Contrat de données — Pydantic V2 valide automatiquement le JSON renvoyé par le LLM et lève une erreur si le format est non-conforme.
 *   **Critère de validation :** Instancier un `AnalysisReport` avec des données valides réussit. Instancier avec un champ manquant (`key_points` absent) lève `ValidationError`. Mypy strict valide la totalité du modèle.
 
-### Étape 4.2 : Conception du prompt systémique — ⏳ À faire
+### Étape 4.2 : Conception du prompt systémique — ✅ Terminé
 *   **Description :** Rédiger dans `clients/prompts.py` le prompt système instruisant le LLM d'agir comme un analyste senior IA. Le prompt inclut : le rôle, les contraintes de format (JSON conforme au schéma `AnalysisReport`), les contraintes de concision (max 200 mots pour le résumé, 3 à 5 points clés), et un exemple de sortie attendue.
 *   **Concept clé :** Prompt Engineering systémique — la qualité et la fiabilité de la sortie dépendent directement de la rigueur des instructions système, pas du contenu utilisateur.
 *   **Critère de validation :** Le prompt est stocké sous forme de constante typée. Il mentionne explicitement le schéma JSON attendu et inclut un exemple de réponse parsable par `AnalysisReport.model_validate_json()`.
 
-### Étape 4.3 : Client LLM de base (sans retry) — ⏳ À faire
+### Étape 4.3 : Client LLM de base (sans retry) — ✅ Terminé
 *   **Description :** Implémenter dans `clients/llm_client.py` une classe `LLMClient` encapsulant l'appel API (via le SDK OpenAI ou HTTPX direct). La méthode `analyze(content: str) -> AnalysisReport` envoie le prompt système + le contenu utilisateur, parse la réponse JSON et retourne un objet `AnalysisReport` validé.  Paramètres configurables : `model`, `temperature` (0.0–0.3), `top_p` (0.9), `max_tokens`.
 *   **Concept clé :** Encapsulation du client API — isoler l'appel réseau dans une couche dédiée permet de le mocker en test, de le remplacer par un autre provider, et de centraliser la gestion d'erreurs.
 *   **Critère de validation :** Avec une clé API valide, `LLMClient().analyze("OpenAI lance GPT-5")` renvoie un `AnalysisReport` complet et validé. Sans clé, une `LLMClientError` est levée.

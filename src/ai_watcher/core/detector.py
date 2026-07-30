@@ -5,7 +5,7 @@ Source type detection logic.
 from enum import Enum
 from pathlib import Path
 
-from src.ai_watcher.exceptions import EmptySourceError
+from ai_watcher.exceptions import EmptySourceError
 
 
 class SourceType(str, Enum):

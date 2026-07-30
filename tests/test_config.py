@@ -3,9 +3,8 @@ Unit tests for configuration loading.
 """
 
 import pytest
-
-from src.ai_watcher.config import get_settings
-from src.ai_watcher.exceptions import ConfigurationError
+from ai_watcher.config import get_settings
+from ai_watcher.exceptions import ConfigurationError
 
 
 def test_missing_api_key_raises_error(monkeypatch: pytest.MonkeyPatch) -> None:

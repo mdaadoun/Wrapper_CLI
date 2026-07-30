@@ -103,3 +103,18 @@ Targeted questions and answers covering architecture design choices and engineer
 
 **Q: How are prompt changes validated to ensure they don't break downstream data contracts?**
 *Expected Answer:* Unit tests in `tests/test_prompts.py` execute `AnalysisReport.model_validate_json()` directly on the sample JSON embedded in the prompt. Any schema change in `AnalysisReport` that breaks the sample JSON causes immediate test failure before deployment.
+
+### 19. HTTPX vs Provider SDKs for LLM Interactions (Step 4.3)
+
+**Q: Why use HTTPX directly instead of provider-specific SDKs like google-generativeai or openai?**
+*Expected Answer:* Using HTTPX directly provides four architectural advantages: (1) Lightweight footprint — avoids importing large provider SDK dependencies, keeping container size under 250 MB. (2) Uniform HTTP engine — reuses HTTPX transport patterns and security headers across both web scrapers and LLM clients. (3) Provider flexibility — supports querying multiple REST API formats (Gemini, OpenAI) without changing SDK client instances. (4) Testability — enables seamless mock transport injection (`httpx.Client(transport=...)`) during unit tests without complex SDK patching.
+
+### 20. Domain Model Enforcement & Markdown Fence Stripping (Step 4.3)
+
+**Q: How does LLMClient guarantee that raw LLM output strictly conforms to the application's AnalysisReport domain model?**
+*Expected Answer:* `LLMClient` uses a multi-stage validation pipeline: (1) It extracts raw candidate text from API response JSON. (2) It executes `_clean_json_text()` to strip markdown code fences (` ```json ... ``` `) if present. (3) It parses the cleaned string into a dict, injects caller context (`source`, `model_used`) and FinOps metrics. (4) It passes the populated dict to `AnalysisReport.model_validate()`. If validation fails due to missing keys or invalid types, it catches `ValidationError` and raises domain `LLMClientError`.
+
+### 21. FinOps Telemetry Measurement (Step 4.3)
+
+**Q: How are FinOps performance latency and financial cost metrics captured during LLM inference execution?**
+*Expected Answer:* `LLMClient` captures wall-clock execution time by wrapping the HTTP POST call with `time.perf_counter()`. Upon receiving the response, it extracts token usage metadata (`promptTokenCount`, `candidatesTokenCount`) from the payload. It then delegates to `utils/cost.py`'s `calculate_cost()` function, which computes the exact USD expenditure based on model-specific input/output rates per 1,000 tokens. Both latency and cost are injected directly into the `AnalysisReport` model before returning to the caller.

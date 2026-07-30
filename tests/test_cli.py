@@ -8,9 +8,8 @@ import sys
 from unittest.mock import patch
 
 import pytest
+from ai_watcher.main import app
 from typer.testing import CliRunner
-
-from src.ai_watcher.main import app
 
 runner = CliRunner()
 
@@ -41,9 +40,7 @@ def test_scan_auto_detection_text():
 
 def test_scan_auto_detection_url():
     """URL auto-detection works; extraction is mocked to avoid network I/O."""
-    with patch(
-        "src.ai_watcher.core.extractor.extract_from_url", return_value="content"
-    ):
+    with patch("ai_watcher.core.extractor.extract_from_url", return_value="content"):
         result = runner.invoke(app, ["scan", "https://example.com"])
     assert result.exit_code == 0
     assert "Scanning source [url mode]: https://example.com" in result.stdout
@@ -73,9 +70,7 @@ def test_scan_explicit_file_flag():
 
 def test_scan_explicit_url_flag():
     """Force URL mode; extraction is mocked to avoid network I/O."""
-    with patch(
-        "src.ai_watcher.core.extractor.extract_from_url", return_value="content"
-    ):
+    with patch("ai_watcher.core.extractor.extract_from_url", return_value="content"):
         result = runner.invoke(app, ["scan", "-u", "https://example.com"])
     assert result.exit_code == 0
     assert "Scanning source [url mode]: https://example.com" in result.stdout
@@ -90,5 +85,5 @@ def test_scan_empty_source_exit_code():
 def test_main_module_execution(monkeypatch):
     monkeypatch.setattr(sys, "argv", ["main.py", "--help"])
     with pytest.raises(SystemExit) as exc_info:
-        runpy.run_module("src.ai_watcher.main", run_name="__main__")
+        runpy.run_module("ai_watcher.main", run_name="__main__")
     assert exc_info.value.code == 0

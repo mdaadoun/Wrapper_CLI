@@ -3,10 +3,9 @@ Application configuration via Pydantic BaseSettings.
 Loads environment variables from .env file.
 """
 
+from ai_watcher.exceptions import ConfigurationError
 from pydantic import SecretStr, ValidationError
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
-from src.ai_watcher.exceptions import ConfigurationError
 
 
 class Settings(BaseSettings):

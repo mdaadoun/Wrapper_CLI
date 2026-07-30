@@ -110,3 +110,12 @@ Providing complete, validated exemplar outputs within prompt context to guide th
 
 ### Zero-Naked-Code-Fence Constraint
 Instructing the LLM to output pure JSON without markdown triple-backtick code fences to streamline downstream parsing and avoid syntax stripping errors.
+
+### LLMClient
+Domain component encapsulating REST interactions with LLM APIs via HTTPX, timing execution, stripping markdown fences, injecting FinOps telemetry, and validating returned `AnalysisReport` models.
+
+### FinOps Cost Matrix
+A mapping dictionary of LLM model identifiers to prompt and completion rates per 1,000 tokens used to compute financial operational expenditure in real time.
+
+### Markdown Fence Stripping
+A pre-processing utility function stripping leading ```json and trailing ``` markdown code block syntax from raw LLM responses before JSON deserialization.

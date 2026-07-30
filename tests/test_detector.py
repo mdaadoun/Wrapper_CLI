@@ -1,7 +1,6 @@
 import pytest
-
-from src.ai_watcher.core.detector import SourceType, detect_source_type
-from src.ai_watcher.exceptions import EmptySourceError
+from ai_watcher.core.detector import SourceType, detect_source_type
+from ai_watcher.exceptions import EmptySourceError
 
 
 def test_detect_url():

@@ -103,3 +103,18 @@ Questions-réponses clés pour défendre l'architecture et les choix d'ingénier
 
 **Q : Comment les modifications du prompt sont-elles validées pour s'assurer qu'elles ne rompent pas les contrats de données en aval ?**
 *Réponse attendue :* Les tests unitaires dans `tests/test_prompts.py` exécutent `AnalysisReport.model_validate_json()` directement sur l'exemple JSON intégré au prompt. Toute modification de schéma dans `AnalysisReport` qui rompt l'exemple JSON provoque un échec immédiat des tests avant tout déploiement.
+
+### 19. HTTPX vs SDKs Fournisseurs pour les Interactions LLM (Étape 4.3)
+
+**Q : Pourquoi utiliser directement HTTPX plutôt que des SDKs spécifiques aux fournisseurs comme google-generativeai ou openai ?**
+*Réponse attendue :* L'utilisation directe d'HTTPX offre quatre avantages architecturaux : (1) Empreinte légère — évite l'importation de dépendances lourdes, maintenant la taille du conteneur sous les 250 Mo. (2) Moteur HTTP uniforme — réutilise les patterns de transport HTTPX et les en-têtes de sécurité aussi bien pour le scraping web que pour le client LLM. (3) Flexibilité — prend en charge l'interrogation de plusieurs formats d'API REST (Gemini, OpenAI) sans changer d'instances de client SDK. (4) Testabilité — permet l'injection fluide de transports factices (`httpx.Client(transport=...)`) lors des tests unitaires sans moquage complexe de SDK.
+
+### 20. Application du Modèle de Domaine et Nettoyage Markdown (Étape 4.3)
+
+**Q : Comment LLMClient garantit-il que la sortie brute du LLM se conforme strictement au modèle de domaine AnalysisReport de l'application ?**
+*Réponse attendue :* `LLMClient` utilise un pipeline de validation en plusieurs étapes : (1) Il extrait le texte brut du candidat depuis le JSON de réponse de l'API. (2) Il exécute `_clean_json_text()` pour supprimer les balises de code markdown (` ```json ... ``` `) si présentes. (3) Il parse la chaîne nettoyée en un dictionnaire, injecte le contexte de l'appelant (`source`, `model_used`) et les métriques FinOps. (4) Il transmet le dictionnaire complété à `AnalysisReport.model_validate()`. Si la validation échoue en raison de clés manquantes ou de types invalides, il capture `ValidationError` et lève une `LLMClientError`.
+
+### 21. Mesure de la Télémétrie FinOps (Étape 4.3)
+
+**Q : Comment la latence d'exécution et les coûts financiers FinOps sont-ils capturés lors de l'exécution d'une inférence LLM ?**
+*Réponse attendue :* `LLMClient` capture le temps d'exécution horloge en enveloppant l'appel HTTP POST avec `time.perf_counter()`. À la réception de la réponse, il extrait les métadonnées d'utilisation des jetons (`promptTokenCount`, `candidatesTokenCount`) du payload. Il délègue ensuite à la fonction `calculate_cost()` de `utils/cost.py`, qui calcule la dépense exacte en USD sur la base des tarifs d'entrée/sortie spécifiques au modèle par 1 000 jetons. La latence et le coût sont directement injectés dans le modèle `AnalysisReport` avant le retour à l'appelant.

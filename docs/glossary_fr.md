@@ -105,3 +105,12 @@ Fourniture d'exemples de sortie complets et validés dans le contexte du prompt 
 
 ### Contrainte Sans Markdown Fences
 Instruction exigeant du LLM qu'il renvoie un objet JSON pur sans balises triple-backticks markdown afin de simplifier le parsing en aval.
+
+### LLMClient
+Composant de domaine encapsulant les interactions REST avec les API LLM via HTTPX, mesurant la latence, nettoyant les balises markdown, injectant la télémétrie FinOps et validant le modèle `AnalysisReport` retourné.
+
+### Grille Tarifaire FinOps (FinOps Cost Matrix)
+Dictionnaire de correspondance associant chaque identifiant de modèle LLM aux tarifs de prompt et de complétion pour 1 000 jetons afin de calculer les coûts opérationnels en temps réel.
+
+### Nettoyage des Balises Markdown (Markdown Fence Stripping)
+Utilitaire de prétraitement supprimant la syntaxe des blocs de code markdown (```json ... ```) d'une réponse LLM brute avant la désérialisation JSON.

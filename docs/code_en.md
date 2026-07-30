@@ -21,9 +21,11 @@ The application adheres to the **Single Responsibility Principle (SRP)**. The co
     - **`extract(source: str, source_type: SourceType) -> str` (Facade):** Dispatches to the correct extractor based on `SourceType` enum, then validates output through `ExtractedContent.from_text()`. This is the single public entry point for the ingestion pipeline, used by `main.py` and test mocks.
 - **`schemas/`:** Strictly typed data contracts for domain entities and LLM structured outputs.
   - **`report.py` (`AnalysisReport`):** Pydantic V2 immutable data model (`ConfigDict(frozen=True)`). Defines context (`source`, `analyzed_at`, `model_used`), analysis deliverables (`title`, `summary`, `key_points`, `impact_technical`, `impact_business`, `impact_regulatory`, `recommendation`, `priority`), and FinOps telemetry (`prompt_tokens`, `completion_tokens`, `total_tokens`, `estimated_cost_usd`, `execution_time_seconds`, `is_cached`). Includes `@model_validator(mode="before")` for auto-calculating `total_tokens`.
-- **`clients/`:** LLM client encapsulation (e.g., `httpx` + API calls).
+- **`clients/`:** LLM client encapsulation and prompt engineering.
+  - **`llm_client.py` (`LLMClient`):** Base LLM API client encapsulating HTTPX REST interactions with Google Gemini and OpenAI formats. Method `analyze(content: str, source: str) -> AnalysisReport` handles request payload construction, timing via `time.perf_counter()`, JSON markdown fence stripping (`_clean_json_text()`), response parsing (`_parse_response()`), and FinOps telemetry injection before returning a validated `AnalysisReport`.
   - **`prompts.py` (`SYSTEM_PROMPT`, `SAMPLE_ANALYSIS_REPORT_JSON`):** System prompt engineering module. Defines Senior AI Analyst persona, strict output constraints (pure JSON, max 200 words summary, 3 to 5 key points, priority enum `"low"`|`"medium"`|`"high"`), and expected `AnalysisReport` JSON schema. Includes a validated raw sample JSON string and helper `validate_sample_report()` that wraps Pydantic validation errors in domain `WatcherError`.
 - **`utils/`:** Cross-cutting utilities (cost calculator, caching).
+  - **`cost.py` (`calculate_cost`):** FinOps cost calculator pure function computing USD financial expenditure based on model pricing matrix (prompt and completion rates per 1,000 tokens).
 - **`formatters/`:** Rendering components (Rich terminal output, Markdown export).
 
 

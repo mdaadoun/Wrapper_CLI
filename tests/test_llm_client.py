@@ -1,0 +1,143 @@
+"""Unit test suite for LLMClient module and API response parsing."""
+
+from unittest.mock import MagicMock
+
+import httpx
+import pytest
+from ai_watcher.clients.llm_client import LLMClient
+from ai_watcher.clients.prompts import SAMPLE_ANALYSIS_REPORT_JSON
+from ai_watcher.exceptions import LLMClientError
+from ai_watcher.schemas.report import AnalysisReport
+
+
+def test_llm_client_missing_api_key() -> None:
+    """Verify LLMClient initialization raises LLMClientError when no API key is provided."""
+    with pytest.raises(LLMClientError, match="Missing or invalid API key"):
+        LLMClient(api_key="")
+
+
+def test_llm_client_empty_content() -> None:
+    """Verify analyze raises LLMClientError when input content is empty."""
+    client = LLMClient(api_key="test-api-key")
+    with pytest.raises(LLMClientError, match="Content to analyze cannot be empty"):
+        client.analyze("")
+
+
+def test_llm_client_successful_analysis_gemini_format() -> None:
+    """Verify analyze parses Gemini REST API response correctly into AnalysisReport."""
+    mock_httpx = MagicMock(spec=httpx.Client)
+    mock_response = MagicMock(spec=httpx.Response)
+    mock_response.status_code = 200
+    mock_response.json.return_value = {
+        "candidates": [{"content": {"parts": [{"text": SAMPLE_ANALYSIS_REPORT_JSON}]}}],
+        "usageMetadata": {
+            "promptTokenCount": 450,
+            "candidatesTokenCount": 180,
+            "totalTokenCount": 630,
+        },
+    }
+    mock_httpx.post.return_value = mock_response
+
+    client = LLMClient(api_key="test-key", httpx_client=mock_httpx)
+    report = client.analyze(
+        content="OpenAI releases new agent SDK.", source="http://example.com"
+    )
+
+    assert isinstance(report, AnalysisReport)
+    assert report.source == "http://example.com"
+    assert report.prompt_tokens == 450
+    assert report.completion_tokens == 180
+    assert report.total_tokens == 630
+    assert report.estimated_cost_usd > 0.0
+    assert report.execution_time_seconds >= 0.0
+
+
+def test_llm_client_successful_analysis_openai_format() -> None:
+    """Verify analyze parses OpenAI format response correctly into AnalysisReport."""
+    mock_httpx = MagicMock(spec=httpx.Client)
+    mock_response = MagicMock(spec=httpx.Response)
+    mock_response.status_code = 200
+    mock_response.json.return_value = {
+        "choices": [{"message": {"content": SAMPLE_ANALYSIS_REPORT_JSON}}],
+        "usage": {
+            "prompt_tokens": 300,
+            "completion_tokens": 150,
+        },
+    }
+    mock_httpx.post.return_value = mock_response
+
+    client = LLMClient(api_key="test-key", httpx_client=mock_httpx)
+    report = client.analyze(content="New AI framework announcement.", source="raw_text")
+
+    assert isinstance(report, AnalysisReport)
+    assert report.prompt_tokens == 300
+    assert report.completion_tokens == 150
+    assert report.total_tokens == 450
+
+
+def test_llm_client_markdown_code_block_json() -> None:
+    """Verify analyze handles responses wrapped in markdown json code fences."""
+    mock_httpx = MagicMock(spec=httpx.Client)
+    mock_response = MagicMock(spec=httpx.Response)
+    mock_response.status_code = 200
+    fenced_json = f"```json\n{SAMPLE_ANALYSIS_REPORT_JSON}\n```"
+    mock_response.json.return_value = {
+        "candidates": [{"content": {"parts": [{"text": fenced_json}]}}]
+    }
+    mock_httpx.post.return_value = mock_response
+
+    client = LLMClient(api_key="test-key", httpx_client=mock_httpx)
+    report = client.analyze(content="Valid content to analyze.")
+
+    assert report.title == "Autonomous Agent Framework Release"
+
+
+def test_llm_client_http_status_error() -> None:
+    """Verify analyze raises LLMClientError on non-200 HTTP response."""
+    mock_httpx = MagicMock(spec=httpx.Client)
+    mock_response = MagicMock(spec=httpx.Response)
+    mock_response.status_code = 401
+    mock_response.text = "Unauthorized API Key"
+    mock_httpx.post.return_value = mock_response
+
+    client = LLMClient(api_key="test-key", httpx_client=mock_httpx)
+    with pytest.raises(LLMClientError, match="status 401"):
+        client.analyze(content="Sample content")
+
+
+def test_llm_client_timeout_error() -> None:
+    """Verify analyze raises LLMClientError when HTTP request times out."""
+    mock_httpx = MagicMock(spec=httpx.Client)
+    mock_httpx.post.side_effect = httpx.TimeoutException("Request timed out")
+
+    client = LLMClient(api_key="test-key", httpx_client=mock_httpx)
+    with pytest.raises(LLMClientError, match="timed out"):
+        client.analyze(content="Sample content")
+
+
+def test_llm_client_invalid_json_schema() -> None:
+    """Verify analyze raises LLMClientError when response violates AnalysisReport schema."""
+    mock_httpx = MagicMock(spec=httpx.Client)
+    mock_response = MagicMock(spec=httpx.Response)
+    mock_response.status_code = 200
+    mock_response.json.return_value = {
+        "candidates": [{"content": {"parts": [{"text": '{"invalid": "data"}'}]}}]
+    }
+    mock_httpx.post.return_value = mock_response
+
+    client = LLMClient(api_key="test-key", httpx_client=mock_httpx)
+    with pytest.raises(LLMClientError, match="validate LLM response"):
+        client.analyze(content="Sample content")
+
+
+def test_llm_client_empty_response_body() -> None:
+    """Verify analyze raises LLMClientError when response body has no text candidates."""
+    mock_httpx = MagicMock(spec=httpx.Client)
+    mock_response = MagicMock(spec=httpx.Response)
+    mock_response.status_code = 200
+    mock_response.json.return_value = {}
+    mock_httpx.post.return_value = mock_response
+
+    client = LLMClient(api_key="test-key", httpx_client=mock_httpx)
+    with pytest.raises(LLMClientError, match="empty or unparseable"):
+        client.analyze(content="Sample content")

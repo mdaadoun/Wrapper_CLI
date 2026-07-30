@@ -4,10 +4,9 @@ Optimized for token usage and readability.
 """
 
 import typer
-
-from src.ai_watcher.core.detector import detect_source_type
-from src.ai_watcher.core.extractor import extract
-from src.ai_watcher.exceptions import WatcherError
+from ai_watcher.core.detector import detect_source_type
+from ai_watcher.core.extractor import extract
+from ai_watcher.exceptions import WatcherError
 
 app = typer.Typer(help="AI Watcher CLI: Automated content extraction and AI analysis.")
 

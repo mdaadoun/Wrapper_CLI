@@ -104,13 +104,12 @@ Phase 1: Baseline Setup ──> Phase 2: CLI Skeleton ──> Phase 3: Ingestion
 * **Key Concept:** Structured Outputs & Data Contract — Pydantic V2 validates LLM JSON response and raises error on schema mismatch.
 * **Validation Criterion:** Instantiating `AnalysisReport` with valid data succeeds. Missing required field (`key_points` missing) raises `ValidationError`. Strict Mypy passes.
 
-
 ### Step 4.2: System Prompt Engineering — ⏳ Pending
 * **Description:** Author system prompt in `clients/prompts.py` instructing LLM to act as a senior AI analyst. Defines role, format constraints (JSON matching `AnalysisReport` schema), conciseness bounds (max 200 words summary, 3-5 key points), and expected sample output.
 * **Key Concept:** System Prompt Engineering — output quality and reliability depend on strict system instructions.
 * **Validation Criterion:** System prompt stored as typed constant. Explicitly mentions expected JSON schema and includes valid example parseable by `AnalysisReport.model_validate_json()`.
 
-### Step 4.3: Base LLM Client (Without Retry) — ⏳ Pending
+### Step 4.3: Base LLM Client (Without Retry) — ✅ Completed
 * **Description:** Implement `LLMClient` in `clients/llm_client.py` encapsulating API call (OpenAI SDK or raw HTTPX). `analyze(content: str) -> AnalysisReport` method sends system prompt + user content, parses JSON, and returns validated `AnalysisReport`. Configurable params: `model`, `temperature` (0.0–0.3), `top_p` (0.9), `max_tokens`.
 * **Key Concept:** API Client Encapsulation — isolating network calls enables mocking in tests, swapping providers, and centralizing error handling.
 * **Validation Criterion:** With valid API key, `LLMClient().analyze("OpenAI launches GPT-5")` returns validated `AnalysisReport`. Without key, raises `LLMClientError`.
