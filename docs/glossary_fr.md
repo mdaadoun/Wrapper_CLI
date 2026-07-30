@@ -147,3 +147,9 @@ Composant d'interface utilisateur de la bibliothèque Python Rich qui dessine de
 
 ### Rich Markdown
 Classe de rendu dans Rich qui analyse les chaînes au format Markdown et les affiche avec un formatage adapté au terminal au sein des applications console.
+
+### Tableau de télémétrie FinOps (FinOps Telemetry Table)
+Composant de tableau CLI dédié affichant les métriques d'utilisation des ressources opérationnelles (nombre de jetons, coût financier en USD et latence d'exécution) pour les appels d'API LLM.
+
+### Seuils d'impact financier (Financial Impact Thresholding)
+Règle de coloration visuelle appliquée aux valeurs monétaires (< 0,01 $ vert pour un faible coût, < 0,05 $ jaune pour un coût modéré, >= 0,05 $ rouge pour un coût élevé) afin de donner une conscience visuelle immédiate des dépenses de requêtes.

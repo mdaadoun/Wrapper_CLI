@@ -22,8 +22,7 @@ L'application repose sur le **Single Responsibility Principle (SRP)**. Le code e
 - **`utils/` :** Utilitaires transverses (calculateur de coûts, mise en cache).
   - **`cost.py` (`calculate_cost`, `MODEL_PRICING`) :** Fonction pure FinOps calculant le coût USD par inférence. Utilise une matrice de 40 modèles (USD par 1M tokens) couvrant 8 fournisseurs (OpenAI, Google, Anthropic, Meta, Mistral, DeepSeek, Cohere, Amazon). Lève `UnknownModelError` pour les modèles inconnus. Recherche insensible à la casse. Coût arrondi à 6 décimales.
   - **`exceptions.py` référencé:** `UnknownModelError(WatcherError)` levée quand le modèle est absent de la matrice.
-- **`formatters/` :** Composants de rendu (Sortie console, Export Markdown).
-  - **`console.py` (`display_report`, `PRIORITY_COLORS`) :** Module de formatage console affichant le rapport d'analyse `AnalysisReport` dans un panneau Rich stylisé. Intègre le rendu Markdown pour le résumé exécutif, des puces pour les points clés, et des thèmes de couleur dynamiques (`green`, `yellow`, `red`) basés sur le niveau de priorité (`low`, `medium`, `high`). Affiche également les métriques de temps d'exécution et de jetons FinOps.
+  - **`console.py` (`display_report`, `PRIORITY_COLORS`) :** Module de formatage console affichant le rapport d'analyse `AnalysisReport` dans un panneau Rich stylisé. Intègre le rendu Markdown pour le résumé exécutif, des puces pour les points clés, des thèmes de couleur dynamiques (`green`, `yellow`, `red`) basés sur le niveau de priorité (`low`, `medium`, `high`), ainsi qu'un tableau Rich dédié résumant les métriques d'inférence FinOps (modèle, jetons prompt/complétion/totaux, latence et coût USD avec coloration par seuil).
 
 
 ---

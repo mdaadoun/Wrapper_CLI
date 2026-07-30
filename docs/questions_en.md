@@ -168,3 +168,13 @@ Targeted questions and answers covering architecture design choices and engineer
 
 **Q: Why map priority levels to visual color themes in CLI outputs?**
 *Expected Answer:* Color-coding priority levels (green for low, yellow for medium, red for high) provides instant visual feedback to engineers reviewing automated scan outputs in CI/CD or local terminals.
+
+### 32. Separation of Analysis vs Telemetry Display (Step 6.2)
+
+**Q: Why format FinOps metrics in a separate Rich Table rather than inside the main AnalysisReport panel?**
+*Expected Answer:* Separating analysis content (summary, key points, recommendations) from operational telemetry (token counts, cost, execution latency) adheres to clean visual hierarchy principles. It allows developers to scan business findings and financial impact independently.
+
+### 33. Financial Impact Thresholding Implementation (Step 6.2)
+
+**Q: How are cost color thresholds selected and implemented in the CLI output?**
+*Expected Answer:* Thresholds are set at $0.01 (green for low cost), $0.05 (yellow for moderate cost), and above (red for high cost). In `display_report()`, `estimated_cost_usd` is evaluated against these bounds to dynamically set the Rich Table column style.

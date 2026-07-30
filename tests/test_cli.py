@@ -117,7 +117,7 @@ def test_scan_demo_mode_text():
     assert "Executing in DEMO mode" in result.stdout
     assert "Executive Summary" in result.stdout
     assert "[DEMO]" in result.stdout
-    assert "--- FINOPS METRICS ---" in result.stdout
+    assert "FinOps Metrics" in result.stdout
 
 
 def test_scan_demo_mode_short_flag():

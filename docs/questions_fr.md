@@ -168,3 +168,13 @@ Questions-réponses clés pour défendre l'architecture et les choix d'ingénier
 
 **Q : Pourquoi associer les niveaux de priorité à des thèmes de couleurs visuels dans les sorties CLI ?**
 *Réponse attendue :* Le code couleur par priorité (vert pour faible, jaune pour moyen, rouge pour élevé) offre un retour visuel immédiat aux ingénieurs lors de la révision des sorties de scans automatisés en CI/CD ou dans les terminaux locaux.
+
+### 32. Séparation de l'affichage de l'analyse et de la télémétrie (Étape 6.2)
+
+**Q : Pourquoi formater les métriques FinOps dans un tableau Rich séparé plutôt qu'à l'intérieur du panneau AnalysisReport principal ?**
+*Réponse attendue :* Séparer le contenu d'analyse (résumé, points clés, recommandations) de la télémétrie opérationnelle (nombre de jetons, coût, latence d'exécution) respecte les principes d'une hiérarchie visuelle claire. Cela permet aux développeurs de parcourir les conclusions métier et l'impact financier de manière indépendante.
+
+### 33. Implémentation des seuils d'impact financier (Étape 6.2)
+
+**Q : Comment les seuils de couleur de coût sont-ils sélectionnés et implémentés dans la sortie CLI ?**
+*Réponse attendue :* Les seuils sont fixés à 0,01 $ (vert pour un faible coût), 0,05 $ (jaune pour un coût modéré) et au-delà (rouge pour un coût élevé). Dans `display_report()`, `estimated_cost_usd` est évalué par rapport à ces limites pour définir dynamiquement le style de la colonne du tableau Rich.

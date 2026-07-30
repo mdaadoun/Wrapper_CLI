@@ -152,3 +152,9 @@ A UI component in the Rich Python library that draws styled border boxes around 
 
 ### Rich Markdown
 A renderable class in Rich that parses Markdown strings and displays them with terminal formatting inside console applications.
+
+### FinOps Telemetry Table
+A dedicated CLI table component displaying operational resource usage metrics (token counts, financial cost in USD, and execution latency) for LLM API calls.
+
+### Financial Impact Thresholding
+Visual color-coding rule applied to monetary values (< $0.01 green for low cost, < $0.05 yellow for moderate cost, >= $0.05 red for high cost) to give immediate visual awareness of query expenditure.

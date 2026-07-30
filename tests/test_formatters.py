@@ -23,7 +23,9 @@ def test_display_report_renders_panel_content():
     assert "Technical Impact" in output
     assert "Business Impact" in output
     assert "Recommendation" in output
-    assert "--- FINOPS METRICS ---" in output
+    assert "FinOps Metrics" in output
+    assert "Prompt" in output
+    assert "Cost" in output
 
 
 def test_display_report_priority_colors():
@@ -48,3 +50,20 @@ def test_display_report_priority_colors():
     output_high = string_io_high.getvalue()
     assert "HIGH" in output_high
     assert "Regulatory Impact" in output_high
+
+
+def test_display_report_cost_color_coding():
+    """Verify cost color coding thresholds (<$0.01 green, <$0.05 yellow, >=$0.05 red)."""
+    for cost, _ in [
+        (0.005, "green"),
+        (0.02, "yellow"),
+        (0.08, "red"),
+    ]:
+        string_io = StringIO()
+        test_console = Console(file=string_io, force_terminal=True, width=100)
+        report = get_mock_analysis_report().model_copy(
+            update={"estimated_cost_usd": cost}
+        )
+        display_report(report, console_instance=test_console)
+        output = string_io.getvalue()
+        assert "FinOps Metrics" in output

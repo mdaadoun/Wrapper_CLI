@@ -4,6 +4,7 @@ from ai_watcher.schemas.report import AnalysisReport
 from rich.console import Console, Group, RenderableType
 from rich.markdown import Markdown
 from rich.panel import Panel
+from rich.table import Table
 from rich.text import Text
 
 console = Console()
@@ -72,10 +73,31 @@ def display_report(
     )
     target_console.print(panel)
 
-    # Temporary text outputs for FinOps metrics until Step 6.2
-    target_console.print("\n[bold]--- FINOPS METRICS ---[/bold]")
-    target_console.print(f"Prompt Tokens: {report.prompt_tokens}")
-    target_console.print(f"Completion Tokens: {report.completion_tokens}")
-    target_console.print(f"Total Tokens: {report.total_tokens}")
-    target_console.print(f"Estimated Cost USD: ${report.estimated_cost_usd:.4f}")
-    target_console.print(f"Execution Time: {report.execution_time_seconds:.4f}s")
+    # Render FinOps Metrics Table (Step 6.2)
+    cost = report.estimated_cost_usd
+    if cost < 0.01:
+        cost_style = "green"
+    elif cost < 0.05:
+        cost_style = "yellow"
+    else:
+        cost_style = "red"
+
+    metrics_table = Table(
+        title="FinOps Metrics", show_header=True, header_style="bold cyan"
+    )
+    metrics_table.add_column("Model", style="white", justify="left")
+    metrics_table.add_column("Prompt Tokens", style="dim", justify="right")
+    metrics_table.add_column("Completion Tokens", style="dim", justify="right")
+    metrics_table.add_column("Total Tokens", style="bold", justify="right")
+    metrics_table.add_column("Cost (USD)", style=cost_style, justify="right")
+    metrics_table.add_column("Latency (s)", style="white", justify="right")
+
+    metrics_table.add_row(
+        report.model_used,
+        f"{report.prompt_tokens:,}",
+        f"{report.completion_tokens:,}",
+        f"{report.total_tokens:,}",
+        f"${report.estimated_cost_usd:.4f}",
+        f"{report.execution_time_seconds:.4f}s",
+    )
+    target_console.print(metrics_table)
