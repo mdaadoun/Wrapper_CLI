@@ -118,3 +118,18 @@ Targeted questions and answers covering architecture design choices and engineer
 
 **Q: How are FinOps performance latency and financial cost metrics captured during LLM inference execution?**
 *Expected Answer:* `LLMClient` captures wall-clock execution time by wrapping the HTTP POST call with `time.perf_counter()`. Upon receiving the response, it extracts token usage metadata (`promptTokenCount`, `candidatesTokenCount`) from the payload. It then delegates to `utils/cost.py`'s `calculate_cost()` function, which computes the exact USD expenditure based on model-specific input/output rates per 1,000 tokens. Both latency and cost are injected directly into the `AnalysisReport` model before returning to the caller.
+
+### 22. Demo Mode Architecture & Decoupling (Step 4.4)
+
+**Q: Why is implementing a Demo Mode essential for LLM wrapper CLIs and AI agent pipelines?**
+*Expected Answer:* Demo Mode decouples internal CLI processing (ingestion, schema validation, text formatting, error handling) from external API availability, network latency, and billing limits. It enables fast local dev loops, zero-setup onboarding for new contributors, and reliable CI/CD automated integration tests without consuming API credits.
+
+### 23. Schema Adherence in Mock Outputs (Step 4.4)
+
+**Q: How does LLMClient ensure type safety and schema consistency between live API responses and mock responses?**
+*Expected Answer:* Both live REST response parsing and `get_mock_analysis_report()` instantiate and return the exact same Pydantic V2 `AnalysisReport` model. This guarantees that downstream consumers (formatters, exporters, UI panels) receive identical structured objects regardless of whether data originated from Gemini or mock generation.
+
+### 24. Zero-Credential Execution Handling (Step 4.4)
+
+**Q: How is API key validation handled when executing in `--demo` mode?**
+*Expected Answer:* When `demo_mode=True` is set on `LLMClient` or `--demo` flag is passed to the CLI `scan` command, the API key validation check is bypassed and a default placeholder key (`"demo-key"`) is assigned internally. This prevents `ConfigurationError` exceptions when `.env` files or `GEMINI_API_KEY` environment variables are absent.

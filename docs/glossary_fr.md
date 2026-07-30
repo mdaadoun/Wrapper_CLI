@@ -114,3 +114,12 @@ Dictionnaire de correspondance associant chaque identifiant de modèle LLM aux t
 
 ### Nettoyage des Balises Markdown (Markdown Fence Stripping)
 Utilitaire de prétraitement supprimant la syntaxe des blocs de code markdown (```json ... ```) d'une réponse LLM brute avant la désérialisation JSON.
+
+### Mode Démo / Réponse Moquée (Demo Mode / Mocked Response)
+Mode de fonctionnement dans les outils de développement dans lequel les services réseau externes sont court-circuités et où des données factices statiques ou programmatiques conformes aux schémas de domaine sont retournées pour permettre des tests hors-ligne et une itération à coût zéro.
+
+### Évaluation en Court-Circuit (Short-Circuit Evaluation)
+Bypass des opérations lourdes ou coûteuses (telles que les appels réseau HTTP REST vers les endpoints LLM) tôt dans l'exécution du code lorsque des conditions de drapeaux spécifiques (ex: `--demo`) sont remplies.
+
+### Télémétrie Synthétique (Synthetic Telemetry)
+Métriques simulées de performance et de coûts financiers (nombre de jetons, estimations de coûts en USD, latence d'exécution) rattachées aux réponses factices pour tester les interfaces de rapport FinOps sans consommation d'API en direct.

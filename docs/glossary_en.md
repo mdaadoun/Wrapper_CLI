@@ -119,3 +119,12 @@ A mapping dictionary of LLM model identifiers to prompt and completion rates per
 
 ### Markdown Fence Stripping
 A pre-processing utility function stripping leading ```json and trailing ``` markdown code block syntax from raw LLM responses before JSON deserialization.
+
+### Demo Mode / Mocked Response
+An operational mode in developer tools where external network services are bypassed, and static or programmatic mock data conforming to domain schemas is returned to enable offline testing and zero-cost iteration.
+
+### Short-Circuit Evaluation
+Bypassing heavy or costly operations (such as HTTP REST network calls to LLM endpoints) early in code execution when specific flag conditions (e.g. `--demo`) are satisfied.
+
+### Synthetic Telemetry
+Simulated performance and financial metrics (token counts, USD cost estimates, execution latency) attached to mock responses to test FinOps reporting interfaces without live API consumption.

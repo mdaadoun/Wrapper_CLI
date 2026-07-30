@@ -7,8 +7,8 @@ Ce document présente une explication détaillée de l'architecture du projet `W
 ## 🛠️ 1. Architecture Modulaire : `src/ai_watcher/`
 
 L'application repose sur le **Single Responsibility Principle (SRP)**. Le code est organisé en modules clairs :
-- **`main.py` :** Point d'entrée principal (CLI Typer). Gère le routage des sous-commandes (ex: `scan`), la validation des arguments positionnels (`source`) et les fanions de mode (`--text/-t`, `--file/-f`, `--url/-u`).
-  - *Fonction `scan()` :* Reçoit la source utilisateur, résout le mode d'évaluation (auto par défaut, ou surchargé par drapeau) et transmet l'entrée au pipeline d'ingestion.
+- **`main.py` :** Point d'entrée principal (CLI Typer). Gère le routage des sous-commandes (ex: `scan`), la validation des arguments positionnels (`source`), les fanions de mode (`--text/-t`, `--file/-f`, `--url/-u`), et le fanion du mode démo (`--demo/-d`).
+  - *Fonction `scan()` :* Reçoit la source utilisateur, résout le mode d'évaluation (auto par défaut, ou surchargé par drapeau), transmet l'entrée au pipeline d'ingestion, initialise `LLMClient` (mode réel ou démo), et effectue le rendu via `display_report()`.
 - **`config.py` :** Chargement de la configuration et des variables d'environnement (via `pydantic-settings`).
 - **`exceptions.py`:** Définition des erreurs personnalisées du domaine via une **Hiérarchie d'Exceptions** granulaire (`WatcherError` comme base, étendue par `EmptySourceError`, `ExtractionError`, `LLMClientError`, `ConfigurationError`). Cela permet une gestion d'erreur ciblée et des messages utilisateur clairs sans faire planter l'interpréteur.
 - **`core/` :** Logique métier.
@@ -17,11 +17,12 @@ L'application repose sur le **Single Responsibility Principle (SRP)**. Le code e
 - **`schemas/` :** Contrats de données strictement typés pour les entités métier et les sorties structurées de l'LLM.
   - **`report.py` (`AnalysisReport`) :** Modèle de données immuable Pydantic V2 (`ConfigDict(frozen=True)`). Définit le contexte (`source`, `analyzed_at`, `model_used`), les livrables d'analyse (`title`, `summary`, `key_points`, `impact_technical`, `impact_business`, `impact_regulatory`, `recommendation`, `priority`), et la télémétrie FinOps (`prompt_tokens`, `completion_tokens`, `total_tokens`, `estimated_cost_usd`, `execution_time_seconds`, `is_cached`). Inclut `@model_validator(mode="before")` pour l'auto-calcul de `total_tokens`.
 - **`clients/` :** Encapsulation des clients LLM et prompt engineering.
-  - **`llm_client.py` (`LLMClient`) :** Client d'API LLM de base encapsulant les interactions REST HTTPX aux formats Google Gemini et OpenAI. La méthode `analyze(content: str, source: str) -> AnalysisReport` gère la construction du payload, la mesure du temps via `time.perf_counter()`, le nettoyage des balises markdown (`_clean_json_text()`), le parsing de la réponse (`_parse_response()`) et l'injection de la télémétrie FinOps avant de retourner un modèle `AnalysisReport` validé.
+  - **`llm_client.py` (`LLMClient`, `get_mock_analysis_report`) :** Client d'API LLM de base encapsulant les interactions REST HTTPX aux formats Google Gemini et OpenAI. La méthode `analyze(content: str, source: str, demo: bool) -> AnalysisReport` gère la construction du payload, la mesure du temps via `time.perf_counter()`, le nettoyage des balises markdown (`_clean_json_text()`), le parsing de la réponse (`_parse_response()`) et l'injection de la télémétrie FinOps. Supporte `demo_mode=True` et l'utilitaire `get_mock_analysis_report()` pour court-circuiter les requêtes REST et retourner un modèle `AnalysisReport` simulé pour des tests hors-ligne à coût zéro sans clé API.
   - **`prompts.py` (`SYSTEM_PROMPT`, `SAMPLE_ANALYSIS_REPORT_JSON`) :** Module de prompt engineering systémique. Définit le persona d'analyste senior IA, les contraintes de formatage (JSON pur, résumé de max 200 mots, 3 à 5 points clés, énumération des priorités `"low"`|`"medium"`|`"high"`) et le schéma JSON `AnalysisReport`. Inclut une réponse exemple JSON validée et un helper `validate_sample_report()` encapsulant les erreurs dans `WatcherError`.
 - **`utils/` :** Utilitaires transverses (calculateur de coûts, mise en cache).
   - **`cost.py` (`calculate_cost`) :** Fonction pure de calcul de coût FinOps évaluant la dépense financière en USD sur la base de la grille tarifaire des modèles (taux par 1 000 jetons de prompt et de complétion).
-- **`formatters/` :** Composants de rendu (terminal avec Rich, export Markdown).
+- **`formatters/` :** Composants de rendu (console stdout, export Markdown).
+  - **`console.py` (`display_report`) :** Module de formatage assurant le rendu propre des livrables `AnalysisReport` et des métriques FinOps dans le terminal standard.
 
 
 ---

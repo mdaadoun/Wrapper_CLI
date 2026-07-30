@@ -141,3 +141,22 @@ def test_llm_client_empty_response_body() -> None:
     client = LLMClient(api_key="test-key", httpx_client=mock_httpx)
     with pytest.raises(LLMClientError, match="empty or unparseable"):
         client.analyze(content="Sample content")
+
+
+def test_llm_client_demo_mode_initialization() -> None:
+    """Verify LLMClient in demo mode requires no API key."""
+    client = LLMClient(demo_mode=True)
+    assert client.demo_mode is True
+    assert client.api_key == "demo-key"  # pragma: allowlist secret
+
+
+def test_llm_client_demo_mode_returns_mock_report() -> None:
+    """Verify analyze returns valid mock report without HTTP calls when demo_mode is True."""
+    client = LLMClient(demo_mode=True)
+    report = client.analyze(content="Test content for demo mode.", source="test_source")
+    assert isinstance(report, AnalysisReport)
+    assert report.source == "test_source"
+    assert "[DEMO]" in report.title
+    assert report.prompt_tokens > 0
+    assert report.total_tokens == report.prompt_tokens + report.completion_tokens
+    assert report.estimated_cost_usd > 0.0

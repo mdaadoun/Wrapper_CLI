@@ -13,6 +13,36 @@ from ai_watcher.utils.cost import calculate_cost
 from pydantic import ValidationError
 
 
+def get_mock_analysis_report(
+    source: str = "raw_text", content: str = ""
+) -> AnalysisReport:
+    """Generate pre-filled mock AnalysisReport for demo mode and offline testing."""
+    snippet = content[:60] + "..." if len(content) > 60 else content
+    return AnalysisReport(
+        source=source,
+        analyzed_at=datetime.now(timezone.utc),
+        model_used="gemini-1.5-pro-latest (mocked)",
+        title="[DEMO] Synthetic AI Tech Radar Report",
+        summary=f"Synthetic analysis generated in demo mode for content: '{snippet}'",
+        key_points=[
+            "Architectural decoupling enables zero-cost offline demo testing.",
+            "Pydantic V2 domain contracts guarantee runtime type safety.",
+            "FinOps instrumentation tracks token volume and estimated expenditure.",
+        ],
+        impact_technical="Modular client design isolates transport logic for zero-latency offline runs.",
+        impact_business="Reduces operational API expenses during dev/testing cycles by 100%.",
+        impact_regulatory="Data privacy maintained with local evaluation bypassing external endpoints.",
+        recommendation="Enable local response caching to minimize redundant production API costs.",
+        priority="medium",
+        prompt_tokens=350,
+        completion_tokens=150,
+        total_tokens=500,
+        estimated_cost_usd=0.00175,
+        execution_time_seconds=0.015,
+        is_cached=False,
+    )
+
+
 class LLMClient:
     """Encapsulates LLM API execution, timing, and response validation."""
 
@@ -25,12 +55,14 @@ class LLMClient:
         max_tokens: Optional[int] = None,
         timeout: float = 30.0,
         httpx_client: Optional[httpx.Client] = None,
+        demo_mode: bool = False,
     ) -> None:
         """Initialize client with injected configuration."""
-        if not api_key or not api_key.strip():
+        self.demo_mode: bool = demo_mode
+        if not demo_mode and (not api_key or not api_key.strip()):
             raise LLMClientError("Missing or invalid API key configuration.")
 
-        self.api_key: str = api_key.strip()
+        self.api_key: str = (api_key or "demo-key").strip()
         self.model_name: str = model_name or "gemini-1.5-pro-latest"
         self.temperature: float = temperature
         self.top_p: float = top_p
@@ -44,10 +76,15 @@ class LLMClient:
             return self._external_client
         return httpx.Client(timeout=self.timeout)
 
-    def analyze(self, content: str, source: str = "raw_text") -> AnalysisReport:
+    def analyze(
+        self, content: str, source: str = "raw_text", demo: bool = False
+    ) -> AnalysisReport:
         """Send prompt and content to API and parse returned report."""
         if not content or not content.strip():
             raise LLMClientError("Content to analyze cannot be empty.")
+
+        if self.demo_mode or demo:
+            return get_mock_analysis_report(source=source, content=content)
 
         start_time = time.perf_counter()
         system_prompt = get_system_prompt()

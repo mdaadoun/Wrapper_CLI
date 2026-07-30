@@ -123,6 +123,20 @@ const TEST_DESCRIPTIONS: Record<
     output: "Scanning source [file mode]: /path/to/sample.md.",
     concept: "Inspection du système de fichiers",
   },
+  "tests/test_cli.py::test_scan_demo_mode_text": {
+    title: "⚡ test_scan_demo_mode_text()",
+    objective: "Valider l'exécution intégrale de la sous-commande scan avec l'option --demo sans appel réseau API.",
+    input: "runner.invoke(app, ['scan', 'Hello World', '--demo'])",
+    output: "Exit code 0 et affichage du rapport d'analyse synthétique de démonstration.",
+    concept: "Mode Démo & Circuit Court Network",
+  },
+  "tests/test_cli.py::test_scan_demo_mode_short_flag": {
+    title: "⚡ test_scan_demo_mode_short_flag()",
+    objective: "Vérifier le fonctionnement de l'option courte -d pour le mode démo.",
+    input: "runner.invoke(app, ['scan', 'Sample text', '-d'])",
+    output: "Exit code 0 et présence de 'Executing in DEMO mode'.",
+    concept: "Short CLI Flags Parsing",
+  },
   "tests/test_detector.py": {
     title: "📁 test_detector.py (Module de Détection Source)",
     objective: "Valider le composant central de catégorisation heuristique (URL, Fichier, Texte brut).",

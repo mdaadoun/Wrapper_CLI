@@ -7,8 +7,8 @@ This document provides a detailed breakdown of the `Wrapper_CLI` architecture, m
 ## 🛠️ 1. Modular Architecture: `src/ai_watcher/`
 
 The application adheres to the **Single Responsibility Principle (SRP)**. The code is organized into clear modules:
-- **`main.py`:** Primary entry point (Typer CLI). Handles subcommand routing (e.g., `scan`), positional argument validation (`source`), and mode flags (`--text/-t`, `--file/-f`, `--url/-u`).
-  - *`scan()` function:* Receives input source, resolves evaluation mode (auto by default or overridden by flag), and routes payload to the ingestion pipeline.
+- **`main.py`:** Primary entry point (Typer CLI). Handles subcommand routing (e.g., `scan`), positional argument validation (`source`), mode flags (`--text/-t`, `--file/-f`, `--url/-u`), and demo mode flag (`--demo/-d`).
+  - *`scan()` function:* Receives input source, resolves evaluation mode (auto by default or overridden by flag), routes payload to the ingestion pipeline, initializes `LLMClient` (live or demo mode), and renders output via `display_report()`.
 - **`config.py`:** Configuration and environment variable loading (via `pydantic-settings`).
 - **`exceptions.py`:** Definition of custom domain errors built on a granular **Exception Hierarchy** (`WatcherError` as base, extended by `EmptySourceError`, `ExtractionError`, `LLMClientError`, `ConfigurationError`). This allows for targeted error handling and user-friendly messages without crashing the interpreter.
 - **`core/`:** Business logic components.
@@ -22,11 +22,12 @@ The application adheres to the **Single Responsibility Principle (SRP)**. The co
 - **`schemas/`:** Strictly typed data contracts for domain entities and LLM structured outputs.
   - **`report.py` (`AnalysisReport`):** Pydantic V2 immutable data model (`ConfigDict(frozen=True)`). Defines context (`source`, `analyzed_at`, `model_used`), analysis deliverables (`title`, `summary`, `key_points`, `impact_technical`, `impact_business`, `impact_regulatory`, `recommendation`, `priority`), and FinOps telemetry (`prompt_tokens`, `completion_tokens`, `total_tokens`, `estimated_cost_usd`, `execution_time_seconds`, `is_cached`). Includes `@model_validator(mode="before")` for auto-calculating `total_tokens`.
 - **`clients/`:** LLM client encapsulation and prompt engineering.
-  - **`llm_client.py` (`LLMClient`):** Base LLM API client encapsulating HTTPX REST interactions with Google Gemini and OpenAI formats. Method `analyze(content: str, source: str) -> AnalysisReport` handles request payload construction, timing via `time.perf_counter()`, JSON markdown fence stripping (`_clean_json_text()`), response parsing (`_parse_response()`), and FinOps telemetry injection before returning a validated `AnalysisReport`.
+  - **`llm_client.py` (`LLMClient`, `get_mock_analysis_report`):** Base LLM API client encapsulating HTTPX REST interactions with Google Gemini and OpenAI formats. Method `analyze(content: str, source: str, demo: bool) -> AnalysisReport` handles request payload construction, timing via `time.perf_counter()`, JSON markdown fence stripping (`_clean_json_text()`), response parsing (`_parse_response()`), and FinOps telemetry injection. Supports `demo_mode=True` and helper `get_mock_analysis_report()` to short-circuit REST requests and return a realistic mock `AnalysisReport` for zero-cost offline testing without an API key.
   - **`prompts.py` (`SYSTEM_PROMPT`, `SAMPLE_ANALYSIS_REPORT_JSON`):** System prompt engineering module. Defines Senior AI Analyst persona, strict output constraints (pure JSON, max 200 words summary, 3 to 5 key points, priority enum `"low"`|`"medium"`|`"high"`), and expected `AnalysisReport` JSON schema. Includes a validated raw sample JSON string and helper `validate_sample_report()` that wraps Pydantic validation errors in domain `WatcherError`.
 - **`utils/`:** Cross-cutting utilities (cost calculator, caching).
   - **`cost.py` (`calculate_cost`):** FinOps cost calculator pure function computing USD financial expenditure based on model pricing matrix (prompt and completion rates per 1,000 tokens).
-- **`formatters/`:** Rendering components (Rich terminal output, Markdown export).
+- **`formatters/`:** Rendering components (Console output, Markdown export).
+  - **`console.py` (`display_report`):** Formatter module rendering structured `AnalysisReport` deliverables and FinOps metrics cleanly to standard terminal output.
 
 
 ---

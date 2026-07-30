@@ -1,6 +1,6 @@
 """LLM client interfaces and system prompt definitions for AI Watcher CLI."""
 
-from ai_watcher.clients.llm_client import LLMClient
+from ai_watcher.clients.llm_client import LLMClient, get_mock_analysis_report
 from ai_watcher.clients.prompts import (
     SAMPLE_ANALYSIS_REPORT_JSON,
     SYSTEM_PROMPT,
@@ -11,6 +11,7 @@ from ai_watcher.clients.prompts import (
 
 __all__ = [
     "LLMClient",
+    "get_mock_analysis_report",
     "SYSTEM_PROMPT",
     "SAMPLE_ANALYSIS_REPORT_JSON",
     "get_system_prompt",

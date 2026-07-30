@@ -118,3 +118,18 @@ Questions-réponses clés pour défendre l'architecture et les choix d'ingénier
 
 **Q : Comment la latence d'exécution et les coûts financiers FinOps sont-ils capturés lors de l'exécution d'une inférence LLM ?**
 *Réponse attendue :* `LLMClient` capture le temps d'exécution horloge en enveloppant l'appel HTTP POST avec `time.perf_counter()`. À la réception de la réponse, il extrait les métadonnées d'utilisation des jetons (`promptTokenCount`, `candidatesTokenCount`) du payload. Il délègue ensuite à la fonction `calculate_cost()` de `utils/cost.py`, qui calcule la dépense exacte en USD sur la base des tarifs d'entrée/sortie spécifiques au modèle par 1 000 jetons. La latence et le coût sont directement injectés dans le modèle `AnalysisReport` avant le retour à l'appelant.
+
+### 22. Architecture du Mode Démo & Découplage (Étape 4.4)
+
+**Q : Pourquoi l'implémentation d'un Mode Démo est-elle essentielle pour les CLI wrappers LLM et les pipelines d'agents IA ?**
+*Réponse attendue :* Le Mode Démo découple le traitement interne du CLI (ingestion, validation de schéma, formatage de texte, gestion des erreurs) de la disponibilité des API externes, de la latence réseau et des plafonds de facturation. Il permet des boucles de dev locales rapides, un onboarding sans configuration pour les nouveaux contributeurs, et des tests d'intégration automatisés CI/CD fiables sans consommer de crédits d'API.
+
+### 23. Respect du Schéma dans les Sorties Moquées (Étape 4.4)
+
+**Q : Comment LLMClient garantit-il le typage strict et la cohérence de schéma entre les réponses d'API en direct et les réponses simulées ?**
+*Réponse attendue :* Le parsing des réponses REST en direct tout comme `get_mock_analysis_report()` instancient et retournent exactement le même modèle Pydantic V2 `AnalysisReport`. Cela garantit que les consommateurs en aval (formateurs, exportateurs, panneaux d'affichage UI) reçoivent des objets structurés identiques, que les données proviennent de Gemini ou d'une génération simulée.
+
+### 24. Gestion de l'Exécution Sans Identifiants (Étape 4.4)
+
+**Q : Comment la validation de la clé API est-elle gérée lors de l'exécution en mode `--demo` ?**
+*Réponse attendue :* Lorsque `demo_mode=True` est défini sur `LLMClient` ou que le flag `--demo` est passé à la commande `scan` du CLI, la vérification de la clé API est ignorée et une clé factice par défaut (`"demo-key"`) est attribuée en interne. Cela évite d'élever des exceptions `ConfigurationError` en l'absence de fichiers `.env` ou de variables d'environnement `GEMINI_API_KEY`.
