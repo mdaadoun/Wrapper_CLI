@@ -123,3 +123,15 @@ Bypass des opérations lourdes ou coûteuses (telles que les appels réseau HTTP
 
 ### Télémétrie Synthétique (Synthetic Telemetry)
 Métriques simulées de performance et de coûts financiers (nombre de jetons, estimations de coûts en USD, latence d'exécution) rattachées aux réponses factices pour tester les interfaces de rapport FinOps sans consommation d'API en direct.
+
+### Matrice de Tarification (Pricing Matrix)
+Dictionnaire associant les identifiants de modèles à leurs taux d'entrée/sortie (USD par 1M tokens). La matrice du Wrapper CLI couvre 40+ modèles sur 8 fournisseurs (OpenAI, Google, Anthropic, Meta, Mistral, DeepSeek, Cohere, Amazon).
+
+### Tarification par 1M Tokens (Per-1M Token Pricing)
+Standard industriel (2025+) où les taux sont exprimés pour 1 000 000 tokens plutôt que pour 1 000. Simplifie le calcul mental et s'aligne sur les pages de tarification officielles.
+
+### UnknownModelError
+Exception personnalisée (`WatcherError` → `UnknownModelError`) levée lorsque `calculate_cost()` reçoit un nom de modèle absent de la matrice. Garantit un suivi FinOps strict en rejetant les modèles inconnus avec un message d'erreur listant les modèles pris en charge.
+
+### Arrondi du Coût Token (Token Cost Rounding)
+Coût financier arrondi à 6 décimales via `round()` de Python pour éviter le bruit numérique dans les rapports tout en capturant la précision sub-centime.

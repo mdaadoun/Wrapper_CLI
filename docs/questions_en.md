@@ -133,3 +133,18 @@ Targeted questions and answers covering architecture design choices and engineer
 
 **Q: How is API key validation handled when executing in `--demo` mode?**
 *Expected Answer:* When `demo_mode=True` is set on `LLMClient` or `--demo` flag is passed to the CLI `scan` command, the API key validation check is bypassed and a default placeholder key (`"demo-key"`) is assigned internally. This prevents `ConfigurationError` exceptions when `.env` files or `GEMINI_API_KEY` environment variables are absent.
+
+### 25. Strict Cost Tracking via UnknownModelError (Step 5.1)
+
+**Q: Why did you choose to raise an exception for unknown models instead of using a default fallback rate?**
+*Expected Answer:* Silent fallback masks configuration errors and leads to budget drift. By raising `UnknownModelError`, the developer gets immediate feedback that the model isn't in the matrix, forcing them to add accurate pricing. This is especially important in FinOps where every inference cost must be tracked correctly. The trade-off strongly favors correctness over convenience in a financial context.
+
+### 26. Per-1M vs Per-1K Token Pricing (Step 5.1)
+
+**Q: Why switch from per-1K to per-1M token pricing?**
+*Expected Answer:* All major providers (OpenAI, Google, Anthropic) updated their pricing pages to per-1M tokens in 2024-2025. Per-1M avoids tiny decimals (e.g., 0.00015 vs 0.15) and makes the matrix more readable. The division factor changes from 1000 to 1,000,000, which is a simple mechanical change. Since this is a new project, there's no legacy to preserve.
+
+### 27. Pricing Matrix Integration with LLMClient (Step 5.1)
+
+**Q: How does the pricing matrix integrate with the existing LLMClient.analyze() flow?**
+*Expected Answer:* `LLMClient._parse_response()` calls `calculate_cost()` with the model name and actual token counts from the API response. The cost is injected into the `AnalysisReport` before Pydantic validation. The `UnknownModelError` is caught by the CLI's existing `WatcherError` handler, displaying a red error message to the user. This tight coupling between token counting (API) and cost calculation (pricing matrix) is by design: cost must always be computed from real usage, not estimated.

@@ -32,3 +32,9 @@ class LLMClientError(WatcherError):
     """Raised when the LLM API returns an error or times out."""
 
     pass
+
+
+class UnknownModelError(WatcherError):
+    """Raised when a model name is not found in the pricing matrix."""
+
+    pass

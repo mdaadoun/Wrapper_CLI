@@ -128,3 +128,15 @@ Bypassing heavy or costly operations (such as HTTP REST network calls to LLM end
 
 ### Synthetic Telemetry
 Simulated performance and financial metrics (token counts, USD cost estimates, execution latency) attached to mock responses to test FinOps reporting interfaces without live API consumption.
+
+### Pricing Matrix
+A dictionary mapping model identifiers to their input/output token rates (USD per 1M tokens). The Wrapper CLI matrix covers 40+ models across 8 providers (OpenAI, Google, Anthropic, Meta, Mistral, DeepSeek, Cohere, Amazon).
+
+### Per-1M Token Pricing
+Industry standard (2025+) denominating model rates per 1,000,000 tokens rather than per 1,000. Simplifies mental math and aligns with official pricing pages.
+
+### UnknownModelError
+Custom exception (`WatcherError` → `UnknownModelError`) raised when `calculate_cost()` receives a model name not found in the pricing matrix. Enforces strict FinOps tracking by rejecting unknown models with a helpful error message listing supported models.
+
+### Token Cost Rounding
+Financial cost rounded to 6 decimal places using Python's `round()` to avoid floating-point noise in reports while capturing sub-cent precision.

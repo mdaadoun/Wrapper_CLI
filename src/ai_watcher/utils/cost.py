@@ -1,18 +1,67 @@
-"""FinOps cost calculator module for model token pricing."""
+"""FinOps cost calculator for model token pricing.
 
-from typing import Dict
+Pricing matrix stores rates in USD per 1M tokens (industry standard).
+"""
 
-# Pricing dictionary in USD per 1,000 tokens
-MODEL_PRICING: Dict[str, Dict[str, float]] = {
-    "gemini-1.5-pro-latest": {"input_per_1k": 0.0035, "output_per_1k": 0.0105},
-    "gemini-1.5-flash": {"input_per_1k": 0.00035, "output_per_1k": 0.00105},
-    "gemini-2.0-flash": {"input_per_1k": 0.0001, "output_per_1k": 0.0004},
-    "gpt-4o": {"input_per_1k": 0.0025, "output_per_1k": 0.0100},
-    "gpt-4o-mini": {"input_per_1k": 0.00015, "output_per_1k": 0.0006},
+from ai_watcher.exceptions import UnknownModelError
+
+# ---------------------------------------------------------------------------
+# Model Pricing Matrix (USD per 1M tokens)
+# Sources: OpenAI, Google AI, Anthropic, Meta, Mistral public pricing pages.
+# Last updated: 2026-07
+# ---------------------------------------------------------------------------
+# Structure: {model_name: {"input_per_1m": float, "output_per_1m": float}}
+MODEL_PRICING: dict[str, dict[str, float]] = {
+    # OpenAI
+    "gpt-4o": {"input_per_1m": 2.50, "output_per_1m": 10.00},
+    "gpt-4o-mini": {"input_per_1m": 0.15, "output_per_1m": 0.60},
+    "gpt-4-turbo": {"input_per_1m": 10.00, "output_per_1m": 30.00},
+    "gpt-4": {"input_per_1m": 30.00, "output_per_1m": 60.00},
+    "gpt-3.5-turbo": {"input_per_1m": 0.50, "output_per_1m": 1.50},
+    "o1": {"input_per_1m": 15.00, "output_per_1m": 60.00},
+    "o1-mini": {"input_per_1m": 3.00, "output_per_1m": 12.00},
+    "o3-mini": {"input_per_1m": 1.10, "output_per_1m": 4.40},
+    # Google Gemini
+    "gemini-2.5-pro-exp-03-25": {"input_per_1m": 1.25, "output_per_1m": 10.00},
+    "gemini-2.0-flash": {"input_per_1m": 0.10, "output_per_1m": 0.40},
+    "gemini-2.0-flash-lite": {"input_per_1m": 0.075, "output_per_1m": 0.30},
+    "gemini-1.5-pro-latest": {"input_per_1m": 3.50, "output_per_1m": 10.50},
+    "gemini-1.5-flash": {"input_per_1m": 0.35, "output_per_1m": 1.05},
+    "gemini-1.5-flash-8b": {"input_per_1m": 0.30, "output_per_1m": 0.90},
+    # Anthropic
+    "claude-3-5-sonnet-20241022": {"input_per_1m": 3.00, "output_per_1m": 15.00},
+    "claude-3-5-haiku-20241022": {"input_per_1m": 0.80, "output_per_1m": 4.00},
+    "claude-3-opus-20240229": {"input_per_1m": 15.00, "output_per_1m": 75.00},
+    "claude-3-sonnet-20240229": {"input_per_1m": 3.00, "output_per_1m": 15.00},
+    "claude-3-haiku-20240307": {"input_per_1m": 0.25, "output_per_1m": 1.25},
+    "claude-4-opus": {"input_per_1m": 15.00, "output_per_1m": 75.00},
+    "claude-4-sonnet": {"input_per_1m": 3.00, "output_per_1m": 15.00},
+    # Meta / Llama (via providers like Together, Groq, AWS Bedrock)
+    "llama-3.1-405b": {"input_per_1m": 2.00, "output_per_1m": 2.00},
+    "llama-3.1-70b": {"input_per_1m": 0.59, "output_per_1m": 0.79},
+    "llama-3.1-8b": {"input_per_1m": 0.06, "output_per_1m": 0.06},
+    "llama-3.2-90b": {"input_per_1m": 0.90, "output_per_1m": 0.90},
+    "llama-3.2-11b": {"input_per_1m": 0.10, "output_per_1m": 0.10},
+    "llama-3.2-3b": {"input_per_1m": 0.03, "output_per_1m": 0.03},
+    "llama-3.2-1b": {"input_per_1m": 0.015, "output_per_1m": 0.015},
+    # Mistral
+    "mistral-large-2407": {"input_per_1m": 2.00, "output_per_1m": 6.00},
+    "mistral-small-2402": {"input_per_1m": 1.00, "output_per_1m": 3.00},
+    "mistral-7b": {"input_per_1m": 0.25, "output_per_1m": 0.25},
+    "codestral-2405": {"input_per_1m": 1.00, "output_per_1m": 3.00},
+    "mixtral-8x7b": {"input_per_1m": 0.50, "output_per_1m": 0.50},
+    "mixtral-8x22b": {"input_per_1m": 1.00, "output_per_1m": 1.00},
+    # DeepSeek
+    "deepseek-chat": {"input_per_1m": 0.14, "output_per_1m": 0.28},
+    "deepseek-reasoner": {"input_per_1m": 0.55, "output_per_1m": 2.19},
+    # Cohere
+    "command-r-plus-08-2024": {"input_per_1m": 2.50, "output_per_1m": 10.00},
+    "command-r-08-2024": {"input_per_1m": 0.50, "output_per_1m": 1.50},
+    # Amazon Nova
+    "amazon-nova-pro": {"input_per_1m": 0.80, "output_per_1m": 3.20},
+    "amazon-nova-lite": {"input_per_1m": 0.06, "output_per_1m": 0.24},
+    "amazon-nova-micro": {"input_per_1m": 0.035, "output_per_1m": 0.14},
 }
-
-DEFAULT_INPUT_COST_PER_1K: float = 0.001
-DEFAULT_OUTPUT_COST_PER_1K: float = 0.002
 
 
 def calculate_cost(
@@ -20,16 +69,28 @@ def calculate_cost(
     prompt_tokens: int,
     completion_tokens: int,
 ) -> float:
-    """Compute financial cost in USD for model token usage."""
-    pricing = MODEL_PRICING.get(model.lower())
-    if pricing:
-        input_rate = pricing["input_per_1k"]
-        output_rate = pricing["output_per_1k"]
-    else:
-        input_rate = DEFAULT_INPUT_COST_PER_1K
-        output_rate = DEFAULT_OUTPUT_COST_PER_1K
+    """Compute financial cost in USD for model token usage.
 
-    cost = (prompt_tokens / 1000.0 * input_rate) + (
-        completion_tokens / 1000.0 * output_rate
+    Args:
+        model: Model identifier (case-insensitive lookup).
+        prompt_tokens: Number of input/prompt tokens.
+        completion_tokens: Number of output/completion tokens.
+
+    Returns:
+        Total cost in USD, rounded to 6 decimal places.
+
+    Raises:
+        UnknownModelError: If model is not found in the pricing matrix.
+    """
+    pricing = MODEL_PRICING.get(model.lower())
+    if pricing is None:
+        raise UnknownModelError(
+            f"Unknown model '{model}'. Add it to MODEL_PRICING in "
+            f"utils/cost.py or use a supported model. "
+            f"Supported models: {', '.join(sorted(MODEL_PRICING.keys()))}"
+        )
+
+    cost = (prompt_tokens / 1_000_000.0 * pricing["input_per_1m"]) + (
+        completion_tokens / 1_000_000.0 * pricing["output_per_1m"]
     )
     return round(cost, 6)

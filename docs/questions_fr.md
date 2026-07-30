@@ -133,3 +133,18 @@ Questions-réponses clés pour défendre l'architecture et les choix d'ingénier
 
 **Q : Comment la validation de la clé API est-elle gérée lors de l'exécution en mode `--demo` ?**
 *Réponse attendue :* Lorsque `demo_mode=True` est défini sur `LLMClient` ou que le flag `--demo` est passé à la commande `scan` du CLI, la vérification de la clé API est ignorée et une clé factice par défaut (`"demo-key"`) est attribuée en interne. Cela évite d'élever des exceptions `ConfigurationError` en l'absence de fichiers `.env` ou de variables d'environnement `GEMINI_API_KEY`.
+
+### 25. Suivi Strict des Coûts via UnknownModelError (Étape 5.1)
+
+**Q : Pourquoi avoir choisi de lever une exception pour les modèles inconnus plutôt que d'utiliser un taux de repli par défaut ?**
+*Réponse attendue :* Un repli silencieux masque les erreurs de configuration et conduit à une dérive budgétaire. En levant `UnknownModelError`, le développeur reçoit un retour immédiat que le modèle n'est pas dans la matrice, le forçant à ajouter une tarification précise. C'est particulièrement important en FinOps où chaque coût d'inférence doit être suivi correctement.
+
+### 26. Tarification par 1M vs par 1K Tokens (Étape 5.1)
+
+**Q : Pourquoi migrer de la tarification par 1K à par 1M tokens ?**
+*Réponse attendue :* Tous les grands fournisseurs (OpenAI, Google, Anthropic) ont mis à jour leurs pages de tarification vers le format par 1M tokens en 2024-2025. Le format par 1M évite les petits décimaux (ex. 0,00015 vs 0,15) et rend la matrice plus lisible. Le facteur de division passe de 1000 à 1 000 000, un changement mécanique simple.
+
+### 27. Intégration de la Matrice avec LLMClient (Étape 5.1)
+
+**Q : Comment la matrice de tarification s'intègre-t-elle avec le flux LLMClient.analyze() existant ?**
+*Réponse attendue :* `LLMClient._parse_response()` appelle `calculate_cost()` avec le nom du modèle et les compteurs de tokens réels de la réponse API. Le coût est injecté dans `AnalysisReport` avant la validation Pydantic. `UnknownModelError` est capturée par le gestionnaire `WatcherError` existant du CLI, affichant un message d'erreur rouge à l'utilisateur. Ce couplage entre comptage de tokens (API) et calcul de coût (matrice) est délibéré : le coût doit toujours être calculé à partir de l'utilisation réelle, pas d'une estimation.
