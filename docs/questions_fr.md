@@ -88,3 +88,18 @@ Questions-réponses clés pour défendre l'architecture et les choix d'ingénier
 
 **Q : Pourquoi modéliser `AnalysisReport` comme une entité immuable (`frozen=True`) et y intégrer directement la télémétrie FinOps ?**
 *Réponse attendue :* (1) L'immuabilité (`ConfigDict(frozen=True)`) garantit la sécurité multi-thread et évite toute modification accidentelle lors du passage dans les couches d'affichage et de mise en cache. (2) L'intégration de la télémétrie FinOps (`prompt_tokens`, `completion_tokens`, `estimated_cost_usd`, `execution_time_seconds`) dans le rapport garantit que les métriques d'observabilité financière restent indissociables des résultats d'analyse.
+
+### 16. Ancrage Few-Shot vs Description du Schéma Seule (Étape 4.2)
+
+**Q : Pourquoi intégrer un exemple de réponse JSON complet directement dans le prompt système au lieu de s'appuyer uniquement sur le texte du schéma Pydantic ?**
+*Réponse attendue :* Même si les définitions de champs décrivent la structure, les LLM (particulièrement les modèles légers comme `gpt-4o-mini`) atteignent une conformité de format nettement supérieure lorsqu'un exemple concret et complet est fourni. Cela élimine toute ambiguïté sur le formatage ISO des dates, la structure des tableaux et les énumérations.
+
+### 17. Contrainte de Sortie JSON Pur (Étape 4.2)
+
+**Q : Comment le prompt système empêche-t-il le LLM d'envelopper sa réponse JSON dans des balises markdown (```json ... ```) ?**
+*Réponse attendue :* Le prompt système inclut des contraintes explicites ordonnant au modèle de renvoyer uniquement du JSON pur sans balises markdown ni commentaires. De plus, l'exemple JSON intégré est présenté directement sous forme de texte JSON brut sans délimiteurs markdown.
+
+### 18. Validation Continue du Contrat de Données (Étape 4.2)
+
+**Q : Comment les modifications du prompt sont-elles validées pour s'assurer qu'elles ne rompent pas les contrats de données en aval ?**
+*Réponse attendue :* Les tests unitaires dans `tests/test_prompts.py` exécutent `AnalysisReport.model_validate_json()` directement sur l'exemple JSON intégré au prompt. Toute modification de schéma dans `AnalysisReport` qui rompt l'exemple JSON provoque un échec immédiat des tests avant tout déploiement.

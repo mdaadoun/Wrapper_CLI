@@ -96,3 +96,12 @@ Patron de modélisation de domaine imposant des objets de données en lecture se
 
 ### Schéma de Télémétrie FinOps
 Patron de conception de schéma intégrant les métriques de coût opérationnel (`prompt_tokens`, `completion_tokens`, `estimated_cost_usd`, `execution_time_seconds`) aux côtés des livrables métier au sein d'une entité unique.
+
+### Prompt Engineering Systémique
+Pratique consistant à rédiger des instructions système de haute précision spécifiant le persona LLM, le format de sortie, les règles métier et les limites pour garantir la livraison de données structurées.
+
+### Ancrage de Schéma Few-Shot (Grounding)
+Fourniture d'exemples de sortie complets et validés dans le contexte du prompt pour guider le modèle vers le respect exact de la syntaxe et du schéma `AnalysisReport.model_validate_json()`.
+
+### Contrainte Sans Markdown Fences
+Instruction exigeant du LLM qu'il renvoie un objet JSON pur sans balises triple-backticks markdown afin de simplifier le parsing en aval.

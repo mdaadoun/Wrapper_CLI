@@ -101,3 +101,12 @@ Domain modeling pattern enforcing read-only data objects post-instantiation (`Co
 
 ### FinOps Telemetry Schema
 Schema design pattern embedding operational cost metrics (`prompt_tokens`, `completion_tokens`, `estimated_cost_usd`, `execution_time_seconds`) alongside domain deliverables within a single entity.
+
+### System Prompt Engineering
+The practice of crafting high-precision system instructions that specify LLM persona, output format, domain rules, and boundaries to guarantee structured data delivery.
+
+### Few-Shot Schema Grounding
+Providing complete, validated exemplar outputs within prompt context to guide the model toward exact syntax and schema adherence matching `AnalysisReport.model_validate_json()`.
+
+### Zero-Naked-Code-Fence Constraint
+Instructing the LLM to output pure JSON without markdown triple-backtick code fences to streamline downstream parsing and avoid syntax stripping errors.

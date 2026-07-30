@@ -88,3 +88,18 @@ Targeted questions and answers covering architecture design choices and engineer
 
 **Q: Why model `AnalysisReport` as an immutable entity (`frozen=True`) and co-locate FinOps telemetry fields inside it?**
 *Expected Answer:* (1) Immutability (`ConfigDict(frozen=True)`) guarantees thread safety and prevents accidental attribute mutation as the report travels through formatting, caching, and export layers. (2) Co-locating FinOps telemetry (`prompt_tokens`, `completion_tokens`, `total_tokens`, `estimated_cost_usd`, `execution_time_seconds`) alongside domain data deliverables creates a single, self-contained report entity. This ensures financial observability data is never lost or decoupled from the analysis results when persisted, rendered in terminal panels, or exported to downstream systems.
+
+### 16. Few-Shot Grounding vs. Schema Description Only (Step 4.2)
+
+**Q: Why embed a full sample JSON response directly inside the system prompt instead of relying solely on Pydantic schema text?**
+*Expected Answer:* While field definitions describe structural types, LLMs (especially smaller edge models like `gpt-4o-mini`) achieve significantly higher format compliance when provided with a complete concrete example. It eliminates ambiguity around ISO timestamp formatting, array structures, and string enum values.
+
+### 17. Raw JSON Output Enforcement (Step 4.2)
+
+**Q: How does the system prompt prevent LLMs from wrapping JSON output in markdown backticks (```json ... ```)?**
+*Expected Answer:* The system prompt includes explicit formatting constraints instructing the model to return raw JSON only with zero markdown fences or commentary. Furthermore, the embedded sample JSON is presented as raw JSON without markdown delimiters.
+
+### 18. Continuous Data Contract Validation (Step 4.2)
+
+**Q: How are prompt changes validated to ensure they don't break downstream data contracts?**
+*Expected Answer:* Unit tests in `tests/test_prompts.py` execute `AnalysisReport.model_validate_json()` directly on the sample JSON embedded in the prompt. Any schema change in `AnalysisReport` that breaks the sample JSON causes immediate test failure before deployment.
