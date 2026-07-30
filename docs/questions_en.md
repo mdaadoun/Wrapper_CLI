@@ -148,3 +148,23 @@ Targeted questions and answers covering architecture design choices and engineer
 
 **Q: How does the pricing matrix integrate with the existing LLMClient.analyze() flow?**
 *Expected Answer:* `LLMClient._parse_response()` calls `calculate_cost()` with the model name and actual token counts from the API response. The cost is injected into the `AnalysisReport` before Pydantic validation. The `UnknownModelError` is caught by the CLI's existing `WatcherError` handler, displaying a red error message to the user. This tight coupling between token counting (API) and cost calculation (pricing matrix) is by design: cost must always be computed from real usage, not estimated.
+
+### 28. High-Precision Latency Tracking Location (Step 5.2)
+
+**Q: Why measure latency with time.perf_counter() in LLMClient.analyze() rather than higher-level decorators?**
+*Expected Answer:* Using `time.perf_counter()` directly around the HTTP client call measures raw network and API processing time without including Python framework or CLI overhead.
+
+### 29. Heterogeneous API Usage Metadata Normalization (Step 5.2)
+
+**Q: How are token counts and costs handled when LLM responses return varying schema key names (e.g. Gemini vs OpenAI)?**
+*Expected Answer:* `LLMClient._parse_response()` normalizes token keys from `usageMetadata` (Gemini) or `usage` (OpenAI) into standard `prompt_tokens` and `completion_tokens` before invoking `calculate_cost()`.
+
+### 30. Rich Renderables in Terminal UI (Step 6.1)
+
+**Q: How does Rich Panel handle nested renderable objects like Markdown and styled text?**
+*Expected Answer:* Rich Panel accepts a single renderable or a Rich Group container combining multiple renderables such as Markdown, Text, or Tables, allowing complex layouts inside a single box.
+
+### 31. Visual Color-Coding for Severity (Step 6.1)
+
+**Q: Why map priority levels to visual color themes in CLI outputs?**
+*Expected Answer:* Color-coding priority levels (green for low, yellow for medium, red for high) provides instant visual feedback to engineers reviewing automated scan outputs in CI/CD or local terminals.

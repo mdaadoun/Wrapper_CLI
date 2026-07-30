@@ -115,7 +115,7 @@ def test_scan_demo_mode_text():
     assert result.exit_code == 0
     assert "Scanning source [text mode]: Hello World" in result.stdout
     assert "Executing in DEMO mode" in result.stdout
-    assert "--- ANALYSIS REPORT ---" in result.stdout
+    assert "Executive Summary" in result.stdout
     assert "[DEMO]" in result.stdout
     assert "--- FINOPS METRICS ---" in result.stdout
 
@@ -125,7 +125,7 @@ def test_scan_demo_mode_short_flag():
     result = runner.invoke(app, ["scan", "Sample text", "-d"])
     assert result.exit_code == 0
     assert "Executing in DEMO mode" in result.stdout
-    assert "--- ANALYSIS REPORT ---" in result.stdout
+    assert "Executive Summary" in result.stdout
 
 
 def test_scan_demo_mode_file(tmp_path):
@@ -135,7 +135,7 @@ def test_scan_demo_mode_file(tmp_path):
     result = runner.invoke(app, ["scan", str(sample), "--demo"])
     assert result.exit_code == 0
     assert f"Scanning source [file mode]: {sample}" in result.stdout
-    assert "--- ANALYSIS REPORT ---" in result.stdout
+    assert "Executive Summary" in result.stdout
 
 
 def test_scan_demo_mode_url():
@@ -146,4 +146,4 @@ def test_scan_demo_mode_url():
         result = runner.invoke(app, ["scan", "https://news.ycombinator.com", "--demo"])
     assert result.exit_code == 0
     assert "Scanning source [url mode]: https://news.ycombinator.com" in result.stdout
-    assert "--- ANALYSIS REPORT ---" in result.stdout
+    assert "Executive Summary" in result.stdout

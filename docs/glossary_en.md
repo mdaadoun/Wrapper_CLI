@@ -140,3 +140,15 @@ Custom exception (`WatcherError` → `UnknownModelError`) raised when `calculate
 
 ### Token Cost Rounding
 Financial cost rounded to 6 decimal places using Python's `round()` to avoid floating-point noise in reports while capturing sub-cent precision.
+
+### Metrics Injection
+The process of populating execution metadata (latency, token counts, calculated costs) into standard domain data structures during output parsing.
+
+### Usage Metadata
+API response payload structure containing token consumption metrics (`promptTokenCount`, `candidatesTokenCount`, `prompt_tokens`, `completion_tokens`).
+
+### Rich Panel
+A UI component in the Rich Python library that draws styled border boxes around terminal text or renderables.
+
+### Rich Markdown
+A renderable class in Rich that parses Markdown strings and displays them with terminal formatting inside console applications.

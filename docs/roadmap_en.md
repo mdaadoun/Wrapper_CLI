@@ -129,7 +129,7 @@ Phase 1: Baseline Setup ──> Phase 2: CLI Skeleton ──> Phase 3: Ingestion
 * **Key Concept:** FinOps Observability — tracking direct marginal API costs in real time to prevent budget drift.
 * **Validation Criterion:** `calculate_cost("gpt-4o-mini", prompt_tokens=1000, completion_tokens=500)` returns accurate USD value based on public rates. Unknown model raises explicit exception.
 
-### Step 5.2: Metrics Injection into Report — ⏳ Pending
+### Step 5.2: Metrics Injection into Report — ✅ Completed
 * **Description:** Enhance `LLMClient.analyze()` to time API call (`time.perf_counter()`), extract token usage (`usage.prompt_tokens`, `usage.completion_tokens`), compute cost via `cost.py`, and populate fields in `AnalysisReport`.
 * **Key Concept:** Transparent Instrumentation — metrics collected at caller level without adding overhead to core logic.
 * **Validation Criterion:** Returned report contains non-zero values for `prompt_tokens`, `completion_tokens`, `estimated_cost_usd`, and `execution_time_seconds`.
@@ -139,7 +139,7 @@ Phase 1: Baseline Setup ──> Phase 2: CLI Skeleton ──> Phase 3: Ingestion
 ## Phase 6: Rich Terminal UI & Output Formats — ⏳ Pending
 *Goal: Deliver premium console user experience with rich visual formatting (FS-04).*
 
-### Step 6.1: Markdown Rendered Panel — ⏳ Pending
+### Step 6.1: Markdown Rendered Panel — ✅ Completed
 * **Description:** Implement `display_report(report: AnalysisReport) -> None` in `formatters/console.py` rendering summary inside styled Rich panel: colored title, Markdown summary, bulleted key points, color-coded impacts and recommendations (green for `low`, yellow for `medium`, red for `high`).
 * **Key Concept:** Terminal UX — well-formatted output improves readability and developer tool adoption.
 * **Validation Criterion:** `--demo` execution displays styled, color-coded panel in terminal.

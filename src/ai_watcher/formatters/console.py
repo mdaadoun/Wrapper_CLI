@@ -1,29 +1,81 @@
 """Console output formatters for rendering AnalysisReport to terminal."""
 
-import typer
 from ai_watcher.schemas.report import AnalysisReport
+from rich.console import Console, Group, RenderableType
+from rich.markdown import Markdown
+from rich.panel import Panel
+from rich.text import Text
+
+console = Console()
+
+PRIORITY_COLORS = {
+    "low": "green",
+    "medium": "yellow",
+    "high": "red",
+}
 
 
-def display_report(report: AnalysisReport) -> None:
-    """Render structured AnalysisReport and FinOps metrics to terminal."""
-    typer.echo("\n--- ANALYSIS REPORT ---")
-    typer.echo(f"Title: {report.title}")
-    typer.echo(f"Source: {report.source}")
-    typer.echo(f"Model: {report.model_used}")
-    typer.echo(f"Analyzed At: {report.analyzed_at.isoformat()}")
-    typer.echo(f"Priority: {report.priority.upper()}")
-    typer.echo(f"\nSummary:\n{report.summary}")
-    typer.echo("\nKey Points:")
+def display_report(
+    report: AnalysisReport, console_instance: Console | None = None
+) -> None:
+    """Render structured AnalysisReport and FinOps metrics to terminal using Rich Panel."""
+    target_console = console_instance or console
+    priority_color = PRIORITY_COLORS.get(report.priority.lower(), "white")
+
+    renderables: list[RenderableType] = []
+
+    # Metadata Header
+    header_text = Text()
+    header_text.append("Source: ", style="bold dim")
+    header_text.append(f"{report.source}\n", style="dim")
+    header_text.append("Model: ", style="bold dim")
+    header_text.append(f"{report.model_used} | ", style="dim")
+    header_text.append("Date: ", style="bold dim")
+    header_text.append(f"{report.analyzed_at.isoformat()}\n", style="dim")
+    header_text.append("Priority: ", style="bold")
+    header_text.append(f"{report.priority.upper()}\n\n", style=f"bold {priority_color}")
+    renderables.append(header_text)
+
+    # Executive Summary (Markdown)
+    renderables.append(Text("Executive Summary", style="bold cyan underline"))
+    renderables.append(Markdown(report.summary))
+    renderables.append(Text("\nKey Points", style="bold cyan underline"))
+
+    # Bulleted Key Points
+    key_points_text = Text()
     for pt in report.key_points:
-        typer.echo(f" - {pt}")
-    typer.echo(f"\nTechnical Impact: {report.impact_technical}")
-    typer.echo(f"Business Impact: {report.impact_business}")
+        key_points_text.append(f" • {pt}\n")
+    renderables.append(key_points_text)
+
+    # Impacts & Recommendation
+    impacts_text = Text()
+    impacts_text.append("\nImpacts & Recommendation\n", style="bold cyan underline")
+    impacts_text.append("Technical Impact: ", style="bold")
+    impacts_text.append(f"{report.impact_technical}\n")
+    impacts_text.append("Business Impact: ", style="bold")
+    impacts_text.append(f"{report.impact_business}\n")
     if report.impact_regulatory:
-        typer.echo(f"Regulatory Impact: {report.impact_regulatory}")
-    typer.echo(f"Recommendation: {report.recommendation}")
-    typer.echo("\n--- FINOPS METRICS ---")
-    typer.echo(f"Prompt Tokens: {report.prompt_tokens}")
-    typer.echo(f"Completion Tokens: {report.completion_tokens}")
-    typer.echo(f"Total Tokens: {report.total_tokens}")
-    typer.echo(f"Estimated Cost USD: ${report.estimated_cost_usd:.4f}")
-    typer.echo(f"Execution Time: {report.execution_time_seconds:.4f}s")
+        impacts_text.append("Regulatory Impact: ", style="bold")
+        impacts_text.append(f"{report.impact_regulatory}\n")
+
+    impacts_text.append("\nRecommendation: ", style=f"bold {priority_color}")
+    impacts_text.append(f"{report.recommendation}\n", style=priority_color)
+    renderables.append(impacts_text)
+
+    # Render main analysis report panel
+    title_text = f"[bold white]{report.title}[/bold white] [[bold {priority_color}]{report.priority.upper()}[/bold {priority_color}]]"
+    panel = Panel(
+        Group(*renderables),
+        title=title_text,
+        border_style=priority_color,
+        expand=True,
+    )
+    target_console.print(panel)
+
+    # Temporary text outputs for FinOps metrics until Step 6.2
+    target_console.print("\n[bold]--- FINOPS METRICS ---[/bold]")
+    target_console.print(f"Prompt Tokens: {report.prompt_tokens}")
+    target_console.print(f"Completion Tokens: {report.completion_tokens}")
+    target_console.print(f"Total Tokens: {report.total_tokens}")
+    target_console.print(f"Estimated Cost USD: ${report.estimated_cost_usd:.4f}")
+    target_console.print(f"Execution Time: {report.execution_time_seconds:.4f}s")

@@ -28,7 +28,7 @@ The application adheres to the **Single Responsibility Principle (SRP)**. The co
   - **`cost.py` (`calculate_cost`, `MODEL_PRICING`):** FinOps pure function computing USD cost per inference. Uses a 40-model pricing matrix (USD per 1M tokens) across 8 providers (OpenAI, Google, Anthropic, Meta, Mistral, DeepSeek, Cohere, Amazon). Raises `UnknownModelError` for unknown models. Case-insensitive lookup. Cost rounded to 6 decimal places.
   - **`exceptions.py` referenced:** `UnknownModelError(WatcherError)` raised when model not found in matrix.
 - **`formatters/`:** Rendering components (Console output, Markdown export).
-  - **`console.py` (`display_report`):** Formatter module rendering structured `AnalysisReport` deliverables and FinOps metrics cleanly to standard terminal output.
+  - **`console.py` (`display_report`, `PRIORITY_COLORS`):** Console formatting module rendering structured `AnalysisReport` deliverables inside a styled Rich Panel. Features Rich Markdown rendering for executive summary, bulleted list for key points, and dynamic color themes (`green`, `yellow`, `red`) based on priority levels (`low`, `medium`, `high`). Also outputs FinOps latency and token metrics.
 
 
 ---

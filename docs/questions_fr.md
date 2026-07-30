@@ -148,3 +148,23 @@ Questions-réponses clés pour défendre l'architecture et les choix d'ingénier
 
 **Q : Comment la matrice de tarification s'intègre-t-elle avec le flux LLMClient.analyze() existant ?**
 *Réponse attendue :* `LLMClient._parse_response()` appelle `calculate_cost()` avec le nom du modèle et les compteurs de tokens réels de la réponse API. Le coût est injecté dans `AnalysisReport` avant la validation Pydantic. `UnknownModelError` est capturée par le gestionnaire `WatcherError` existant du CLI, affichant un message d'erreur rouge à l'utilisateur. Ce couplage entre comptage de tokens (API) et calcul de coût (matrice) est délibéré : le coût doit toujours être calculé à partir de l'utilisation réelle, pas d'une estimation.
+
+### 28. Emplacement de la Mesure de Latence Haute Précision (Étape 5.2)
+
+**Q : Pourquoi mesurer la latence avec time.perf_counter() dans LLMClient.analyze() plutôt qu'avec des décorateurs de niveau supérieur ?**
+*Réponse attendue :* Utiliser `time.perf_counter()` directement autour de l'appel client HTTP mesure le temps brut du réseau et du traitement de l'API sans inclure la surcharge du framework Python ou du CLI.
+
+### 29. Normalisation des métadonnées d'utilisation hétérogènes (Étape 5.2)
+
+**Q : Comment les compteurs de jetons et les coûts sont-ils gérés lorsque les réponses LLM renvoient des clés de schéma différentes (ex. Gemini vs OpenAI) ?**
+*Réponse attendue :* `LLMClient._parse_response()` normalise les clés de jetons à partir de `usageMetadata` (Gemini) ou `usage` (OpenAI) vers les champs standards `prompt_tokens` et `completion_tokens` avant d'appeler `calculate_cost()`.
+
+### 30. Composants de rendu Rich dans l'interface terminal (Étape 6.1)
+
+**Q : Comment le composant Rich Panel gère-t-il les objets imbriqués tels que Markdown et le texte stylisé ?**
+*Réponse attendue :* Rich Panel accepte un composant unique ou un conteneur Rich Group combinant plusieurs éléments (Markdown, Texte, Tableaux), permettant des mises en page complexes dans un seul encadré.
+
+### 31. Code couleur visuel selon la sévérité (Étape 6.1)
+
+**Q : Pourquoi associer les niveaux de priorité à des thèmes de couleurs visuels dans les sorties CLI ?**
+*Réponse attendue :* Le code couleur par priorité (vert pour faible, jaune pour moyen, rouge pour élevé) offre un retour visuel immédiat aux ingénieurs lors de la révision des sorties de scans automatisés en CI/CD ou dans les terminaux locaux.

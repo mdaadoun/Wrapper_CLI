@@ -129,7 +129,7 @@ Phase 1 : Adaptation Socle ──> Phase 2 : CLI Squelette ──> Phase 3 : Ing
 *   **Concept clé :** Observabilité FinOps — dans un contexte de production, chaque appel d'API a un coût marginal direct. Le tracking granulaire permet d'optimiser les budgets et de détecter les dérives.
 *   **Critère de validation :** `calculate_cost("gpt-4o-mini", prompt_tokens=1000, completion_tokens=500)` retourne une valeur cohérente avec la grille tarifaire publique. Passer un modèle inconnu lève une exception explicite.
 
-### Étape 5.2 : Injection des métriques dans le rapport — ⏳ À faire
+### Étape 5.2 : Injection des métriques dans le rapport — ✅ Fait
 *   **Description :** Enrichir la méthode `LLMClient.analyze()` pour chronométrer l'appel (`time.perf_counter()`), extraire les compteurs de tokens depuis la réponse API (`usage.prompt_tokens`, `usage.completion_tokens`), calculer le coût via `cost.py`, et injecter ces valeurs dans l'objet `AnalysisReport` avant de le retourner.
 *   **Concept clé :** Instrumentation transparente — les métriques sont collectées au plus proche de l'appel, sans surcoût de complexité pour le code appelant.
 *   **Critère de validation :** Le rapport retourné contient des valeurs non-nulles pour `prompt_tokens`, `completion_tokens`, `estimated_cost_usd` et `execution_time_seconds`.
@@ -139,10 +139,10 @@ Phase 1 : Adaptation Socle ──> Phase 2 : CLI Squelette ──> Phase 3 : Ing
 ## Phase 6 : Affichage Console Enrichi avec Rich — ⏳ À faire
 *Objectif : Offrir une expérience console premium avec des rendus visuels élégants (SF-04).*
 
-### Étape 6.1 : Panneau de rendu Markdown — ⏳ À faire
-*   **Description :** Implémenter dans `formatters/console.py` une fonction `display_report(report: AnalysisReport) -> None` qui affiche la synthèse dans un panneau Rich stylisé : titre coloré, résumé en Markdown, points clés en puces, impacts et recommandation avec codes couleur (vert pour `low`, jaune pour `medium`, rouge pour `high`).
-*   **Concept clé :** UX en terminal — une sortie bien formatée augmente la lisibilité, la crédibilité et l'adoption d'un outil CLI par les développeurs.
-*   **Critère de validation :** L'exécution en mode `--demo` affiche un panneau coloré dans le terminal avec une structure claire et lisible.
+### Étape 6.1 : Panneau de rendu Markdown — ✅ Terminé
+* **Description :** Implémenter `display_report(report: AnalysisReport) -> None` dans `formatters/console.py` affichant le résumé dans un panneau Rich stylisé : titre coloré, résumé Markdown, puces pour les points clés, impacts et recommandations codés par couleur (vert pour `low`, jaune pour `medium`, rouge pour `high`).
+* **Concept clé :** Terminal UX — un rendu console propre améliore grandement la lisibilité et l'adoption par les développeurs.
+* **Critère de validation :** L'exécution de `--demo` affiche un panneau stylisé avec rendu couleur dans le terminal. avec une structure claire et lisible.
 
 ### Étape 6.2 : Tableau récapitulatif des métriques FinOps — ⏳ À faire
 *   **Description :** Ajouter sous le panneau principal un tableau Rich résumant les métriques d'inférence : modèle utilisé, tokens entrée/sortie, coût USD, latence en secondes. Utiliser un code couleur pour le coût (vert si < $0.01, jaune si < $0.05, rouge au-delà).

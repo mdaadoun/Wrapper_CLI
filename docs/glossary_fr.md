@@ -135,3 +135,15 @@ Exception personnalisée (`WatcherError` → `UnknownModelError`) levée lorsque
 
 ### Arrondi du Coût Token (Token Cost Rounding)
 Coût financier arrondi à 6 décimales via `round()` de Python pour éviter le bruit numérique dans les rapports tout en capturant la précision sub-centime.
+
+### Injection de métriques
+Le processus consistant à remplir les métadonnées d'exécution (latence, nombre de jetons, coûts calculés) dans les structures de données du domaine lors du traitement de la sortie.
+
+### Métadonnées d'utilisation
+Structure de réponse de l'API contenant les métriques de consommation de jetons (`promptTokenCount`, `candidatesTokenCount`, `prompt_tokens`, `completion_tokens`).
+
+### Rich Panel
+Composant d'interface utilisateur de la bibliothèque Python Rich qui dessine des encadrés avec bordures stylisées autour du texte ou des éléments de rendu en terminal.
+
+### Rich Markdown
+Classe de rendu dans Rich qui analyse les chaînes au format Markdown et les affiche avec un formatage adapté au terminal au sein des applications console.

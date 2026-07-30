@@ -186,6 +186,34 @@ const TEST_DESCRIPTIONS: Record<
     output: "Compilations 0 erreur et fichiers docs présents.",
     concept: "Tests de Dashboard & Compilation",
   },
+  "tests/test_cost.py": {
+    title: "📁 test_cost.py (Calculatrice FinOps)",
+    objective: "Tester la grille tarifaire 40 modèles et la fonction calculate_cost() avec validation des erreurs UnknownModelError.",
+    input: "Identifiants de modèles et compteurs de tokens d'entrée/sortie.",
+    output: "Coût USD calculé et arrondi à 6 décimales.",
+    concept: "Calculateur de Coût FinOps & Invariance Tarifaire",
+  },
+  "tests/test_cost.py::test_calculate_cost_known_models": {
+    title: "⚡ test_calculate_cost_known_models()",
+    objective: "Vérifier l'exactitude du calcul du coût USD pour les modèles répertoriés (ex: gpt-4o, gemini-1.5-flash).",
+    input: "Modèle 'gpt-4o-mini', prompt_tokens=1000, completion_tokens=500.",
+    output: "Retour de la valeur exacte selon la grille tarifaire par 1M tokens.",
+    concept: "Validation des Coûts FinOps",
+  },
+  "tests/test_cost.py::test_calculate_cost_unknown_model_raises": {
+    title: "⚡ test_calculate_cost_unknown_model_raises()",
+    objective: "S'assurer qu'un modèle inconnu lève immédiatement UnknownModelError sans fallback silencieux.",
+    input: "Modèle inconnu 'invalid-model-xyz'.",
+    output: "Levée d'exception UnknownModelError avec liste des modèles supportés.",
+    concept: "Détection des Erreurs de Configuration FinOps",
+  },
+  "tests/test_llm_client.py": {
+    title: "📁 test_llm_client.py (Client API LLM & Métriques)",
+    objective: "Tester l'intégration de LLMClient avec mesure de latence perf_counter, extraction de tokens et injection FinOps.",
+    input: "Mocks de réponses API Gemini/OpenAI et mode démo offline.",
+    output: "AnalysisReport validé contenant les métriques FinOps complètes.",
+    concept: "Client Transport LLM & Injection de Métriques",
+  },
 };
 
 function getFileIcon(name: string): string {
@@ -289,13 +317,14 @@ const PHASES_DATA = [
   {
     id: 5,
     title: "Phase 5 : Calculatrice FinOps & Accounting",
-    status: "pending",
-    badge: "⏳ À venir",
-    desc: "Calcul en temps réel du coût financier de chaque appel API via grille tarifaire par modèle et mesure précise de latence.",
-    concepts: ["Token Pricing Matrix", "Direct Marginal Cost Calculator", "Latency & Financial Observability"],
-    inputExample: 'model="gemini-1.5-pro-latest", prompt_tokens=450, completion_tokens=180',
-    outputExample: "estimated_cost_usd=0.000315, execution_time_seconds=0.85s",
-    tests: "tests/test_cost.py",
+    status: "completed",
+    badge: "✅ Complété",
+    desc: "Calcul en temps réel du coût financier de chaque appel API via grille tarifaire 40 modèles et mesure précise de latence via perf_counter.",
+    concepts: ["Token Pricing Matrix (USD/1M tokens)", "Direct Marginal Cost Calculator", "Latency & Financial Observability", "UnknownModelError Fail-Fast Guard", "Heterogeneous Usage Metadata Normalization"],
+    inputExample: 'model="gemini-1.5-flash", prompt_tokens=1000, completion_tokens=500',
+    outputExample: "estimated_cost_usd=0.000875, execution_time_seconds=0.0125s, total_tokens=1500",
+    tests: "tests/test_cost.py, tests/test_llm_client.py",
+    hasPlayground: "finops",
   },
   {
     id: 6,
@@ -397,6 +426,37 @@ export default function DashboardPage() {
       console.error(err);
     } finally {
       setDemoLoading(false);
+    }
+  };
+
+  // FinOps Playground State
+  const [finopsModel, setFinopsModel] = useState<string>("gemini-1.5-flash");
+  const [finopsPromptTokens, setFinopsPromptTokens] = useState<number>(1000);
+  const [finopsCompletionTokens, setFinopsCompletionTokens] = useState<number>(500);
+  const [finopsResult, setFinopsResult] = useState<any>(null);
+  const [finopsLoading, setFinopsLoading] = useState<boolean>(false);
+  const [finopsOutputTab, setFinopsOutputTab] = useState<"visual" | "json">("visual");
+
+  const handleRunFinopsCalculation = async () => {
+    setFinopsLoading(true);
+    try {
+      const res = await fetch("/api/finops-demo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: finopsModel,
+          prompt_tokens: Number(finopsPromptTokens),
+          completion_tokens: Number(finopsCompletionTokens),
+        }),
+      });
+      const data = await res.json();
+      if (data.status === "success") {
+        setFinopsResult(data.result);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setFinopsLoading(false);
     }
   };
 
@@ -1245,6 +1305,271 @@ export default function DashboardPage() {
                                   ) : (
                                     <pre style={{ fontSize: "0.8rem", color: "#a78bfa", fontFamily: "monospace", overflowX: "auto" }}>
                                       {JSON.stringify(demoResult, null, 2)}
+                                    </pre>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* PHASE 5 PLAYGROUND - FINOPS COST CALCULATOR & METRICS INJECTION */}
+                        {currentPhase.id === 5 && (
+                          <div style={{ padding: "24px", background: "rgba(16, 185, 129, 0.08)", border: "1px solid rgba(16, 185, 129, 0.3)", borderRadius: "14px" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                              <div>
+                                <h4 style={{ fontSize: "1.15rem", fontWeight: 800, color: "#fff", display: "flex", alignItems: "center", gap: "8px" }}>
+                                  ⚡ Demo Live : Calculatrice FinOps & Injection de Métriques (Phase 5)
+                                </h4>
+                                <p style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
+                                  Simulez et calculez le coût d'inférence marginal direct (USD/1M tokens) et la télémétrie FinOps pour 40+ modèles d'IA.
+                                </p>
+                              </div>
+                              <button
+                                onClick={handleRunFinopsCalculation}
+                                disabled={finopsLoading}
+                                style={{
+                                  padding: "10px 20px",
+                                  borderRadius: "8px",
+                                  background: "linear-gradient(135deg, #10b981 0%, #3b82f6 100%)",
+                                  color: "#fff",
+                                  fontWeight: 700,
+                                  fontSize: "0.9rem",
+                                  border: "none",
+                                  cursor: "pointer",
+                                  boxShadow: "0 4px 14px rgba(16, 185, 129, 0.4)",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "8px",
+                                }}
+                              >
+                                {finopsLoading ? <Loader2 size={16} className="spin" /> : <Play size={16} />}
+                                {finopsLoading ? "Calcul en cours..." : "⚡ Lancer le Calcul FinOps Live"}
+                              </button>
+                            </div>
+
+                            {/* Preset Buttons */}
+                            <div style={{ display: "flex", gap: "8px", marginBottom: "14px", flexWrap: "wrap" }}>
+                              <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", alignSelf: "center" }}>Presets de modèles :</span>
+                              <button
+                                onClick={() => { setFinopsModel("gemini-1.5-flash"); setFinopsPromptTokens(1000); setFinopsCompletionTokens(500); }}
+                                style={{ padding: "4px 10px", borderRadius: "6px", background: "rgba(255,255,255,0.05)", border: "1px solid var(--border)", color: "#fff", fontSize: "0.75rem", cursor: "pointer" }}
+                              >
+                                ⚡ Gemini 1.5 Flash (Standard)
+                              </button>
+                              <button
+                                onClick={() => { setFinopsModel("gpt-4o"); setFinopsPromptTokens(2500); setFinopsCompletionTokens(800); }}
+                                style={{ padding: "4px 10px", borderRadius: "6px", background: "rgba(255,255,255,0.05)", border: "1px solid var(--border)", color: "#fff", fontSize: "0.75rem", cursor: "pointer" }}
+                              >
+                                🚀 OpenAI GPT-4o (High Performance)
+                              </button>
+                              <button
+                                onClick={() => { setFinopsModel("claude-3-5-sonnet-20241022"); setFinopsPromptTokens(5000); setFinopsCompletionTokens(1200); }}
+                                style={{ padding: "4px 10px", borderRadius: "6px", background: "rgba(255,255,255,0.05)", border: "1px solid var(--border)", color: "#fff", fontSize: "0.75rem", cursor: "pointer" }}
+                              >
+                                💡 Claude 3.5 Sonnet (Large Prompt)
+                              </button>
+                              <button
+                                onClick={() => { setFinopsModel("gpt-4o-mini"); setFinopsPromptTokens(10000); setFinopsCompletionTokens(2000); }}
+                                style={{ padding: "4px 10px", borderRadius: "6px", background: "rgba(255,255,255,0.05)", border: "1px solid var(--border)", color: "#fff", fontSize: "0.75rem", cursor: "pointer" }}
+                              >
+                                🎯 GPT-4o Mini (Batch Economy)
+                              </button>
+                            </div>
+
+                            {/* Form Controls */}
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px", marginBottom: "16px" }}>
+                              <div>
+                                <label style={{ fontSize: "0.75rem", color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>
+                                  Modèle d'IA :
+                                </label>
+                                <select
+                                  value={finopsModel}
+                                  onChange={(e) => setFinopsModel(e.target.value)}
+                                  style={{
+                                    width: "100%",
+                                    padding: "10px",
+                                    borderRadius: "8px",
+                                    background: "rgba(0,0,0,0.4)",
+                                    border: "1px solid var(--border)",
+                                    color: "#fff",
+                                    fontSize: "0.85rem",
+                                  }}
+                                >
+                                  <option value="gemini-1.5-flash">Google Gemini 1.5 Flash</option>
+                                  <option value="gemini-1.5-pro-latest">Google Gemini 1.5 Pro</option>
+                                  <option value="gemini-2.0-flash">Google Gemini 2.0 Flash</option>
+                                  <option value="gpt-4o">OpenAI GPT-4o</option>
+                                  <option value="gpt-4o-mini">OpenAI GPT-4o Mini</option>
+                                  <option value="claude-3-5-sonnet-20241022">Anthropic Claude 3.5 Sonnet</option>
+                                  <option value="claude-3-5-haiku-20241022">Anthropic Claude 3.5 Haiku</option>
+                                  <option value="deepseek-chat">DeepSeek Chat</option>
+                                  <option value="deepseek-reasoner">DeepSeek Reasoner</option>
+                                  <option value="llama-3.1-70b">Meta Llama 3.1 70B</option>
+                                </select>
+                              </div>
+
+                              <div>
+                                <label style={{ fontSize: "0.75rem", color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>
+                                  Tokens d'Entrée (Prompt Tokens) :
+                                </label>
+                                <input
+                                  type="number"
+                                  value={finopsPromptTokens}
+                                  onChange={(e) => setFinopsPromptTokens(Number(e.target.value))}
+                                  style={{
+                                    width: "100%",
+                                    padding: "10px",
+                                    borderRadius: "8px",
+                                    background: "rgba(0,0,0,0.4)",
+                                    border: "1px solid var(--border)",
+                                    color: "#fff",
+                                    fontFamily: "monospace",
+                                    fontSize: "0.85rem",
+                                  }}
+                                />
+                              </div>
+
+                              <div>
+                                <label style={{ fontSize: "0.75rem", color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>
+                                  Tokens de Sortie (Completion Tokens) :
+                                </label>
+                                <input
+                                  type="number"
+                                  value={finopsCompletionTokens}
+                                  onChange={(e) => setFinopsCompletionTokens(Number(e.target.value))}
+                                  style={{
+                                    width: "100%",
+                                    padding: "10px",
+                                    borderRadius: "8px",
+                                    background: "rgba(0,0,0,0.4)",
+                                    border: "1px solid var(--border)",
+                                    color: "#fff",
+                                    fontFamily: "monospace",
+                                    fontSize: "0.85rem",
+                                  }}
+                                />
+                              </div>
+                            </div>
+
+                            {/* FinOps Calculation Results Viewer */}
+                            {finopsResult && (
+                              <div style={{ marginTop: "16px", background: "rgba(9, 5, 20, 0.8)", border: "1px solid var(--border)", borderRadius: "12px", overflow: "hidden" }}>
+                                <div style={{ display: "flex", borderBottom: "1px solid var(--border)", background: "rgba(0,0,0,0.3)" }}>
+                                  <button
+                                    onClick={() => setFinopsOutputTab("visual")}
+                                    style={{
+                                      padding: "10px 18px",
+                                      background: finopsOutputTab === "visual" ? "rgba(16, 185, 129, 0.2)" : "transparent",
+                                      border: "none",
+                                      borderBottom: finopsOutputTab === "visual" ? "2px solid var(--success)" : "none",
+                                      color: finopsOutputTab === "visual" ? "#fff" : "var(--text-muted)",
+                                      fontWeight: 600,
+                                      fontSize: "0.85rem",
+                                      cursor: "pointer",
+                                    }}
+                                  >
+                                    📊 Tableau Télémetrie FinOps
+                                  </button>
+                                  <button
+                                    onClick={() => setFinopsOutputTab("json")}
+                                    style={{
+                                      padding: "10px 18px",
+                                      background: finopsOutputTab === "json" ? "rgba(16, 185, 129, 0.2)" : "transparent",
+                                      border: "none",
+                                      borderBottom: finopsOutputTab === "json" ? "2px solid var(--success)" : "none",
+                                      color: finopsOutputTab === "json" ? "#fff" : "var(--text-muted)",
+                                      fontWeight: 600,
+                                      fontSize: "0.85rem",
+                                      cursor: "pointer",
+                                    }}
+                                  >
+                                    💻 Payload JSON Pydantic V2
+                                  </button>
+                                </div>
+
+                                <div style={{ padding: "20px" }}>
+                                  {finopsOutputTab === "visual" ? (
+                                    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                                      {/* Telemetry Metric Cards */}
+                                      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px" }}>
+                                        <div style={{ background: "rgba(0,0,0,0.4)", padding: "14px", borderRadius: "10px", border: "1px solid var(--border)" }}>
+                                          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Modèle Sélectionné</span>
+                                          <strong style={{ fontSize: "0.95rem", color: "#60a5fa" }}>{finopsResult.model_used}</strong>
+                                        </div>
+
+                                        <div style={{ background: "rgba(0,0,0,0.4)", padding: "14px", borderRadius: "10px", border: "1px solid var(--border)" }}>
+                                          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Volume Total Tokens</span>
+                                          <strong style={{ fontSize: "1rem", color: "#a78bfa" }}>{finopsResult.total_tokens} tokens</strong>
+                                          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block", marginTop: "2px" }}>
+                                            {finopsResult.prompt_tokens} in / {finopsResult.completion_tokens} out
+                                          </span>
+                                        </div>
+
+                                        <div style={{ background: "rgba(0,0,0,0.4)", padding: "14px", borderRadius: "10px", border: "1px solid var(--border)" }}>
+                                          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Coût Total Estimé (USD)</span>
+                                          <strong
+                                            style={{
+                                              fontSize: "1.1rem",
+                                              color: finopsResult.cost_breakdown?.total_cost_usd < 0.01 ? "#34d399" : finopsResult.cost_breakdown?.total_cost_usd < 0.05 ? "#fbbf24" : "#f87171",
+                                            }}
+                                          >
+                                            ${finopsResult.cost_breakdown?.total_cost_usd}
+                                          </strong>
+                                          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block", marginTop: "2px" }}>
+                                            Arrondi sub-centime (6 décimales)
+                                          </span>
+                                        </div>
+
+                                        <div style={{ background: "rgba(0,0,0,0.4)", padding: "14px", borderRadius: "10px", border: "1px solid var(--border)" }}>
+                                          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Latence (Execution Time)</span>
+                                          <strong style={{ fontSize: "1rem", color: "#34d399" }}>{finopsResult.execution_time_seconds}s</strong>
+                                          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block", marginTop: "2px" }}>
+                                            Mesure time.perf_counter()
+                                          </span>
+                                        </div>
+                                      </div>
+
+                                      {/* Financial Breakdown Table */}
+                                      <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: "10px", padding: "14px", border: "1px solid var(--border)" }}>
+                                        <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--success)", marginBottom: "10px" }}>
+                                          💰 Ventilation Financière par Million de Tokens (USD per 1M Tokens Matrix)
+                                        </div>
+                                        <table style={{ width: "100%", fontSize: "0.8rem", borderCollapse: "collapse", color: "#d1d5db" }}>
+                                          <thead>
+                                            <tr style={{ borderBottom: "1px solid var(--border)", textAlign: "left", color: "var(--text-muted)" }}>
+                                              <th style={{ padding: "8px" }}>Type de Token</th>
+                                              <th style={{ padding: "8px" }}>Nombre de Tokens</th>
+                                              <th style={{ padding: "8px" }}>Taux Tarifaire (per 1M)</th>
+                                              <th style={{ padding: "8px", textAlign: "right" }}>Coût Calculé (USD)</th>
+                                            </tr>
+                                          </thead>
+                                          <tbody>
+                                            <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                                              <td style={{ padding: "8px" }}>📥 Prompt (Entrée)</td>
+                                              <td style={{ padding: "8px", fontFamily: "monospace" }}>{finopsResult.prompt_tokens}</td>
+                                              <td style={{ padding: "8px", fontFamily: "monospace" }}>${finopsResult.rates?.input_per_1m_usd} / 1M</td>
+                                              <td style={{ padding: "8px", textAlign: "right", fontFamily: "monospace", color: "#34d399" }}>${finopsResult.cost_breakdown?.input_cost_usd}</td>
+                                            </tr>
+                                            <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                                              <td style={{ padding: "8px" }}>📤 Completion (Sortie)</td>
+                                              <td style={{ padding: "8px", fontFamily: "monospace" }}>{finopsResult.completion_tokens}</td>
+                                              <td style={{ padding: "8px", fontFamily: "monospace" }}>${finopsResult.rates?.output_per_1m_usd} / 1M</td>
+                                              <td style={{ padding: "8px", textAlign: "right", fontFamily: "monospace", color: "#34d399" }}>${finopsResult.cost_breakdown?.output_cost_usd}</td>
+                                            </tr>
+                                            <tr style={{ fontWeight: 700 }}>
+                                              <td style={{ padding: "8px", color: "#fff" }}>💵 TOTAL ESTIMATION</td>
+                                              <td style={{ padding: "8px", fontFamily: "monospace", color: "#fff" }}>{finopsResult.total_tokens}</td>
+                                              <td style={{ padding: "8px" }}>—</td>
+                                              <td style={{ padding: "8px", textAlign: "right", fontFamily: "monospace", color: "var(--success)", fontSize: "0.9rem" }}>${finopsResult.cost_breakdown?.total_cost_usd}</td>
+                                            </tr>
+                                          </tbody>
+                                        </table>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <pre style={{ fontSize: "0.8rem", color: "#34d399", fontFamily: "monospace", overflowX: "auto" }}>
+                                      {JSON.stringify(finopsResult, null, 2)}
                                     </pre>
                                   )}
                                 </div>
