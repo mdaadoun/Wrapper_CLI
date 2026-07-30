@@ -1,6 +1,6 @@
 """Unit test suite for LLMClient module and API response parsing."""
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import httpx
 import pytest
@@ -160,3 +160,92 @@ def test_llm_client_demo_mode_returns_mock_report() -> None:
     assert report.prompt_tokens > 0
     assert report.total_tokens == report.prompt_tokens + report.completion_tokens
     assert report.estimated_cost_usd > 0.0
+
+
+def test_llm_client_retry_success_after_initial_failures() -> None:
+    """Verify tenacity retries on 429 rate limits and succeeds on attempt 4."""
+    mock_httpx = MagicMock(spec=httpx.Client)
+
+    res_429 = MagicMock(spec=httpx.Response)
+    res_429.status_code = 429
+    res_429.text = "Rate limit exceeded"
+
+    res_200 = MagicMock(spec=httpx.Response)
+    res_200.status_code = 200
+    res_200.json.return_value = {
+        "candidates": [{"content": {"parts": [{"text": SAMPLE_ANALYSIS_REPORT_JSON}]}}]
+    }
+
+    mock_httpx.post.side_effect = [res_429, res_429, res_429, res_200]
+
+    client = LLMClient(api_key="test-key", httpx_client=mock_httpx)
+
+    with patch("time.sleep") as mock_sleep:
+        report = client.analyze(content="Retry test content")
+        assert report.title == "Autonomous Agent Framework Release"
+        assert mock_httpx.post.call_count == 4
+        assert mock_sleep.call_count == 3
+
+
+def test_llm_client_retry_exhausted_max_attempts() -> None:
+    """Verify tenacity raises LLMRetryableError after 4 failed retry attempts on 503."""
+    from ai_watcher.exceptions import LLMRetryableError
+
+    mock_httpx = MagicMock(spec=httpx.Client)
+
+    res_503 = MagicMock(spec=httpx.Response)
+    res_503.status_code = 503
+    res_503.text = "Service Unavailable"
+
+    mock_httpx.post.return_value = res_503
+
+    client = LLMClient(api_key="test-key", httpx_client=mock_httpx)
+
+    with patch("time.sleep") as mock_sleep:
+        with pytest.raises(LLMRetryableError, match="status 503"):
+            client.analyze(content="503 test content")
+        assert mock_httpx.post.call_count == 4
+        assert mock_sleep.call_count == 3
+
+
+def test_llm_client_retry_network_error_recovery() -> None:
+    """Verify tenacity retries on network errors and recovers on attempt 2."""
+    mock_httpx = MagicMock(spec=httpx.Client)
+
+    res_200 = MagicMock(spec=httpx.Response)
+    res_200.status_code = 200
+    res_200.json.return_value = {
+        "candidates": [{"content": {"parts": [{"text": SAMPLE_ANALYSIS_REPORT_JSON}]}}]
+    }
+
+    mock_httpx.post.side_effect = [
+        httpx.ConnectError("Connection refused"),
+        res_200,
+    ]
+
+    client = LLMClient(api_key="test-key", httpx_client=mock_httpx)
+
+    with patch("time.sleep") as mock_sleep:
+        report = client.analyze(content="Network recovery content")
+        assert report.title == "Autonomous Agent Framework Release"
+        assert mock_httpx.post.call_count == 2
+        assert mock_sleep.call_count == 1
+
+
+def test_llm_client_non_retryable_http_error() -> None:
+    """Verify non-retryable 401 error fails immediately without retrying."""
+    mock_httpx = MagicMock(spec=httpx.Client)
+
+    res_401 = MagicMock(spec=httpx.Response)
+    res_401.status_code = 401
+    res_401.text = "Unauthorized Key"
+
+    mock_httpx.post.return_value = res_401
+
+    client = LLMClient(api_key="test-key", httpx_client=mock_httpx)
+
+    with patch("time.sleep") as mock_sleep:
+        with pytest.raises(LLMClientError, match="status 401"):
+            client.analyze(content="401 test content")
+        assert mock_httpx.post.call_count == 1
+        assert mock_sleep.call_count == 0

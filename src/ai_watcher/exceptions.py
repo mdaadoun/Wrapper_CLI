@@ -34,6 +34,12 @@ class LLMClientError(WatcherError):
     pass
 
 
+class LLMRetryableError(LLMClientError):
+    """Raised when LLM API experiences transient retryable failure (429, 5xx, network error)."""
+
+    pass
+
+
 class UnknownModelError(WatcherError):
     """Raised when a model name is not found in the pricing matrix."""
 

@@ -79,3 +79,11 @@ The application adheres to the **Single Responsibility Principle (SRP)**. The co
 
 - **Purpose:** A baseline test module allowing `pytest` to execute successfully on a newly initialized (or cleaned up) codebase.
 - **Concept:** Prevents "no tests ran" errors (exit code 5) during automated `Makefile` checks in the initial setup phase.
+
+
+### Network Resilience (`llm_client.py` & `exceptions.py`)
+
+- **`LLMRetryableError`**: Custom domain exception inheriting from LLMClientError representing transient, retryable API or network failures.
+- **`_log_retry_attempt`**: Tenacity before_sleep callback function rendering yellow warning console logs with next attempt number and backoff sleep duration.
+- **`LLMClient._post_with_retry`**: Internal helper method decorated with @retry(stop=stop_after_attempt(4), wait=wait_exponential_jitter(initial=2, max=10), reraise=True) executing client.post and evaluating status codes.
+- **`LLMClient.analyze`**: Public entrypoint method invoking _post_with_retry within a try-finally block, ensuring proper client session cleanup and response parsing.

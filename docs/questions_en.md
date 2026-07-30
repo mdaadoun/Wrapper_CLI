@@ -218,3 +218,15 @@ Targeted questions and answers covering architecture design choices and engineer
 
 **Q: What is the operational difference between --no-cache and --cache-ttl 0?**
 *Expected Answer:* `--cache-ttl 0` forces a fresh API call and overwrites the local cache entry with the newly generated report, whereas `--no-cache` bypasses cache reading and writing entirely, preserving existing cached data on disk.
+
+
+### Network Resilience (Tenacity)
+
+**Q: Why is exponential backoff with jitter preferred over fixed interval retries?**
+> A: Fixed interval retries cause all failing clients to retry at exact same moments, creating request spikes (thundering herd problem). Exponential backoff spreads retries further apart, while jitter randomizes the delay so clients recover asynchronously.
+
+**Q: How does the system distinguish retryable failures from permanent client errors?**
+> A: HTTP 429 (rate limits), HTTP 5xx (server errors), and network connection errors raise `LLMRetryableError` which triggers Tenacity retries. HTTP 401 (unauthorized) or 400 (bad request) raise base `LLMClientError` which bypasses retry logic for fast failure.
+
+**Q: Why decorate `_post_with_retry` instead of the full `analyze` method?**
+> A: Decorating the narrow transport method prevents re-executing prompt assembly, timing setups, or schema validations on retry, restricting retries strictly to the network HTTP POST request.

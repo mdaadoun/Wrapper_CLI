@@ -7,10 +7,32 @@ from typing import Any, Dict, Optional
 
 import httpx
 from ai_watcher.clients.prompts import get_system_prompt
-from ai_watcher.exceptions import LLMClientError
+from ai_watcher.exceptions import LLMClientError, LLMRetryableError
 from ai_watcher.schemas.report import AnalysisReport
 from ai_watcher.utils.cost import calculate_cost
 from pydantic import ValidationError
+from rich.console import Console
+from tenacity import (
+    RetryCallState,
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential_jitter,
+)
+
+console = Console()
+
+
+def _log_retry_attempt(retry_state: RetryCallState) -> None:
+    """Log yellow warning message before exponential backoff sleep attempt."""
+    attempt = retry_state.attempt_number
+    next_attempt = attempt + 1
+    sleep_time = (
+        retry_state.next_action.sleep if retry_state.next_action is not None else 0.0
+    )
+    console.print(
+        f"[yellow]⚠️ Retry {next_attempt}/4 — waiting {sleep_time:.1f}s…[/yellow]"
+    )
 
 
 def get_mock_analysis_report(
@@ -76,6 +98,55 @@ class LLMClient:
             return self._external_client
         return httpx.Client(timeout=self.timeout)
 
+    @retry(
+        stop=stop_after_attempt(4),
+        wait=wait_exponential_jitter(initial=2, max=10),
+        retry=retry_if_exception_type(
+            (
+                LLMRetryableError,
+                httpx.RequestError,
+                ConnectionError,
+                TimeoutError,
+                OSError,
+            )
+        ),
+        before_sleep=_log_retry_attempt,
+        reraise=True,
+    )
+    def _post_with_retry(
+        self,
+        client: httpx.Client,
+        url: str,
+        headers: Dict[str, str],
+        payload: Dict[str, Any],
+    ) -> httpx.Response:
+        """Execute HTTP POST with exponential backoff and jitter retry mechanism."""
+        try:
+            response = client.post(url, headers=headers, json=payload)
+        except (
+            httpx.TimeoutException,
+            httpx.RequestError,
+            ConnectionError,
+            TimeoutError,
+            OSError,
+        ) as err:
+            raise LLMRetryableError(f"LLM API request error: {err}") from err
+
+        if response.status_code == 429:
+            raise LLMRetryableError(
+                f"LLM API request failed with status 429: Rate limit exceeded. {response.text}"
+            )
+        if response.status_code >= 500:
+            raise LLMRetryableError(
+                f"LLM API request failed with status {response.status_code}: Server error. {response.text}"
+            )
+        if response.status_code != 200:
+            raise LLMClientError(
+                f"LLM API request failed with status {response.status_code}: {response.text}"
+            )
+
+        return response
+
     def analyze(
         self, content: str, source: str = "raw_text", demo: bool = False
     ) -> AnalysisReport:
@@ -114,15 +185,9 @@ class LLMClient:
         should_close = self._external_client is None
 
         try:
-            response = client.post(url, headers=headers, json=payload)
-            if response.status_code != 200:
-                raise LLMClientError(
-                    f"LLM API request failed with status {response.status_code}: {response.text}"
-                )
+            response = self._post_with_retry(client, url, headers, payload)
             data: Dict[str, Any] = response.json()
-        except httpx.TimeoutException as e:
-            raise LLMClientError(f"LLM API request timed out: {e}") from e
-        except (httpx.RequestError, json.JSONDecodeError) as e:
+        except json.JSONDecodeError as e:
             raise LLMClientError(f"LLM API request error: {e}") from e
         finally:
             if should_close:

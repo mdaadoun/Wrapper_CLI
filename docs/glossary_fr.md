@@ -174,3 +174,11 @@ Nettoyage automatique en arrière-plan lors de l'initialisation qui élimine les
 
 ### Fanion de contournement du cache (Cache Bypass Flag - --no-cache)
 Option CLI ignorant à la fois la lecture et l'écriture dans le cache local sur disque, exécutant une analyse LLM fraîche sans modifier les données existantes du cache.
+
+
+### Tenacity & Résilience Réseau
+
+- **Backoff Exponentiel** : Algorithme de réessai qui multiplie le temps d'attente de manière exponentielle (ex. 2s, 4s, 8s) pour laisser le temps aux services distants de récupérer.
+- **Jitter (Gigue)** : Variation aléatoire ajoutée aux délais d'attente pour éviter que les réessais synchronisés ne surchargent un serveur (troupeau foudroyant).
+- **Rate Limiting (HTTP 429)** : Code HTTP renvoyé par une API indiquant que le client a envoyé trop de requêtes dans une fenêtre de temps donnée.
+- **Erreur Transitoire** : Condition d'échec temporaire (coupure réseau, timeout) censée se résoudre d'elle-même lors d'un réessai ultérieur.

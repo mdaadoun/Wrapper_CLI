@@ -218,3 +218,15 @@ Questions-réponses clés pour défendre l'architecture et les choix d'ingénier
 
 **Q : Quelle est la différence opérationnelle entre --no-cache et --cache-ttl 0 ?**
 *Réponse attendue :* `--cache-ttl 0` force un nouvel appel d'API et écrase l'entrée de cache locale avec le rapport nouvellement généré, tandis que `--no-cache` contourne totalement la lecture et l'écriture du cache, préservant ainsi les données en cache existantes sur disque.
+
+
+### Résilience Réseau (Tenacity)
+
+**Q: Pourquoi préférer le backoff exponentiel avec jitter aux réessais à intervalles fixes ?**
+> A: Les réessais à intervalles fixes poussent tous les clients en échec à réessayer exactement au même moment, ce qui crée des pics de requêtes. Le backoff exponentiel espace les réessais, et le jitter ajoute de l'aléatoire pour désynchroniser les clients.
+
+**Q: Comment le système distingue-t-il les échecs réessayables des erreurs client permanentes ?**
+> A: Les erreurs HTTP 429 (rate limits), 5xx (erreurs serveur) et les timeouts réseau déclenchent une `LLMRetryableError` qui active Tenacity. Les erreurs 401 ou 400 déclenchent une `LLMClientError` classique qui échoue immédiatement sans réessai.
+
+**Q: Pourquoi décorer `_post_with_retry` plutôt que la méthode `analyze` entière ?**
+> A: Décorer uniquement la méthode de transport réseau empêche de réexécuter l'assemblage du prompt, l'allocation des variables ou la validation du schéma à chaque réessai, gardant le réessai strictement concentré sur l'appel HTTP.

@@ -74,3 +74,11 @@ L'application repose sur le **Single Responsibility Principle (SRP)**. Le code e
 
 - **Rôle :** Un module de test de base permettant à `pytest` de s'exécuter avec succès sur une base de code nouvellement initialisée (ou nettoyée).
 - **Concept :** Évite les erreurs "no tests ran" (code de sortie 5) lors des appels automatiques du `Makefile` pendant le setup initial.
+
+
+### Résilience Réseau (`llm_client.py` & `exceptions.py`)
+
+- **`LLMRetryableError`** : Exception de domaine personnalisée héritant de `LLMClientError`, représentant les échecs API ou réseau transitoires.
+- **`_log_retry_attempt`** : Callback `before_sleep` de Tenacity affichant dans la console un avertissement jaune avec le numéro de la tentative et la durée du backoff.
+- **`LLMClient._post_with_retry`** : Méthode interne décorée avec `@retry(stop=stop_after_attempt(4), wait=wait_exponential_jitter(initial=2, max=10), reraise=True)` exécutant `client.post` et évaluant les codes HTTP.
+- **`LLMClient.analyze`** : Méthode d'entrée publique invoquant `_post_with_retry` dans un bloc try-finally, garantissant le nettoyage de la session HTTP et le parsing de la réponse.

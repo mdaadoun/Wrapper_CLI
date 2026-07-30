@@ -179,3 +179,11 @@ Automated background cleanup during initialization that sweeps expired or malfor
 
 ### Cache Bypass Flag (--no-cache)
 A CLI option that skips both reading from and writing to the local disk cache, executing fresh LLM analysis without modifying existing cache data.
+
+
+### Tenacity & Resilience
+
+- **Exponential Backoff**: A retry algorithm that multiplies the wait time between successive failed attempts exponentially (e.g. 2s, 4s, 8s) to give remote services time to recover.
+- **Jitter**: Randomized variation added to backoff delays to prevent synchronized client retries from overwhelming a recovering server (thundering herd problem).
+- **Rate Limiting (HTTP 429)**: An HTTP status code returned by an API indicating the client has sent too many requests within a given window.
+- **Transient Error**: A temporary failure condition (such as network drops, server timeouts, or temporary load shedding) expected to resolve upon retrying.
