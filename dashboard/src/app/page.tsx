@@ -214,6 +214,55 @@ const TEST_DESCRIPTIONS: Record<
     output: "AnalysisReport validé contenant les métriques FinOps complètes.",
     concept: "Client Transport LLM & Injection de Métriques",
   },
+  "tests/test_export.py": {
+    title: "📁 test_export.py (Formatteurs d'Export & CLI Multi-Formats)",
+    objective: "Valider les exportateurs de rapport Markdown et JSON via les options CLI -o / --output.",
+    input: "AnalysisReport Pydantic V2 et arguments CLI (-o report.md, --output json).",
+    output: "Fichiers .md et .json générés sur disque ou sorties JSON valides sur stdout.",
+    concept: "Exporters Multi-Formats & Persistance sur disque",
+  },
+  "tests/test_export.py::test_render_markdown_report": {
+    title: "⚡ test_render_markdown_report()",
+    objective: "Vérifier que render_markdown_report génère les sections Markdown (Metadata, Summary, FinOps Table).",
+    input: "Objet AnalysisReport instancié.",
+    output: "Document Markdown formaté avec en-têtes # et table de métriques.",
+    concept: "Rendu de Document Markdown",
+  },
+  "tests/test_export.py::test_export_markdown": {
+    title: "⚡ test_export_markdown()",
+    objective: "Tester la persistance effective d'un fichier Markdown sur le système de fichiers.",
+    input: "Fichier cible temporaire output_test.md.",
+    output: "Création du fichier avec encodage UTF-8 vérifié.",
+    concept: "Ecriture de fichier sur disque",
+  },
+  "tests/test_export.py::test_cli_export_json_stdout": {
+    title: "⚡ test_cli_export_json_stdout()",
+    objective: "Valider que l'option CLI --output json produit un JSON Pydantic V2 valide sur stdout.",
+    input: "runner.invoke(app, ['scan', 'text', '--demo', '--output', 'json'])",
+    output: "Parse JSON valide contenant title, summary, estimated_cost_usd.",
+    concept: "Flux d'Entrée/Sortie Standard (stdout)",
+  },
+  "tests/test_formatters.py": {
+    title: "📁 test_formatters.py (Console Rich UI Panel & Formatting)",
+    objective: "Tester le rendu visuel console Rich avec panneaux colorés et indicateurs de priorité.",
+    input: "Objet AnalysisReport et instance Rich Console sur StringIO.",
+    output: "Rendu ANSI coloré contenant les panneaux Executive Summary et la table FinOps.",
+    concept: "Composants Terminal Rich UI",
+  },
+  "tests/test_formatters.py::test_display_report_renders_panel_content": {
+    title: "⚡ test_display_report_renders_panel_content()",
+    objective: "Vérifier la présence de tous les blocs visuels dans le panneau console Rich.",
+    input: "display_report(report, console_instance)",
+    output: "Présence des chaînes Executive Summary, Key Points, FinOps Metrics.",
+    concept: "Validation du Rendu Console Rich",
+  },
+  "tests/test_formatters.py::test_display_report_cost_color_coding": {
+    title: "⚡ test_display_report_cost_color_coding()",
+    objective: "Valider les seuils de coloration du coût FinOps (<$0.01 vert, <$0.05 jaune, >=$0.05 rouge).",
+    input: "Rapports avec des coûts variés (0.005$, 0.02$, 0.08$).",
+    output: "Styles de couleur appropriés appliqués aux tableaux de métriques.",
+    concept: "Colorimétrie Dynamique des Métriques FinOps",
+  },
 };
 
 function getFileIcon(name: string): string {
@@ -329,13 +378,14 @@ const PHASES_DATA = [
   {
     id: 6,
     title: "Phase 6 : Rich UI & Formats d'Export",
-    status: "pending",
-    badge: "⏳ À venir",
+    status: "completed",
+    badge: "✅ Complété",
     desc: "Rendu console élégant avec panneaux et tableaux colorés Rich, et options d'export multi-formats (Console, JSON, Markdown).",
-    concepts: ["Rich Terminal Panelling & Tables", "Multi-Format Exporters (-o json, -o markdown)"],
-    inputExample: "AnalysisReport + flag --output json",
-    outputExample: "Sortie JSON indendée sur stdout ou fichier report.md généré",
-    tests: "tests/test_console.py",
+    concepts: ["Rich Terminal Panelling & Tables", "Multi-Format Exporters (-o json, -o markdown)", "Pydantic V2 Schema Validation", "FinOps Observability Telemetry"],
+    inputExample: 'Inputs: Payload structure { content, format: "console"|"markdown"|"json", model, temperature, theme }',
+    outputExample: "Outputs: AnalysisReport (Pydantic V2), Rich Console Panel string / Markdown string / Raw JSON + Telemetry",
+    tests: "tests/test_export.py, tests/test_formatters.py, tests/test_cli.py",
+    hasPlayground: "rich-ui",
   },
   {
     id: 7,
@@ -457,6 +507,43 @@ export default function DashboardPage() {
       console.error(err);
     } finally {
       setFinopsLoading(false);
+    }
+  };
+
+  // Rich UI & Output Formats Playground State (Phase 6)
+  const [richUiContent, setRichUiContent] = useState<string>(
+    "Architecture micro-services et agents IA autonomes avec validation Pydantic V2 native, calculateur de coûts FinOps sub-centime et rendu console Rich UI multi-formats."
+  );
+  const [richUiFormat, setRichUiFormat] = useState<"console" | "markdown" | "json">("console");
+  const [richUiModel, setRichUiModel] = useState<string>("gemini-1.5-flash");
+  const [richUiTemperature, setRichUiTemperature] = useState<number>(0.2);
+  const [richUiTheme, setRichUiTheme] = useState<string>("emerald");
+  const [richUiResult, setRichUiResult] = useState<any>(null);
+  const [richUiLoading, setRichUiLoading] = useState<boolean>(false);
+  const [richUiTab, setRichUiTab] = useState<"visual" | "json" | "preview">("visual");
+
+  const handleRunRichUiDemo = async () => {
+    setRichUiLoading(true);
+    try {
+      const res = await fetch("/api/rich-ui-demo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: richUiContent,
+          format: richUiFormat,
+          model: richUiModel,
+          temperature: Number(richUiTemperature),
+          theme: richUiTheme,
+        }),
+      });
+      const data = await res.json();
+      if (data.status === "success") {
+        setRichUiResult(data);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setRichUiLoading(false);
     }
   };
 
@@ -1570,6 +1657,325 @@ export default function DashboardPage() {
                                   ) : (
                                     <pre style={{ fontSize: "0.8rem", color: "#34d399", fontFamily: "monospace", overflowX: "auto" }}>
                                       {JSON.stringify(finopsResult, null, 2)}
+                                    </pre>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* PHASE 6 PLAYGROUND - RICH TERMINAL UI & OUTPUT FORMATS */}
+                        {currentPhase.id === 6 && (
+                          <div style={{ padding: "24px", background: "rgba(59, 130, 246, 0.08)", border: "1px solid rgba(59, 130, 246, 0.3)", borderRadius: "14px" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                              <div>
+                                <h4 style={{ fontSize: "1.15rem", fontWeight: 800, color: "#fff", display: "flex", alignItems: "center", gap: "8px" }}>
+                                  ⚡ Demo Live : Rich Terminal UI & Formats d'Export (Phase 6)
+                                </h4>
+                                <p style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
+                                  Exécutez la génération de rapports enrichis Terminal Rich UI et testez l'export multi-formats (Console ANSI, Markdown, Raw JSON) avec télémétrie FinOps.
+                                </p>
+                              </div>
+                              <button
+                                onClick={handleRunRichUiDemo}
+                                disabled={richUiLoading}
+                                style={{
+                                  padding: "10px 20px",
+                                  borderRadius: "8px",
+                                  background: "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)",
+                                  color: "#fff",
+                                  fontWeight: 700,
+                                  fontSize: "0.9rem",
+                                  border: "none",
+                                  cursor: "pointer",
+                                  boxShadow: "0 4px 14px rgba(59, 130, 246, 0.4)",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "8px",
+                                }}
+                              >
+                                {richUiLoading ? <Loader2 size={16} className="spin" /> : <Play size={16} />}
+                                {richUiLoading ? "Génération..." : "⚡ Lancer l'Analyse Live"}
+                              </button>
+                            </div>
+
+                            {/* Presets */}
+                            <div style={{ display: "flex", gap: "8px", marginBottom: "14px", flexWrap: "wrap" }}>
+                              <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", alignSelf: "center" }}>Exemples d'entrées :</span>
+                              <button
+                                onClick={() => setRichUiContent("OpenAI annonce le lancement du framework agentic autonome avec validation Pydantic V2 native, latence sub-100ms sur edge runtime et le suivi FinOps des tokens.")}
+                                style={{ padding: "4px 10px", borderRadius: "6px", background: "rgba(255,255,255,0.05)", border: "1px solid var(--border)", color: "#fff", fontSize: "0.75rem", cursor: "pointer" }}
+                              >
+                                🚀 Release Agentic Framework
+                              </button>
+                              <button
+                                onClick={() => setRichUiContent("Audit annuel des dépenses FinOps et optimisation de la grille tarifaire pour 40+ modèles de langage avec réduction de 35% de la facture API.")}
+                                style={{ padding: "4px 10px", borderRadius: "6px", background: "rgba(255,255,255,0.05)", border: "1px solid var(--border)", color: "#fff", fontSize: "0.75rem", cursor: "pointer" }}
+                              >
+                                📊 Audit FinOps Annuel
+                              </button>
+                              <button
+                                onClick={() => setRichUiContent("URGENT: Critical Security Advisory - vulnérabilité SSRF sur les requêtes Web scraping et guardrails de décontamination HTML.")}
+                                style={{ padding: "4px 10px", borderRadius: "6px", background: "rgba(255,255,255,0.05)", border: "1px solid var(--border)", color: "#fff", fontSize: "0.75rem", cursor: "pointer" }}
+                              >
+                                🛡️ Critical Security Advisory
+                              </button>
+                            </div>
+
+                            {/* Input Content Textarea */}
+                            <textarea
+                              rows={3}
+                              value={richUiContent}
+                              onChange={(e) => setRichUiContent(e.target.value)}
+                              placeholder="Entrez le texte à analyser et exporter..."
+                              style={{
+                                width: "100%",
+                                padding: "12px",
+                                borderRadius: "8px",
+                                background: "rgba(0,0,0,0.4)",
+                                border: "1px solid var(--border)",
+                                color: "#fff",
+                                fontSize: "0.85rem",
+                                marginBottom: "16px",
+                              }}
+                            />
+
+                            {/* Controls */}
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "12px", marginBottom: "16px" }}>
+                              <div>
+                                <label style={{ fontSize: "0.75rem", color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>
+                                  Format d'Export :
+                                </label>
+                                <select
+                                  value={richUiFormat}
+                                  onChange={(e) => setRichUiFormat(e.target.value as any)}
+                                  style={{
+                                    width: "100%",
+                                    padding: "10px",
+                                    borderRadius: "8px",
+                                    background: "rgba(0,0,0,0.4)",
+                                    border: "1px solid var(--border)",
+                                    color: "#fff",
+                                    fontSize: "0.85rem",
+                                  }}
+                                >
+                                  <option value="console">🖥️ Terminal Rich UI (Console)</option>
+                                  <option value="markdown">📄 Document Markdown (.md)</option>
+                                  <option value="json">💻 Raw JSON (Pydantic V2)</option>
+                                </select>
+                              </div>
+
+                              <div>
+                                <label style={{ fontSize: "0.75rem", color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>
+                                  Modèle LLM :
+                                </label>
+                                <select
+                                  value={richUiModel}
+                                  onChange={(e) => setRichUiModel(e.target.value)}
+                                  style={{
+                                    width: "100%",
+                                    padding: "10px",
+                                    borderRadius: "8px",
+                                    background: "rgba(0,0,0,0.4)",
+                                    border: "1px solid var(--border)",
+                                    color: "#fff",
+                                    fontSize: "0.85rem",
+                                  }}
+                                >
+                                  <option value="gemini-1.5-flash">Google Gemini 1.5 Flash</option>
+                                  <option value="gpt-4o">OpenAI GPT-4o</option>
+                                  <option value="claude-3-5-sonnet-20241022">Anthropic Claude 3.5 Sonnet</option>
+                                  <option value="deepseek-chat">DeepSeek Chat</option>
+                                </select>
+                              </div>
+
+                              <div>
+                                <label style={{ fontSize: "0.75rem", color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>
+                                  Température (0.0 - 1.0) :
+                                </label>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  max="1"
+                                  step="0.1"
+                                  value={richUiTemperature}
+                                  onChange={(e) => setRichUiTemperature(Number(e.target.value))}
+                                  style={{
+                                    width: "100%",
+                                    padding: "10px",
+                                    borderRadius: "8px",
+                                    background: "rgba(0,0,0,0.4)",
+                                    border: "1px solid var(--border)",
+                                    color: "#fff",
+                                    fontFamily: "monospace",
+                                    fontSize: "0.85rem",
+                                  }}
+                                />
+                              </div>
+
+                              <div>
+                                <label style={{ fontSize: "0.75rem", color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>
+                                  Thème Visuel Rich UI :
+                                </label>
+                                <select
+                                  value={richUiTheme}
+                                  onChange={(e) => setRichUiTheme(e.target.value)}
+                                  style={{
+                                    width: "100%",
+                                    padding: "10px",
+                                    borderRadius: "8px",
+                                    background: "rgba(0,0,0,0.4)",
+                                    border: "1px solid var(--border)",
+                                    color: "#fff",
+                                    fontSize: "0.85rem",
+                                  }}
+                                >
+                                  <option value="emerald">💚 Emerald / Tech Green</option>
+                                  <option value="cyberpunk">💜 Cyberpunk / Neon Violet</option>
+                                  <option value="monokai">💛 Monokai / Solarized</option>
+                                </select>
+                              </div>
+                            </div>
+
+                            {/* Demo Results Viewer */}
+                            {richUiResult && (
+                              <div style={{ marginTop: "16px", background: "rgba(9, 5, 20, 0.8)", border: "1px solid var(--border)", borderRadius: "12px", overflow: "hidden" }}>
+                                <div style={{ display: "flex", borderBottom: "1px solid var(--border)", background: "rgba(0,0,0,0.3)" }}>
+                                  <button
+                                    onClick={() => setRichUiTab("visual")}
+                                    style={{
+                                      padding: "10px 18px",
+                                      background: richUiTab === "visual" ? "rgba(59, 130, 246, 0.2)" : "transparent",
+                                      border: "none",
+                                      borderBottom: richUiTab === "visual" ? "2px solid #3b82f6" : "none",
+                                      color: richUiTab === "visual" ? "#fff" : "var(--text-muted)",
+                                      fontWeight: 600,
+                                      fontSize: "0.85rem",
+                                      cursor: "pointer",
+                                    }}
+                                  >
+                                    📊 Rendered View & Télémétrie
+                                  </button>
+                                  <button
+                                    onClick={() => setRichUiTab("json")}
+                                    style={{
+                                      padding: "10px 18px",
+                                      background: richUiTab === "json" ? "rgba(59, 130, 246, 0.2)" : "transparent",
+                                      border: "none",
+                                      borderBottom: richUiTab === "json" ? "2px solid #3b82f6" : "none",
+                                      color: richUiTab === "json" ? "#fff" : "var(--text-muted)",
+                                      fontWeight: 600,
+                                      fontSize: "0.85rem",
+                                      cursor: "pointer",
+                                    }}
+                                  >
+                                    💻 Raw JSON (Pydantic V2)
+                                  </button>
+                                  <button
+                                    onClick={() => setRichUiTab("preview")}
+                                    style={{
+                                      padding: "10px 18px",
+                                      background: richUiTab === "preview" ? "rgba(59, 130, 246, 0.2)" : "transparent",
+                                      border: "none",
+                                      borderBottom: richUiTab === "preview" ? "2px solid #3b82f6" : "none",
+                                      color: richUiTab === "preview" ? "#fff" : "var(--text-muted)",
+                                      fontWeight: 600,
+                                      fontSize: "0.85rem",
+                                      cursor: "pointer",
+                                    }}
+                                  >
+                                    📄 Export Preview ({richUiResult.format?.toUpperCase()})
+                                  </button>
+                                </div>
+
+                                <div style={{ padding: "20px" }}>
+                                  {richUiTab === "visual" && (
+                                    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                        <h4 style={{ fontSize: "1.2rem", fontWeight: 800, color: "#fff" }}>
+                                          {richUiResult.report?.title}
+                                        </h4>
+                                        <span
+                                          style={{
+                                            padding: "4px 12px",
+                                            borderRadius: "20px",
+                                            background: richUiResult.report?.priority === "high" ? "rgba(239, 68, 68, 0.2)" : "rgba(245, 158, 11, 0.2)",
+                                            color: richUiResult.report?.priority === "high" ? "#f87171" : "#fbbf24",
+                                            fontWeight: 800,
+                                            fontSize: "0.75rem",
+                                            textTransform: "uppercase",
+                                          }}
+                                        >
+                                          Priorité : {richUiResult.report?.priority}
+                                        </span>
+                                      </div>
+
+                                      <div style={{ fontSize: "0.9rem", color: "#d1d5db", lineHeight: 1.6, background: "rgba(255,255,255,0.02)", padding: "12px", borderRadius: "8px" }}>
+                                        <strong>Executive Summary :</strong> {richUiResult.report?.summary}
+                                      </div>
+
+                                      <div>
+                                        <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "#60a5fa", marginBottom: "6px" }}>
+                                          Points Clés :
+                                        </div>
+                                        <ul style={{ paddingLeft: "20px", fontSize: "0.85rem", color: "var(--text-muted)", lineHeight: 1.6 }}>
+                                          {richUiResult.report?.key_points?.map((kp: string, idx: number) => (
+                                            <li key={idx}>{kp}</li>
+                                          ))}
+                                        </ul>
+                                      </div>
+
+                                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px" }}>
+                                        <div style={{ background: "rgba(0,0,0,0.3)", padding: "10px", borderRadius: "8px", border: "1px solid var(--border)" }}>
+                                          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Impact Technique</span>
+                                          <span style={{ fontSize: "0.8rem", color: "#fff" }}>{richUiResult.report?.impact_technical}</span>
+                                        </div>
+                                        <div style={{ background: "rgba(0,0,0,0.3)", padding: "10px", borderRadius: "8px", border: "1px solid var(--border)" }}>
+                                          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Impact Business</span>
+                                          <span style={{ fontSize: "0.8rem", color: "#fff" }}>{richUiResult.report?.impact_business}</span>
+                                        </div>
+                                        <div style={{ background: "rgba(0,0,0,0.3)", padding: "10px", borderRadius: "8px", border: "1px solid var(--border)" }}>
+                                          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Impact AI Act / Réglementaire</span>
+                                          <span style={{ fontSize: "0.8rem", color: "#fff" }}>{richUiResult.report?.impact_regulatory || "N/A"}</span>
+                                        </div>
+                                      </div>
+
+                                      {/* FinOps Telemetry Bar */}
+                                      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "10px", padding: "12px", background: "rgba(59, 130, 246, 0.08)", borderRadius: "8px", border: "1px solid rgba(59, 130, 246, 0.2)" }}>
+                                        <div>
+                                          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Prompt Tokens</span>
+                                          <strong style={{ color: "#60a5fa" }}>{richUiResult.telemetry?.prompt_tokens}</strong>
+                                        </div>
+                                        <div>
+                                          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Completion Tokens</span>
+                                          <strong style={{ color: "#60a5fa" }}>{richUiResult.telemetry?.completion_tokens}</strong>
+                                        </div>
+                                        <div>
+                                          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Coût Estimé (USD)</span>
+                                          <strong style={{ color: "#34d399" }}>${richUiResult.telemetry?.estimated_cost_usd}</strong>
+                                        </div>
+                                        <div>
+                                          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Latence</span>
+                                          <strong style={{ color: "#60a5fa" }}>{richUiResult.telemetry?.execution_time_seconds}s</strong>
+                                        </div>
+                                        <div>
+                                          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Format Exporter</span>
+                                          <strong style={{ color: "#a78bfa", textTransform: "uppercase" }}>{richUiResult.telemetry?.export_format}</strong>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {richUiTab === "json" && (
+                                    <pre style={{ fontSize: "0.8rem", color: "#a78bfa", fontFamily: "monospace", overflowX: "auto" }}>
+                                      {JSON.stringify(richUiResult.report, null, 2)}
+                                    </pre>
+                                  )}
+
+                                  {richUiTab === "preview" && (
+                                    <pre style={{ fontSize: "0.8rem", color: "#34d399", fontFamily: "monospace", overflowX: "auto", background: "rgba(0,0,0,0.6)", padding: "14px", borderRadius: "8px" }}>
+                                      {richUiResult.rendered_output}
                                     </pre>
                                   )}
                                 </div>
