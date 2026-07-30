@@ -159,3 +159,12 @@ Capacité d'une application CLI à exporter ses sorties structurées de domaine 
 
 ### Rendu de rapport Markdown (Markdown Report Rendering)
 Processus de conversion de modèles de données Pydantic structurés en fichiers Markdown lisibles par l'homme, incluant des tableaux d'en-tête, des listes à puces et des sections structurées.
+
+### Persistance par hachage de contenu (Content Hash Persistence)
+Stockage des résultats d'analyse calculés indexés par une empreinte cryptographique SHA-256 du texte d'entrée afin de garantir des accès au cache déterministes et idempotents.
+
+### Contournement idempotent d'inférence (Idempotent Inference Bypassing)
+Élimination des requêtes d'API LLM redondantes et des coûts en jetons associées en réutilisant les artefacts d'analyse vérifiés lors du traitement d'un contenu identique.
+
+### Durée de vie du cache (Cache TTL - Time-To-Live)
+La durée en secondes pendant laquelle un rapport d'analyse en cache reste valide avant de nécessiter une réévaluation par le modèle LLM principal.

@@ -188,3 +188,18 @@ Targeted questions and answers covering architecture design choices and engineer
 
 **Q: How does the CLI handle output destination routing for --output?**
 *Expected Answer:* If `--output json` is passed, raw JSON is output to stdout; if a filename ending in `.json` or `.md` is provided, the report is saved directly to that file path via `export_markdown()` or file writing.
+
+### 36. Raw Content Hashing vs Source Path Keying (Step 7.1)
+
+**Q: Why do we compute the SHA-256 hash on extracted content rather than on the source URL or file path?**
+*Expected Answer:* Different source paths or URLs might serve identical content. Hashing the extracted raw text guarantees true content idempotency and avoids cache misses when the same article or document is scanned from different file paths or web endpoints.
+
+### 37. Graceful Degradation on Cache Corruption (Step 7.1)
+
+**Q: How does ContentCache handle corrupt or unparseable cache files on disk?**
+*Expected Answer:* ContentCache uses safe file I/O wrapped in try-except blocks catching JSONDecodeError and OSError. If corrupt data or schema mismatches occur, it degrades gracefully by returning None (cache miss) without crashing the CLI user experience.
+
+### 38. Immutable Schema Preservation from Cache (Step 7.1)
+
+**Q: How is immutability maintained for AnalysisReport when returned from cache?**
+*Expected Answer:* AnalysisReport is a Pydantic model configured with frozen=True. When served from cache, a copy is instantiated setting is_cached=True, preserving schema validation and immutability throughout downstream formatters.

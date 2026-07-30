@@ -13,6 +13,7 @@ from ai_watcher.formatters import (
     display_report,
     export_markdown,
 )
+from ai_watcher.utils import ContentCache, compute_content_hash
 
 app = typer.Typer(help="AI Watcher CLI: Automated content extraction and AI analysis.")
 
@@ -67,19 +68,30 @@ def scan(
         if output.lower() == "console":
             typer.echo(f"Extracted {len(content)} characters.")
 
-        # Analysis phase (demo vs live)
-        if demo:
-            if output.lower() == "console":
-                typer.echo("Executing in DEMO mode (mocked LLM response)...")
-            client = LLMClient(demo_mode=True)
-        else:
-            settings = get_settings()
-            client = LLMClient(
-                api_key=settings.gemini_api_key.get_secret_value(),
-                model_name=settings.model_name,
-            )
+        # Local cache check
+        content_hash = compute_content_hash(content)
+        cache = ContentCache()
+        cached_report = cache.get(content_hash)
 
-        report = client.analyze(content=content, source=source)
+        if cached_report is not None:
+            if output.lower() == "console":
+                typer.echo("[CACHE HIT] Loaded report from local cache.")
+            report = cached_report
+        else:
+            # Analysis phase (demo vs live)
+            if demo:
+                if output.lower() == "console":
+                    typer.echo("Executing in DEMO mode (mocked LLM response)...")
+                client = LLMClient(demo_mode=True)
+            else:
+                settings = get_settings()
+                client = LLMClient(
+                    api_key=settings.gemini_api_key.get_secret_value(),
+                    model_name=settings.model_name,
+                )
+
+            report = client.analyze(content=content, source=source)
+            cache.set(content_hash, report)
 
         # Output formatting phase
         out_fmt = output.lower()

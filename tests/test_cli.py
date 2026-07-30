@@ -10,9 +10,19 @@ from unittest.mock import patch
 import pytest
 from ai_watcher.clients import get_mock_analysis_report
 from ai_watcher.main import app
+from ai_watcher.utils.cache import ContentCache
 from typer.testing import CliRunner
 
 runner = CliRunner()
+
+
+@pytest.fixture(autouse=True)
+def isolate_cache(tmp_path, monkeypatch):
+    """Ensure all CLI tests run with an isolated, clean temporary cache."""
+    cache_file = tmp_path / "test_cli_cache.json"
+    monkeypatch.setattr(
+        "ai_watcher.main.ContentCache", lambda: ContentCache(cache_file=cache_file)
+    )
 
 
 def test_app_help():

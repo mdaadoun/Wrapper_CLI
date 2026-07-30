@@ -188,3 +188,18 @@ Questions-réponses clés pour défendre l'architecture et les choix d'ingénier
 
 **Q : Comment le CLI gère-t-il le routage de la destination de sortie pour --output ?**
 *Réponse attendue :* Si `--output json` est transmis, le JSON brut est affiché sur stdout ; si un nom de fichier se terminant par `.json` ou `.md` est fourni, le rapport est enregistré directement dans ce chemin de fichier via `export_markdown()` ou écriture de fichier.
+
+### 36. Hachage de contenu brut vs Clé basée sur le chemin source (Étape 7.1)
+
+**Q : Pourquoi calcule-t-on le hachage SHA-256 sur le contenu extrait plutôt que sur l'URL source ou le chemin de fichier ?**
+*Réponse attendue :* Différents chemins sources ou URLs peuvent servir un contenu identique. Hacher le texte brut extrait garantit une vraie idempotence de contenu et évite les échecs de cache lorsque le même article ou document est scanné depuis des fichiers ou endpoints web différents.
+
+### 37. Dégradation gracieuse lors de la corruption du cache (Étape 7.1)
+
+**Q : Comment ContentCache gère-t-il les fichiers de cache corrompus ou illisibles sur le disque ?**
+*Réponse attendue :* ContentCache utilise des E/S de fichier sécurisées enveloppées dans des blocs try-except attrapant JSONDecodeError et OSError. Si des données corrompues ou des incohérences de schéma surviennent, il se dégrade gracieusement en renvoyant None (cache miss) sans faire planter l'expérience utilisateur du CLI.
+
+### 38. Préservation du schéma immuable depuis le cache (Étape 7.1)
+
+**Q : Comment l'immuabilité est-elle maintenue pour AnalysisReport lorsqu'il est restitué depuis le cache ?**
+*Réponse attendue :* AnalysisReport est un modèle Pydantic configuré avec frozen=True. Lorsqu'il est servi à partir du cache, une copie est instanciée avec is_cached=True, préservant la validation du schéma et l'immuabilité à travers l'ensemble des formateurs en aval.

@@ -34,7 +34,12 @@ def display_report(
     header_text.append("Date: ", style="bold dim")
     header_text.append(f"{report.analyzed_at.isoformat()}\n", style="dim")
     header_text.append("Priority: ", style="bold")
-    header_text.append(f"{report.priority.upper()}\n\n", style=f"bold {priority_color}")
+    header_text.append(f"{report.priority.upper()}", style=f"bold {priority_color}")
+    if report.is_cached:
+        header_text.append(" | ", style="dim")
+        header_text.append("Cache: ", style="bold dim")
+        header_text.append("[CACHE HIT]", style="bold green")
+    header_text.append("\n\n")
     renderables.append(header_text)
 
     # Executive Summary (Markdown)

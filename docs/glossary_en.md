@@ -164,3 +164,12 @@ The capacity of a CLI application to export its structured domain outputs into s
 
 ### Markdown Report Rendering
 The process of converting structured Pydantic data models into human-readable Markdown files including header tables, bulleted lists, and structured sections.
+
+### Content Hash Persistence
+Storing calculated analysis results keyed by a cryptographic SHA-256 digest of input text to ensure deterministic and idempotent cache hits.
+
+### Idempotent Inference Bypassing
+Eliminating redundant LLM API requests and token costs by reusing verified analysis artifacts when processing identical input content.
+
+### Cache TTL (Time-To-Live)
+The duration in seconds for which a cached analysis report remains valid before requiring re-evaluation from the primary LLM model.
