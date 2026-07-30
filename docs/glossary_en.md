@@ -158,3 +158,9 @@ A dedicated CLI table component displaying operational resource usage metrics (t
 
 ### Financial Impact Thresholding
 Visual color-coding rule applied to monetary values (< $0.01 green for low cost, < $0.05 yellow for moderate cost, >= $0.05 red for high cost) to give immediate visual awareness of query expenditure.
+
+### Format Interoperability
+The capacity of a CLI application to export its structured domain outputs into standardized interchange formats (JSON, Markdown) for integration with external pipelines or human documentation.
+
+### Markdown Report Rendering
+The process of converting structured Pydantic data models into human-readable Markdown files including header tables, bulleted lists, and structured sections.

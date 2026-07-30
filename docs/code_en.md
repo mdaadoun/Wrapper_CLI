@@ -7,10 +7,10 @@ This document provides a detailed breakdown of the `Wrapper_CLI` architecture, m
 ## 🛠️ 1. Modular Architecture: `src/ai_watcher/`
 
 The application adheres to the **Single Responsibility Principle (SRP)**. The code is organized into clear modules:
-- **`main.py`:** Primary entry point (Typer CLI). Handles subcommand routing (e.g., `scan`), positional argument validation (`source`), mode flags (`--text/-t`, `--file/-f`, `--url/-u`), and demo mode flag (`--demo/-d`).
-  - *`scan()` function:* Receives input source, resolves evaluation mode (auto by default or overridden by flag), routes payload to the ingestion pipeline, initializes `LLMClient` (live or demo mode), and renders output via `display_report()`.
+- **`main.py`:** Primary entry point (Typer CLI). Handles subcommand routing (e.g., `scan`), positional argument validation (`source`), mode flags (`--text/-t`, `--file/-f`, `--url/-u`), output format flags (`--output/-o`), and demo mode flag (`--demo/-d`).
+  - *`scan()` function:* Receives input source, resolves evaluation mode (auto by default or overridden by flag), routes payload to the ingestion pipeline, initializes `LLMClient` (live or demo mode), and renders output via `display_report()`, stdout JSON, or exports to `.md`/`.json` file destinations using `export_markdown()`.
 - **`config.py`:** Configuration and environment variable loading (via `pydantic-settings`).
-- **`exceptions.py`:** Definition of custom domain errors built on a granular **Exception Hierarchy** (`WatcherError` as base, extended by `EmptySourceError`, `ExtractionError`, `LLMClientError`, `ConfigurationError`). This allows for targeted error handling and user-friendly messages without crashing the interpreter.
+- **`exceptions.py`:** Definition of custom domain errors built on a granular **Exception Hierarchy** (`WatcherError` as base, extended by `EmptySourceError`, `ExtractionError`, `LLMClientError`, `ConfigurationError`, `UnknownModelError`, `ExportError`). This allows for targeted error handling and user-friendly messages without crashing the interpreter.
 - **`core/`:** Business logic components.
   - **`detector.py`:** Deterministic source type inference
   - **`extractor.py`:** Pure functions for parsing and normalizing raw strings, reading strictly validated `.txt`/`.md` files, and scraping/cleaning URLs with `httpx` and `BeautifulSoup4`. (`SourceType.URL`, `SourceType.FILE`, `SourceType.TEXT`) and `EmptySourceError` validation.
@@ -26,8 +26,9 @@ The application adheres to the **Single Responsibility Principle (SRP)**. The co
   - **`prompts.py` (`SYSTEM_PROMPT`, `SAMPLE_ANALYSIS_REPORT_JSON`):** System prompt engineering module. Defines Senior AI Analyst persona, strict output constraints (pure JSON, max 200 words summary, 3 to 5 key points, priority enum `"low"`|`"medium"`|`"high"`), and expected `AnalysisReport` JSON schema. Includes a validated raw sample JSON string and helper `validate_sample_report()` that wraps Pydantic validation errors in domain `WatcherError`.
 - **`utils/`:** Cross-cutting utilities (cost calculator, caching).
   - **`cost.py` (`calculate_cost`, `MODEL_PRICING`):** FinOps pure function computing USD cost per inference. Uses a 40-model pricing matrix (USD per 1M tokens) across 8 providers (OpenAI, Google, Anthropic, Meta, Mistral, DeepSeek, Cohere, Amazon). Raises `UnknownModelError` for unknown models. Case-insensitive lookup. Cost rounded to 6 decimal places.
-  - **`exceptions.py` referenced:** `UnknownModelError(WatcherError)` raised when model not found in matrix.
+- **`formatters/`:** Output formatting and file export modules.
   - **`console.py` (`display_report`, `PRIORITY_COLORS`):** Console formatting module rendering structured `AnalysisReport` deliverables inside a styled Rich Panel. Features Rich Markdown rendering for executive summary, bulleted list for key points, dynamic color themes (`green`, `yellow`, `red`) based on priority levels (`low`, `medium`, `high`), and a dedicated Rich Table summarizing FinOps inference metrics (model, prompt/completion/total tokens, latency, and threshold-based color-coded USD cost).
+  - **`markdown.py` (`render_markdown_report`, `export_markdown`):** Markdown document generator and file exporter. Converts `AnalysisReport` instance into a formatted Markdown string (with metadata, summary, bulleted key points, impacts, and FinOps metrics table) and writes to disk, handling file I/O errors by wrapping `OSError` in `ExportError`.
 
 
 ---

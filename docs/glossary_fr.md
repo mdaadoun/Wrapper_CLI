@@ -153,3 +153,9 @@ Composant de tableau CLI dédié affichant les métriques d'utilisation des ress
 
 ### Seuils d'impact financier (Financial Impact Thresholding)
 Règle de coloration visuelle appliquée aux valeurs monétaires (< 0,01 $ vert pour un faible coût, < 0,05 $ jaune pour un coût modéré, >= 0,05 $ rouge pour un coût élevé) afin de donner une conscience visuelle immédiate des dépenses de requêtes.
+
+### Interopérabilité des formats (Format Interoperability)
+Capacité d'une application CLI à exporter ses sorties structurées de domaine dans des formats d'échange standardisés (JSON, Markdown) pour une intégration avec des pipelines externes ou une documentation humaine.
+
+### Rendu de rapport Markdown (Markdown Report Rendering)
+Processus de conversion de modèles de données Pydantic structurés en fichiers Markdown lisibles par l'homme, incluant des tableaux d'en-tête, des listes à puces et des sections structurées.

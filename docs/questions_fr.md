@@ -178,3 +178,13 @@ Questions-réponses clés pour défendre l'architecture et les choix d'ingénier
 
 **Q : Comment les seuils de couleur de coût sont-ils sélectionnés et implémentés dans la sortie CLI ?**
 *Réponse attendue :* Les seuils sont fixés à 0,01 $ (vert pour un faible coût), 0,05 $ (jaune pour un coût modéré) et au-delà (rouge pour un coût élevé). Dans `display_report()`, `estimated_cost_usd` est évalué par rapport à ces limites pour définir dynamiquement le style de la colonne du tableau Rich.
+
+### 34. Formateur découplé vs Sortie console (Étape 6.3)
+
+**Q : Pourquoi séparer le rendu console de la logique d'exportation de fichier Markdown ?**
+*Réponse attendue :* Le rendu console repose sur des codes de contrôle de terminal Rich et des palettes de couleurs interactives, tandis que l'exportation Markdown nécessite un balisage texte propre et statique adapté au contrôle de version et aux systèmes de documentation comme GitHub ou Notion.
+
+### 35. Logique de routage de la destination de sortie (Étape 6.3)
+
+**Q : Comment le CLI gère-t-il le routage de la destination de sortie pour --output ?**
+*Réponse attendue :* Si `--output json` est transmis, le JSON brut est affiché sur stdout ; si un nom de fichier se terminant par `.json` ou `.md` est fourni, le rapport est enregistré directement dans ce chemin de fichier via `export_markdown()` ou écriture de fichier.

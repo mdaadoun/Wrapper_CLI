@@ -178,3 +178,13 @@ Targeted questions and answers covering architecture design choices and engineer
 
 **Q: How are cost color thresholds selected and implemented in the CLI output?**
 *Expected Answer:* Thresholds are set at $0.01 (green for low cost), $0.05 (yellow for moderate cost), and above (red for high cost). In `display_report()`, `estimated_cost_usd` is evaluated against these bounds to dynamically set the Rich Table column style.
+
+### 34. Decoupled Formatter vs Console Output (Step 6.3)
+
+**Q: Why separate console rendering from Markdown file export logic?**
+*Expected Answer:* Console rendering relies on Rich terminal control codes and interactive color palettes, whereas Markdown export requires clean, static text markup suitable for version control and documentation systems like GitHub or Notion.
+
+### 35. Output Destination Routing Logic (Step 6.3)
+
+**Q: How does the CLI handle output destination routing for --output?**
+*Expected Answer:* If `--output json` is passed, raw JSON is output to stdout; if a filename ending in `.json` or `.md` is provided, the report is saved directly to that file path via `export_markdown()` or file writing.

@@ -38,3 +38,9 @@ class UnknownModelError(WatcherError):
     """Raised when a model name is not found in the pricing matrix."""
 
     pass
+
+
+class ExportError(WatcherError):
+    """Raised when exporting report to file fails."""
+
+    pass
