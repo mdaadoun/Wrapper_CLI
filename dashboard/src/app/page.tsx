@@ -446,13 +446,14 @@ const PHASES_DATA = [
   {
     id: 7,
     title: "Phase 7 : Système de Cache Local",
-    status: "pending",
-    badge: "⏳ À venir",
-    desc: "Évitement des appels API redondants via mise en cache sur disque indexée par hash MD5/SHA256 du contenu.",
-    concepts: ["Content Hashing", "Disk-backed Response Cache", "Cost & Latency Elimination"],
-    inputExample: "Contenu déjà analysé auparavant",
-    outputExample: "Rapport retourné en 0.001s avec is_cached=True et coût 0$",
-    tests: "À venir",
+    status: "completed",
+    badge: "✅ Complété",
+    desc: "Évitement des appels API redondants via mise en cache sur disque indexée par hash SHA-256 du contenu, purge automatique et invalidation par TTL configurable.",
+    concepts: ["Content SHA-256 Fingerprinting", "Disk-backed Response Cache (cache.json)", "TTL Expiration & Auto-Purging", "CLI Cache Overrides (--no-cache, --cache-ttl 0)", "FinOps Cost & Latency Elimination ($0.00 / 0.8ms)"],
+    inputExample: 'Inputs: Payload structure { content, model, ttl: 3600, bypass_cache: false }',
+    outputExample: 'Outputs: AnalysisReport (Pydantic V2), is_cached: true, saved_cost_usd, latency: ~0.8ms, SHA-256 hash',
+    tests: "tests/test_cache.py, tests/test_cli.py",
+    hasPlayground: "cache",
   },
   {
     id: 8,
@@ -600,6 +601,50 @@ export default function DashboardPage() {
       console.error(err);
     } finally {
       setRichUiLoading(false);
+    }
+  };
+
+  // Local Caching System Playground State (Phase 7)
+  const [cacheContent, setCacheContent] = useState<string>(
+    "Analyse récurrente de documentation technique. Le système de cache local JSON avec empreinte SHA-256 élimine la latence API et garantit un coût financier de $0.00 USD."
+  );
+  const [cacheModel, setCacheModel] = useState<string>("gemini-1.5-flash");
+  const [cacheTtl, setCacheTtl] = useState<number>(3600);
+  const [cacheBypass, setCacheBypass] = useState<boolean>(false);
+  const [cacheResult, setCacheResult] = useState<any>(null);
+  const [cacheLoading, setCacheLoading] = useState<boolean>(false);
+  const [cacheTab, setCacheTab] = useState<"visual" | "json">("visual");
+
+  const handleRunCacheDemo = async (action: "analyze" | "clear" = "analyze") => {
+    setCacheLoading(true);
+    try {
+      const body =
+        action === "clear"
+          ? { clear_cache: true }
+          : {
+              content: cacheContent,
+              model: cacheModel,
+              ttl: Number(cacheTtl),
+              bypass_cache: cacheBypass,
+            };
+
+      const res = await fetch("/api/cache-demo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (data.status === "success") {
+        if (action === "clear") {
+          setCacheResult(null);
+        } else {
+          setCacheResult(data);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setCacheLoading(false);
     }
   };
 
@@ -2032,6 +2077,307 @@ export default function DashboardPage() {
                                   {richUiTab === "preview" && (
                                     <pre style={{ fontSize: "0.8rem", color: "#34d399", fontFamily: "monospace", overflowX: "auto", background: "rgba(0,0,0,0.6)", padding: "14px", borderRadius: "8px" }}>
                                       {richUiResult.rendered_output}
+                                    </pre>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* PHASE 7 PLAYGROUND - LOCAL CACHING SYSTEM */}
+                        {currentPhase.id === 7 && (
+                          <div style={{ padding: "24px", background: "rgba(168, 85, 247, 0.08)", border: "1px solid rgba(168, 85, 247, 0.3)", borderRadius: "14px" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                              <div>
+                                <h4 style={{ fontSize: "1.15rem", fontWeight: 800, color: "#fff", display: "flex", alignItems: "center", gap: "8px" }}>
+                                  ⚡ Demo Live : Système de Cache Local & Empreinte SHA-256 (Phase 7)
+                                </h4>
+                                <p style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
+                                  Testez l'invalidation par TTL, le contournement CLI (--no-cache) et la suppression de latence/coût API sur CACHE HIT.
+                                </p>
+                              </div>
+                              <div style={{ display: "flex", gap: "8px" }}>
+                                <button
+                                  onClick={() => handleRunCacheDemo("clear")}
+                                  disabled={cacheLoading}
+                                  style={{
+                                    padding: "10px 14px",
+                                    borderRadius: "8px",
+                                    background: "rgba(239, 68, 68, 0.2)",
+                                    color: "#f87171",
+                                    fontWeight: 700,
+                                    fontSize: "0.85rem",
+                                    border: "1px solid rgba(239, 68, 68, 0.3)",
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  🗑️ Vider le Cache
+                                </button>
+                                <button
+                                  onClick={() => handleRunCacheDemo("analyze")}
+                                  disabled={cacheLoading}
+                                  style={{
+                                    padding: "10px 20px",
+                                    borderRadius: "8px",
+                                    background: "linear-gradient(135deg, #a855f7 0%, #ec4899 100%)",
+                                    color: "#fff",
+                                    fontWeight: 700,
+                                    fontSize: "0.9rem",
+                                    border: "none",
+                                    cursor: "pointer",
+                                    boxShadow: "0 4px 14px rgba(168, 85, 247, 0.4)",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "8px",
+                                  }}
+                                >
+                                  {cacheLoading ? <Loader2 size={16} className="spin" /> : <Play size={16} />}
+                                  {cacheLoading ? "Exécution..." : "⚡ Lancer l'Analyse Live"}
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Presets */}
+                            <div style={{ display: "flex", gap: "8px", marginBottom: "14px", flexWrap: "wrap" }}>
+                              <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", alignSelf: "center" }}>Exemples d'entrées :</span>
+                              <button
+                                onClick={() => setCacheContent("Analyse récurrente de documentation technique. Le système de cache local JSON avec empreinte SHA-256 élimine la latence API et garantit un coût financier de $0.00 USD.")}
+                                style={{ padding: "4px 10px", borderRadius: "6px", background: "rgba(255,255,255,0.05)", border: "1px solid var(--border)", color: "#fff", fontSize: "0.75rem", cursor: "pointer" }}
+                              >
+                                ⚡ Documentation Tech (Hit Récurrent)
+                              </button>
+                              <button
+                                onClick={() => setCacheContent(`Contenu dynamique unique généré à ${new Date().toLocaleTimeString()} pour forcer un CACHE MISS.`)}
+                                style={{ padding: "4px 10px", borderRadius: "6px", background: "rgba(255,255,255,0.05)", border: "1px solid var(--border)", color: "#fff", fontSize: "0.75rem", cursor: "pointer" }}
+                              >
+                                🔄 Dynamic Unique String (Cache Miss)
+                              </button>
+                            </div>
+
+                            {/* Input Content Textarea */}
+                            <textarea
+                              rows={3}
+                              value={cacheContent}
+                              onChange={(e) => setCacheContent(e.target.value)}
+                              placeholder="Entrez le texte à analyser via le cache local..."
+                              style={{
+                                width: "100%",
+                                padding: "12px",
+                                borderRadius: "8px",
+                                background: "rgba(0,0,0,0.4)",
+                                border: "1px solid var(--border)",
+                                color: "#fff",
+                                fontSize: "0.85rem",
+                                marginBottom: "16px",
+                              }}
+                            />
+
+                            {/* Controls */}
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px", marginBottom: "16px" }}>
+                              <div>
+                                <label style={{ fontSize: "0.75rem", color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>
+                                  Modèle LLM :
+                                </label>
+                                <select
+                                  value={cacheModel}
+                                  onChange={(e) => setCacheModel(e.target.value)}
+                                  style={{
+                                    width: "100%",
+                                    padding: "10px",
+                                    borderRadius: "8px",
+                                    background: "rgba(0,0,0,0.4)",
+                                    border: "1px solid var(--border)",
+                                    color: "#fff",
+                                    fontSize: "0.85rem",
+                                  }}
+                                >
+                                  <option value="gemini-1.5-flash">Google Gemini 1.5 Flash</option>
+                                  <option value="gpt-4o">OpenAI GPT-4o</option>
+                                  <option value="claude-3-5-sonnet-20241022">Anthropic Claude 3.5 Sonnet</option>
+                                </select>
+                              </div>
+
+                              <div>
+                                <label style={{ fontSize: "0.75rem", color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>
+                                  TTL (Time-To-Live en secondes) :
+                                </label>
+                                <input
+                                  type="number"
+                                  value={cacheTtl}
+                                  onChange={(e) => setCacheTtl(Number(e.target.value))}
+                                  placeholder="3600 (0 pour forcer expiration)"
+                                  style={{
+                                    width: "100%",
+                                    padding: "10px",
+                                    borderRadius: "8px",
+                                    background: "rgba(0,0,0,0.4)",
+                                    border: "1px solid var(--border)",
+                                    color: "#fff",
+                                    fontFamily: "monospace",
+                                    fontSize: "0.85rem",
+                                  }}
+                                />
+                              </div>
+
+                              <div style={{ display: "flex", alignItems: "center", gap: "8px", paddingTop: "20px" }}>
+                                <input
+                                  type="checkbox"
+                                  id="bypass_cache_chk"
+                                  checked={cacheBypass}
+                                  onChange={(e) => setCacheBypass(e.target.checked)}
+                                  style={{ width: "18px", height: "18px", cursor: "pointer" }}
+                                />
+                                <label htmlFor="bypass_cache_chk" style={{ fontSize: "0.85rem", color: "#fff", cursor: "pointer" }}>
+                                  🚫 Flag <code>--no-cache</code> (Bypass Cache)
+                                </label>
+                              </div>
+                            </div>
+
+                            {/* Demo Results Viewer */}
+                            {cacheResult && (
+                              <div style={{ marginTop: "16px", background: "rgba(9, 5, 20, 0.8)", border: "1px solid var(--border)", borderRadius: "12px", overflow: "hidden" }}>
+                                <div style={{ display: "flex", borderBottom: "1px solid var(--border)", background: "rgba(0,0,0,0.3)" }}>
+                                  <button
+                                    onClick={() => setCacheTab("visual")}
+                                    style={{
+                                      padding: "10px 18px",
+                                      background: cacheTab === "visual" ? "rgba(168, 85, 247, 0.2)" : "transparent",
+                                      border: "none",
+                                      borderBottom: cacheTab === "visual" ? "2px solid #a855f7" : "none",
+                                      color: cacheTab === "visual" ? "#fff" : "var(--text-muted)",
+                                      fontWeight: 600,
+                                      fontSize: "0.85rem",
+                                      cursor: "pointer",
+                                    }}
+                                  >
+                                    📊 Rendered View & Status Cache
+                                  </button>
+                                  <button
+                                    onClick={() => setCacheTab("json")}
+                                    style={{
+                                      padding: "10px 18px",
+                                      background: cacheTab === "json" ? "rgba(168, 85, 247, 0.2)" : "transparent",
+                                      border: "none",
+                                      borderBottom: cacheTab === "json" ? "2px solid #a855f7" : "none",
+                                      color: cacheTab === "json" ? "#fff" : "var(--text-muted)",
+                                      fontWeight: 600,
+                                      fontSize: "0.85rem",
+                                      cursor: "pointer",
+                                    }}
+                                  >
+                                    💻 Raw JSON (Pydantic V2)
+                                  </button>
+                                </div>
+
+                                <div style={{ padding: "20px" }}>
+                                  {cacheTab === "visual" && (
+                                    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                                      {/* Cache Hit/Miss Status Banner */}
+                                      <div
+                                        style={{
+                                          display: "flex",
+                                          justify: "space-between",
+                                          alignItems: "center",
+                                          padding: "14px 18px",
+                                          borderRadius: "10px",
+                                          background: cacheResult.cache_hit ? "rgba(16, 185, 129, 0.15)" : "rgba(245, 158, 11, 0.15)",
+                                          border: cacheResult.cache_hit ? "1px solid rgba(16, 185, 129, 0.3)" : "1px solid rgba(245, 158, 11, 0.3)",
+                                        }}
+                                      >
+                                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                          <span
+                                            style={{
+                                              padding: "6px 14px",
+                                              borderRadius: "20px",
+                                              background: cacheResult.cache_hit ? "#10b981" : "#f59e0b",
+                                              color: "#000",
+                                              fontWeight: 900,
+                                              fontSize: "0.85rem",
+                                            }}
+                                          >
+                                            {cacheResult.cache_hit ? "⚡ CACHE HIT" : "🌐 CACHE MISS"}
+                                          </span>
+                                          <span style={{ fontSize: "0.85rem", color: "#fff" }}>
+                                            {cacheResult.cache_hit
+                                              ? "Résultat restitué instantanément depuis le cache disque local."
+                                              : "Exécution de l'analyse et enregistrement de l'empreinte SHA-256."}
+                                          </span>
+                                        </div>
+                                        <span style={{ fontSize: "0.75rem", fontFamily: "monospace", color: "var(--text-muted)" }}>
+                                          SHA-256: {cacheResult.content_hash?.substring(0, 18)}...
+                                        </span>
+                                      </div>
+
+                                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                        <h4 style={{ fontSize: "1.2rem", fontWeight: 800, color: "#fff" }}>
+                                          {cacheResult.report?.title}
+                                        </h4>
+                                        <span
+                                          style={{
+                                            padding: "4px 12px",
+                                            borderRadius: "20px",
+                                            background: cacheResult.report?.priority === "high" ? "rgba(239, 68, 68, 0.2)" : "rgba(245, 158, 11, 0.2)",
+                                            color: cacheResult.report?.priority === "high" ? "#f87171" : "#fbbf24",
+                                            fontWeight: 800,
+                                            fontSize: "0.75rem",
+                                            textTransform: "uppercase",
+                                          }}
+                                        >
+                                          Priorité : {cacheResult.report?.priority}
+                                        </span>
+                                      </div>
+
+                                      <div style={{ fontSize: "0.9rem", color: "#d1d5db", lineHeight: 1.6, background: "rgba(255,255,255,0.02)", padding: "12px", borderRadius: "8px" }}>
+                                        <strong>Executive Summary :</strong> {cacheResult.report?.summary}
+                                      </div>
+
+                                      <div>
+                                        <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "#c084fc", marginBottom: "6px" }}>
+                                          Points Clés Cache Local :
+                                        </div>
+                                        <ul style={{ paddingLeft: "20px", fontSize: "0.85rem", color: "var(--text-muted)", lineHeight: 1.6 }}>
+                                          {cacheResult.report?.key_points?.map((kp: string, idx: number) => (
+                                            <li key={idx}>{kp}</li>
+                                          ))}
+                                        </ul>
+                                      </div>
+
+                                      {/* FinOps & Cache Telemetry Bar */}
+                                      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "10px", padding: "12px", background: "rgba(168, 85, 247, 0.08)", borderRadius: "8px", border: "1px solid rgba(168, 85, 247, 0.2)" }}>
+                                        <div>
+                                          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Statut Cache</span>
+                                          <strong style={{ color: cacheResult.cache_hit ? "#34d399" : "#fbbf24" }}>
+                                            {cacheResult.cache_hit ? "HIT" : "MISS"}
+                                          </strong>
+                                        </div>
+                                        <div>
+                                          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Coût Effectif API</span>
+                                          <strong style={{ color: cacheResult.cache_hit ? "#34d399" : "#f87171" }}>
+                                            ${cacheResult.telemetry?.estimated_cost_usd}
+                                          </strong>
+                                        </div>
+                                        <div>
+                                          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Économie FinOps</span>
+                                          <strong style={{ color: "#34d399" }}>
+                                            ${cacheResult.telemetry?.saved_cost_usd || (cacheResult.cache_hit ? cacheResult.report?.estimated_cost_usd : 0)}
+                                          </strong>
+                                        </div>
+                                        <div>
+                                          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Latence Effective</span>
+                                          <strong style={{ color: "#34d399" }}>{cacheResult.telemetry?.execution_time_seconds}s</strong>
+                                        </div>
+                                        <div>
+                                          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>TTL Restant / Âge</span>
+                                          <strong style={{ color: "#c084fc" }}>{cacheResult.age_seconds}s / {cacheResult.ttl}s</strong>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {cacheTab === "json" && (
+                                    <pre style={{ fontSize: "0.8rem", color: "#c084fc", fontFamily: "monospace", overflowX: "auto" }}>
+                                      {JSON.stringify(cacheResult, null, 2)}
                                     </pre>
                                   )}
                                 </div>

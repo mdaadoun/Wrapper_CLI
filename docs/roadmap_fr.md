@@ -121,22 +121,22 @@ Phase 1 : Adaptation Socle ──> Phase 2 : CLI Squelette ──> Phase 3 : Ing
 
 ---
 
-## Phase 5 : Calculatrice FinOps — ⏳ À faire
+## Phase 5 : Calculatrice FinOps — ✅ Terminé
 *Objectif : Mesurer et calculer le coût financier exact de chaque appel d'API (SF-03).*
 
-### Étape 5.1 : Grille tarifaire et calculatrice de coût — ⏳ À faire
+### Étape 5.1 : Grille tarifaire et calculatrice de coût — ✅ Terminé
 *   **Description :** Implémenter dans `utils/cost.py` un dictionnaire de tarifs par modèle (prix par million de tokens en entrée et en sortie) et une fonction `calculate_cost(model: str, prompt_tokens: int, completion_tokens: int) -> float` qui retourne le coût en USD.
 *   **Concept clé :** Observabilité FinOps — dans un contexte de production, chaque appel d'API a un coût marginal direct. Le tracking granulaire permet d'optimiser les budgets et de détecter les dérives.
 *   **Critère de validation :** `calculate_cost("gpt-4o-mini", prompt_tokens=1000, completion_tokens=500)` retourne une valeur cohérente avec la grille tarifaire publique. Passer un modèle inconnu lève une exception explicite.
 
-### Étape 5.2 : Injection des métriques dans le rapport — ✅ Fait
+### Étape 5.2 : Injection des métriques dans le rapport — ✅ Terminé
 *   **Description :** Enrichir la méthode `LLMClient.analyze()` pour chronométrer l'appel (`time.perf_counter()`), extraire les compteurs de tokens depuis la réponse API (`usage.prompt_tokens`, `usage.completion_tokens`), calculer le coût via `cost.py`, et injecter ces valeurs dans l'objet `AnalysisReport` avant de le retourner.
 *   **Concept clé :** Instrumentation transparente — les métriques sont collectées au plus proche de l'appel, sans surcoût de complexité pour le code appelant.
 *   **Critère de validation :** Le rapport retourné contient des valeurs non-nulles pour `prompt_tokens`, `completion_tokens`, `estimated_cost_usd` et `execution_time_seconds`.
 
 ---
 
-## Phase 6 : Affichage Console Enrichi avec Rich — ⏳ À faire
+## Phase 6 : Affichage Console Enrichi avec Rich — ✅ Terminé
 *Objectif : Offrir une expérience console premium avec des rendus visuels élégants (SF-04).*
 
 ### Étape 6.1 : Panneau de rendu Markdown — ✅ Terminé
@@ -144,27 +144,27 @@ Phase 1 : Adaptation Socle ──> Phase 2 : CLI Squelette ──> Phase 3 : Ing
 * **Concept clé :** Terminal UX — un rendu console propre améliore grandement la lisibilité et l'adoption par les développeurs.
 * **Critère de validation :** L'exécution de `--demo` affiche un panneau stylisé avec rendu couleur dans le terminal. avec une structure claire et lisible.
 
-### Étape 6.2 : Tableau récapitulatif des métriques FinOps — ⏳ À faire
+### Étape 6.2 : Tableau récapitulatif des métriques FinOps — ✅ Terminé
 *   **Description :** Ajouter sous le panneau principal un tableau Rich résumant les métriques d'inférence : modèle utilisé, tokens entrée/sortie, coût USD, latence en secondes. Utiliser un code couleur pour le coût (vert si < $0.01, jaune si < $0.05, rouge au-delà).
 *   **Concept clé :** Reporting visuel instantané — le développeur voit immédiatement l'impact économique de sa requête.
 *   **Critère de validation :** Le tableau s'affiche correctement avec les valeurs numériques alignées et colorées.
 
-### Étape 6.3 : Formats d'export (`--output`) — ⏳ À faire
+### Étape 6.3 : Formats d'export (`--output`) — ✅ Terminé
 *   **Description :** Implémenter dans `formatters/` les options d'export : `console` (défaut, rendu Rich), `json` (sortie brute `AnalysisReport.model_dump_json(indent=2)` sur stdout), `markdown` (écriture dans un fichier `.md` via `formatters/markdown.py`). L'option se configure via `--output / -o`.
 *   **Concept clé :** Interopérabilité des formats — la sortie JSON permet l'intégration dans des pipelines CI/CD, le Markdown facilite l'archivage et le partage.
 *   **Critère de validation :** `scan "test" --demo -o json` produit du JSON valide parsable. `scan "test" --demo -o report.md` crée un fichier Markdown lisible.
 
 ---
 
-## Phase 7 : Système de Cache Local — ⏳ À faire
+## Phase 7 : Système de Cache Local — ✅ Terminé
 *Objectif : Éviter les appels API redondants pour le même contenu et réduire les coûts (SF-05).*
 
-### Étape 7.1 : Mécanisme de persistance par empreinte de hachage — ⏳ À faire
+### Étape 7.1 : Mécanisme de persistance par empreinte de hachage — ✅ Terminé
 *   **Description :** Implémenter dans `utils/cache.py` un système de cache basé sur un hash SHA-256 du contenu extrait. Les rapports sont stockés dans un fichier JSON local (`~/.cache/ai_watcher/cache.json`). Chaque entrée contient : le hash, le timestamp de création, le TTL et le rapport sérialisé.
 *   **Concept clé :** Idempotence — analyser deux fois le même contenu doit produire le même résultat sans consommer de crédit API supplémentaire.
 *   **Critère de validation :** Un premier appel `scan` effectue l'appel API et enregistre le résultat. Un second appel identique retourne le résultat caché instantanément (latence < 100ms) avec un message `[CACHE HIT]`.
 
-### Étape 7.2 : TTL configurable et invalidation — ⏳ À faire
+### Étape 7.2 : TTL configurable et invalidation — ✅ Terminé
 *   **Description :** Ajouter les options CLI `--cache-ttl <secondes>` (durée de validité, défaut : 3600s) et `--no-cache` (désactive totalement le cache). Implémenter la purge automatique des entrées expirées au démarrage.
 *   **Concept clé :** Fraîcheur des données vs économie — le TTL permet à l'utilisateur de contrôler le compromis entre actualité de l'analyse et coûts d'API.
 *   **Critère de validation :** Avec `--cache-ttl 0`, chaque appel passe par l'API. Avec `--no-cache`, aucun fichier de cache n'est lu ni écrit. Une entrée expirée est automatiquement ignorée et recalculée.

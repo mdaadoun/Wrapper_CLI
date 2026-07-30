@@ -67,3 +67,13 @@ def test_display_report_cost_color_coding():
         display_report(report, console_instance=test_console)
         output = string_io.getvalue()
         assert "FinOps Metrics" in output
+
+
+def test_display_report_cached():
+    """Verify cached report displays [CACHE HIT] badge."""
+    string_io = StringIO()
+    test_console = Console(file=string_io, force_terminal=True, width=100)
+    report = get_mock_analysis_report().model_copy(update={"is_cached": True})
+    display_report(report, console_instance=test_console)
+    output = string_io.getvalue()
+    assert "CACHE HIT" in output

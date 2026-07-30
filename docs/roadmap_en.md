@@ -121,10 +121,10 @@ Phase 1: Baseline Setup ──> Phase 2: CLI Skeleton ──> Phase 3: Ingestion
 
 ---
 
-## Phase 5: FinOps Cost Calculator — ⏳ Pending
+## Phase 5: FinOps Cost Calculator — ✅ Completed
 *Goal: Measure and calculate exact financial cost of each API inference (FS-03).*
 
-### Step 5.1: Model Pricing Matrix & Cost Calculator — ⏳ Pending
+### Step 5.1: Model Pricing Matrix & Cost Calculator — ✅ Completed
 * **Description:** Implement model pricing dictionary (input/output price per million tokens) in `utils/cost.py` and function `calculate_cost(model: str, prompt_tokens: int, completion_tokens: int) -> float` returning cost in USD.
 * **Key Concept:** FinOps Observability — tracking direct marginal API costs in real time to prevent budget drift.
 * **Validation Criterion:** `calculate_cost("gpt-4o-mini", prompt_tokens=1000, completion_tokens=500)` returns accurate USD value based on public rates. Unknown model raises explicit exception.
@@ -136,7 +136,7 @@ Phase 1: Baseline Setup ──> Phase 2: CLI Skeleton ──> Phase 3: Ingestion
 
 ---
 
-## Phase 6: Rich Terminal UI & Output Formats — ⏳ Pending
+## Phase 6: Rich Terminal UI & Output Formats — ✅ Completed
 *Goal: Deliver premium console user experience with rich visual formatting (FS-04).*
 
 ### Step 6.1: Markdown Rendered Panel — ✅ Completed
@@ -144,27 +144,27 @@ Phase 1: Baseline Setup ──> Phase 2: CLI Skeleton ──> Phase 3: Ingestion
 * **Key Concept:** Terminal UX — well-formatted output improves readability and developer tool adoption.
 * **Validation Criterion:** `--demo` execution displays styled, color-coded panel in terminal.
 
-### Step 6.2: FinOps Metrics Table — ⏳ Pending
+### Step 6.2: FinOps Metrics Table — ✅ Completed
 * **Description:** Render Rich table below main panel summarizing inference metrics: model used, prompt/completion tokens, USD cost, latency in seconds. Color-code cost (green < $0.01, yellow < $0.05, red above).
 * **Key Concept:** Instant Visual Reporting — developer immediately sees economic impact of query.
 * **Validation Criterion:** Metrics table displays cleanly with aligned, color-coded numbers.
 
-### Step 6.3: Export Formats (`--output`) — ⏳ Pending
+### Step 6.3: Export Formats (`--output`) — ✅ Completed
 * **Description:** Implement export options in `formatters/`: `console` (default Rich UI), `json` (`AnalysisReport.model_dump_json(indent=2)` to stdout), `markdown` (file export via `formatters/markdown.py`). Configurable via `--output / -o`.
 * **Key Concept:** Format Interoperability — JSON output enables CI/CD integration; Markdown enables report sharing/archiving.
 * **Validation Criterion:** `scan "test" --demo -o json` outputs valid parseable JSON. `scan "test" --demo -o report.md` writes readable Markdown file.
 
 ---
 
-## Phase 7: Local Caching System — ⏳ Pending
+## Phase 7: Local Caching System — ✅ Completed
 *Goal: Eliminate redundant API calls for identical content and reduce costs (FS-05).*
 
-### Step 7.1: SHA-256 Content Hash Persistence — ⏳ Pending
+### Step 7.1: SHA-256 Content Hash Persistence — ✅ Completed
 * **Description:** Implement caching system in `utils/cache.py` based on SHA-256 hash of extracted content. Store reports in local JSON file (`~/.cache/ai_watcher/cache.json`). Entry schema: hash, creation timestamp, TTL, serialized report.
 * **Key Concept:** Idempotency — analyzing identical input produces instant cached result without consuming API credits.
 * **Validation Criterion:** First `scan` invocation calls API and saves result. Second identical invocation returns cached report instantly (< 100ms) with `[CACHE HIT]` indicator.
 
-### Step 7.2: Configurable TTL and Cache Invalidation — ⏳ Pending
+### Step 7.2: Configurable TTL and Cache Invalidation — ✅ Completed
 * **Description:** Add CLI flags `--cache-ttl <seconds>` (default: 3600s) and `--no-cache` (bypasses cache). Implement automatic purging of expired entries on startup.
 * **Key Concept:** Data Freshness vs. Cost Efficiency — TTL grants user control over cost/recency trade-offs.
 * **Validation Criterion:** `--cache-ttl 0` forces fresh API call every time. `--no-cache` skips reading/writing cache file. Expired entries automatically recalculate.
