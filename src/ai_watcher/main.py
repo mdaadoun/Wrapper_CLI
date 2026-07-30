@@ -10,6 +10,7 @@ from ai_watcher.core.detector import detect_source_type
 from ai_watcher.core.extractor import extract
 from ai_watcher.exceptions import ExportError, WatcherError
 from ai_watcher.formatters import (
+    display_error,
     display_report,
     export_markdown,
 )
@@ -132,7 +133,10 @@ def scan(
             typer.echo(f"Report successfully exported to: {output}")
 
     except WatcherError as err:
-        typer.secho(f"Error: {err}", fg=typer.colors.RED, err=True)
+        display_error(err)
+        raise typer.Exit(code=1) from err
+    except Exception as err:
+        display_error(f"Unexpected error: {err}")
         raise typer.Exit(code=1) from err
 
 

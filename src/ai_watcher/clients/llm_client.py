@@ -187,6 +187,13 @@ class LLMClient:
         try:
             response = self._post_with_retry(client, url, headers, payload)
             data: Dict[str, Any] = response.json()
+        except LLMRetryableError as err:
+            err_msg = str(err)
+            if "Failed after 4 attempts" not in err_msg:
+                raise LLMRetryableError(
+                    f"❌ Failed after 4 attempts: {err_msg}"
+                ) from err
+            raise
         except json.JSONDecodeError as e:
             raise LLMClientError(f"LLM API request error: {e}") from e
         finally:

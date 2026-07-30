@@ -90,7 +90,7 @@ def test_scan_explicit_file_flag():
     """Force file mode on a non-existent file → exits 1 with clean error."""
     result = runner.invoke(app, ["scan", "--file", "document.md"])
     assert result.exit_code == 1
-    assert "Error:" in result.stderr
+    assert "Error" in result.output
 
 
 def test_scan_explicit_url_flag(monkeypatch):
@@ -109,7 +109,7 @@ def test_scan_explicit_url_flag(monkeypatch):
 def test_scan_empty_source_exit_code():
     result = runner.invoke(app, ["scan", "   "])
     assert result.exit_code == 1
-    assert "Error: Source cannot be empty or whitespace-only." in result.stderr
+    assert "Source cannot be empty or whitespace-only." in result.output
 
 
 def test_main_module_execution(monkeypatch):

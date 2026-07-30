@@ -87,3 +87,10 @@ The application adheres to the **Single Responsibility Principle (SRP)**. The co
 - **`_log_retry_attempt`**: Tenacity before_sleep callback function rendering yellow warning console logs with next attempt number and backoff sleep duration.
 - **`LLMClient._post_with_retry`**: Internal helper method decorated with @retry(stop=stop_after_attempt(4), wait=wait_exponential_jitter(initial=2, max=10), reraise=True) executing client.post and evaluating status codes.
 - **`LLMClient.analyze`**: Public entrypoint method invoking _post_with_retry within a try-finally block, ensuring proper client session cleanup and response parsing.
+
+
+### Graceful Failure & Exit Codes (`console.py`, `main.py`, `test_graceful_failure.py`)
+
+- **`display_error`**: Formatter helper in `formatters/console.py` rendering domain exception messages inside a red Rich `Panel` targeting `stderr`.
+- **`scan` Error Catching**: Entrypoint error orchestration in `main.py` catching `WatcherError` and generic `Exception`, rendering via `display_error`, and raising `typer.Exit(code=1)`.
+- **`test_graceful_failure.py`**: Unit test suite validating red panel rendering, 4-attempt network outage simulations, domain error exit status `1`, and zero unhandled tracebacks.

@@ -82,3 +82,10 @@ L'application repose sur le **Single Responsibility Principle (SRP)**. Le code e
 - **`_log_retry_attempt`** : Callback `before_sleep` de Tenacity affichant dans la console un avertissement jaune avec le numéro de la tentative et la durée du backoff.
 - **`LLMClient._post_with_retry`** : Méthode interne décorée avec `@retry(stop=stop_after_attempt(4), wait=wait_exponential_jitter(initial=2, max=10), reraise=True)` exécutant `client.post` et évaluant les codes HTTP.
 - **`LLMClient.analyze`** : Méthode d'entrée publique invoquant `_post_with_retry` dans un bloc try-finally, garantissant le nettoyage de la session HTTP et le parsing de la réponse.
+
+
+### Gestion Gracieuse des Erreurs & Codes de Sortie (`console.py`, `main.py`, `test_graceful_failure.py`)
+
+- **`display_error`** : Fonction utilitaire dans `formatters/console.py` affichant les exceptions de domaine dans un `Panel` Rich rouge ciblant `stderr`.
+- **`scan` Error Catching** : Orchestration centralisée dans `main.py` attrapant `WatcherError` et `Exception`, déléguant l'affichage à `display_error` et levant `typer.Exit(code=1)`.
+- **`test_graceful_failure.py`** : Suite de tests unitaires validant le rendu du panneau rouge, la simulation de panne réseau après 4 tentatives, le code de sortie `1` et l'absence totale de tracebacks.

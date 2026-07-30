@@ -187,3 +187,6 @@ A CLI option that skips both reading from and writing to the local disk cache, e
 - **Jitter**: Randomized variation added to backoff delays to prevent synchronized client retries from overwhelming a recovering server (thundering herd problem).
 - **Rate Limiting (HTTP 429)**: An HTTP status code returned by an API indicating the client has sent too many requests within a given window.
 - **Transient Error**: A temporary failure condition (such as network drops, server timeouts, or temporary load shedding) expected to resolve upon retrying.
+- **Graceful Failure**: A software design pattern where runtime errors are caught, formatted, and presented cleanly without crashing the process or exposing raw stack traces.
+- **Exit Status / Code**: An integer value returned by a process to its parent shell upon completion (0 for success, non-zero e.g. 1 for errors).
+- **Rich Error Panel**: A styled terminal block rendered with the Rich library displaying error messages inside a red border box on stderr.

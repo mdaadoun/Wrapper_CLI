@@ -110,4 +110,4 @@ def test_cli_export_json_os_error(tmp_path):
         app, ["scan", "Sample text", "--demo", "-o", str(invalid_path)]
     )
     assert result.exit_code == 1
-    assert "Error: Failed to export JSON report" in result.stderr
+    assert "Failed to export JSON report" in result.output

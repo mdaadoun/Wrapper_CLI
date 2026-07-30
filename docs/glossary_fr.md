@@ -182,3 +182,6 @@ Option CLI ignorant à la fois la lecture et l'écriture dans le cache local sur
 - **Jitter (Gigue)** : Variation aléatoire ajoutée aux délais d'attente pour éviter que les réessais synchronisés ne surchargent un serveur (troupeau foudroyant).
 - **Rate Limiting (HTTP 429)** : Code HTTP renvoyé par une API indiquant que le client a envoyé trop de requêtes dans une fenêtre de temps donnée.
 - **Erreur Transitoire** : Condition d'échec temporaire (coupure réseau, timeout) censée se résoudre d'elle-même lors d'un réessai ultérieur.
+- **Gestion Gracieuse des Erreurs (Graceful Failure)** : Patron d'architecture logicielle où les erreurs d'exécution sont interceptées, formatées et présentées proprement sans faire planter le processus ni exposer de tracebacks.
+- **Code de Sortie (Exit Status / Code)** : Valeur entière renvoyée par un processus au shell parent lors de sa terminaison (0 pour le succès, non nul ex. 1 pour les erreurs).
+- **Panneau d'Erreur Rich (Rich Error Panel)** : Bloc d'affichage CLI stylisé avec la bibliothèque Rich affichant le message d'erreur dans une boîte rouge sur stderr.

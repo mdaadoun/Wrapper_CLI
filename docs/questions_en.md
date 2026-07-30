@@ -230,3 +230,15 @@ Targeted questions and answers covering architecture design choices and engineer
 
 **Q: Why decorate `_post_with_retry` instead of the full `analyze` method?**
 > A: Decorating the narrow transport method prevents re-executing prompt assembly, timing setups, or schema validations on retry, restricting retries strictly to the network HTTP POST request.
+
+
+### Graceful Failure & Exit Codes
+
+**Q: Why is it important to prevent unhandled Python tracebacks in production CLI tools?**
+> A: Raw tracebacks pollute terminal output, confuse non-technical users, expose internal codebase details or file paths, and hinder structured error handling in parent shell scripts.
+
+**Q: How does returning exit code 1 facilitate automation and scripting?**
+> A: POSIX-compliant scripts and CI/CD pipelines rely on process exit codes (`$?`) to detect failures and conditionally execute error-handling or rollback steps.
+
+**Q: What is the role of `display_error` in the application architecture?**
+> A: It decouples exception handling in business logic from terminal presentation, allowing all CLI commands to present errors through a unified Rich UI component.

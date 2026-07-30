@@ -230,3 +230,15 @@ Questions-réponses clés pour défendre l'architecture et les choix d'ingénier
 
 **Q: Pourquoi décorer `_post_with_retry` plutôt que la méthode `analyze` entière ?**
 > A: Décorer uniquement la méthode de transport réseau empêche de réexécuter l'assemblage du prompt, l'allocation des variables ou la validation du schéma à chaque réessai, gardant le réessai strictement concentré sur l'appel HTTP.
+
+
+### Gestion Gracieuse des Erreurs & Codes de Sortie
+
+**Q : Pourquoi est-il essentiel d'éviter l'affichage de tracebacks Python non gérés dans des outils CLI en production ?**
+> R : Les tracebacks bruts polluent la sortie terminal, rendent le message confus pour les utilisateurs, exposent des détails internes du code ou des chemins de fichiers, et compliquent la gestion d'erreur dans les scripts shell parents.
+
+**Q : Comment le renvoi d'un code de sortie 1 facilite-t-il l'automatisation et les scripts ?**
+> R : Les scripts conformes POSIX et les pipelines CI/CD s'appuient sur les codes de sortie (`$?`) pour détecter les échecs et exécuter conditionnellement des étapes d'erreur ou de nettoyage.
+
+**Q : Quel est le rôle de `display_error` dans l'architecture de l'application ?**
+> R : Elle sépare la gestion des exceptions dans la logique métier du rendu graphique du terminal, permettant à toutes les commandes CLI d'afficher des erreurs via un composant UI Rich unifié.

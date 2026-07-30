@@ -106,3 +106,18 @@ def display_report(
         f"{report.execution_time_seconds:.4f}s",
     )
     target_console.print(metrics_table)
+
+
+def display_error(
+    error: Exception | str, console_instance: Console | None = None
+) -> None:
+    """Render clean error message in a red Rich panel without raw tracebacks."""
+    target_console = console_instance or Console(stderr=True)
+    msg = str(error)
+    panel = Panel(
+        Text(msg, style="bold red"),
+        title="[bold red]❌ Error[/bold red]",
+        border_style="red",
+        expand=False,
+    )
+    target_console.print(panel)

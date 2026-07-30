@@ -319,6 +319,34 @@ const TEST_DESCRIPTIONS: Record<
     output: "Absence d'écriture ou de lecture du fichier cache.json.",
     concept: "Option CLI --no-cache",
   },
+  "tests/test_graceful_failure.py": {
+    title: "📁 test_graceful_failure.py (Résilience & Exit Code 1)",
+    objective: "Tester la dégradation élégante et les codes de sortie CLI (1) en cas de panne réseau critique sans exposer de stack trace Python.",
+    input: "Panne réseau simulée avec 4 tentatives infructueuses.",
+    output: "Message d'erreur propre Rich Panel et exit code 1.",
+    concept: "Graceful Degradation & Ergonomie CLI",
+  },
+  "tests/test_graceful_failure.py::test_scan_graceful_failure_network_outage": {
+    title: "⚡ test_scan_graceful_failure_network_outage()",
+    objective: "Simuler 4 échecs de retry consécutifs et vérifier que le CLI se termine avec l'exit code 1 et le message 'Failed after 4 attempts'.",
+    input: "runner.invoke(app, ['scan', 'Network failure test content']) avec side_effect LLMRetryableError",
+    output: "Exit status code 1 et présence de '❌ Failed after 4 attempts' dans la console.",
+    concept: "Failure Boundary & Exit Codes",
+  },
+  "tests/test_graceful_failure.py::test_scan_graceful_failure_domain_error": {
+    title: "⚡ test_scan_graceful_failure_domain_error()",
+    objective: "Vérifier qu'une exception métier (WatcherError) génère un panneau d'erreur sans traceback.",
+    input: "runner.invoke(app, ['scan', '   '])",
+    output: "Exit code 1 et message d'erreur 'Source cannot be empty'.",
+    concept: "Catch-All Business Exception Handler",
+  },
+  "tests/test_graceful_failure.py::test_scan_graceful_failure_unexpected_exception": {
+    title: "⚡ test_scan_graceful_failure_unexpected_exception()",
+    objective: "Vérifier que les exceptions inattendues du système d'exploitation sont interceptées proprement.",
+    input: "Mock side_effect RuntimeError",
+    output: "Exit code 1 et message d'erreur 'Unexpected error'.",
+    concept: "Fail-Safe Safety Guard",
+  },
 };
 
 function getFileIcon(name: string): string {
@@ -458,13 +486,14 @@ const PHASES_DATA = [
   {
     id: 8,
     title: "Phase 8 : Résilience & Retry Adaptatif",
-    status: "pending",
-    badge: "⏳ À venir",
-    desc: "Gestion des erreurs réseau et rate-limits avec Exponential Backoff et Jitter (Tenacity).",
-    concepts: ["Exponential Backoff", "Rate Limit (HTTP 429) Handling", "Transient Failure Recovery"],
-    inputExample: "Réseau instable ou quota API temporairement dépassé",
-    outputExample: "Tentatives espacées (1s, 2s, 4s) jusqu'au succès sans crash CLI",
-    tests: "À venir",
+    status: "completed",
+    badge: "✅ Complété",
+    desc: "Gestion des erreurs réseau, rate-limits (HTTP 429) et timeouts avec Exponential Backoff et Jitter (Tenacity) jusqu'à 4 tentatives max.",
+    concepts: ["Exponential Backoff with Jitter", "HTTP 429 Rate-Limit Handling", "Transient Failure Self-Healing", "Tenacity @retry Decorator", "Graceful Degradation (Exit code 1)"],
+    inputExample: 'Inputs: Payload structure { content, model, max_retries: 4, scenario: "rate_limit_recovered"|"network_flake_recovered"|"outage_failed" }',
+    outputExample: 'Outputs: AnalysisReport (Pydantic V2), status: "success", attempts: 3, total_backoff_seconds: 6.2s, telemetry',
+    tests: "tests/test_graceful_failure.py, tests/test_llm_client.py",
+    hasPlayground: "retry",
   },
   {
     id: 9,
@@ -645,6 +674,45 @@ export default function DashboardPage() {
       console.error(err);
     } finally {
       setCacheLoading(false);
+    }
+  };
+
+  // Network Resilience Playground State (Phase 8)
+  const [retryContent, setRetryContent] = useState<string>(
+    "Simulation d'appel API LLM sous forte charge avec perturbations réseau transitoires et gestion automatique des tentatives de réessai."
+  );
+  const [retryModel, setRetryModel] = useState<string>("gemini-1.5-flash");
+  const [retryScenario, setRetryScenario] = useState<string>("rate_limit_recovered");
+  const [retryMaxAttempts, setRetryMaxAttempts] = useState<number>(4);
+  const [retryInitialDelay, setRetryInitialDelay] = useState<number>(2.0);
+  const [retryJitter, setRetryJitter] = useState<boolean>(true);
+  const [retryResult, setRetryResult] = useState<any>(null);
+  const [retryLoading, setRetryLoading] = useState<boolean>(false);
+  const [retryTab, setRetryTab] = useState<"visual" | "json">("visual");
+
+  const handleRunRetryDemo = async (customScenario?: string) => {
+    setRetryLoading(true);
+    try {
+      const scenarioToRun = customScenario || retryScenario;
+      const res = await fetch("/api/retry-demo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: retryContent,
+          model: retryModel,
+          max_retries: Number(retryMaxAttempts),
+          initial_delay: Number(retryInitialDelay),
+          scenario: scenarioToRun,
+          jitter: retryJitter,
+        }),
+      });
+      const data = await res.json();
+      setRetryResult(data);
+    } catch (err: any) {
+      console.error(err);
+      setRetryResult({ status: "error", message: err.message || "Retry demo failed" });
+    } finally {
+      setRetryLoading(false);
     }
   };
 
@@ -2385,7 +2453,417 @@ export default function DashboardPage() {
                             )}
                           </div>
                         )}
-                      </div>
+
+                        {/* PHASE 8 PLAYGROUND - NETWORK RESILIENCE (RETRY & BACKOFF) */}
+                        {currentPhase.id === 8 && (
+                          <div style={{ padding: "24px", background: "rgba(239, 68, 68, 0.08)", border: "1px solid rgba(239, 68, 68, 0.3)", borderRadius: "14px" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                              <div>
+                                <h4 style={{ fontSize: "1.15rem", fontWeight: 800, color: "#fff", display: "flex", alignItems: "center", gap: "8px" }}>
+                                  🛡️ Demo Live : Résilience Réseau & Backoff Exponentiel Tenacity (Phase 8)
+                                </h4>
+                                <p style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
+                                  Simulez des erreurs API (HTTP 429, Timeout réseau, Panne totale) et observez la politique de réessai adaptative avec Jitter.
+                                </p>
+                              </div>
+                              <button
+                                onClick={() => handleRunRetryDemo()}
+                                disabled={retryLoading}
+                                style={{
+                                  padding: "10px 20px",
+                                  borderRadius: "8px",
+                                  background: "linear-gradient(135deg, #ef4444 0%, #f59e0b 100%)",
+                                  color: "#fff",
+                                  fontWeight: 700,
+                                  fontSize: "0.9rem",
+                                  border: "none",
+                                  cursor: "pointer",
+                                  boxShadow: "0 4px 14px rgba(239, 68, 68, 0.4)",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "8px",
+                                }}
+                              >
+                                {retryLoading ? <Loader2 size={16} className="spin" /> : <Play size={16} />}
+                                {retryLoading ? "Exécution..." : "⚡ Lancer l'Analyse Live"}
+                              </button>
+                            </div>
+
+                            {/* Scenarios & Presets */}
+                            <div style={{ display: "flex", gap: "8px", marginBottom: "14px", flexWrap: "wrap" }}>
+                              <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", alignSelf: "center" }}>Scénarios Pré-remplis :</span>
+                              <button
+                                onClick={() => {
+                                  setRetryScenario("success");
+                                  handleRunRetryDemo("success");
+                                }}
+                                style={{
+                                  padding: "4px 10px",
+                                  borderRadius: "6px",
+                                  background: retryScenario === "success" ? "rgba(16, 185, 129, 0.3)" : "rgba(255,255,255,0.05)",
+                                  border: "1px solid " + (retryScenario === "success" ? "#10b981" : "var(--border)"),
+                                  color: "#fff",
+                                  fontSize: "0.75rem",
+                                  cursor: "pointer",
+                                }}
+                              >
+                                🟢 Direct Success (1st Attempt)
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setRetryScenario("rate_limit_recovered");
+                                  handleRunRetryDemo("rate_limit_recovered");
+                                }}
+                                style={{
+                                  padding: "4px 10px",
+                                  borderRadius: "6px",
+                                  background: retryScenario === "rate_limit_recovered" ? "rgba(245, 158, 11, 0.3)" : "rgba(255,255,255,0.05)",
+                                  border: "1px solid " + (retryScenario === "rate_limit_recovered" ? "#f59e0b" : "var(--border)"),
+                                  color: "#fff",
+                                  fontSize: "0.75rem",
+                                  cursor: "pointer",
+                                }}
+                              >
+                                ⚡ Rate Limit (429 -> Success 3rd Try)
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setRetryScenario("network_flake_recovered");
+                                  handleRunRetryDemo("network_flake_recovered");
+                                }}
+                                style={{
+                                  padding: "4px 10px",
+                                  borderRadius: "6px",
+                                  background: retryScenario === "network_flake_recovered" ? "rgba(59, 130, 246, 0.3)" : "rgba(255,255,255,0.05)",
+                                  border: "1px solid " + (retryScenario === "network_flake_recovered" ? "#3b82f6" : "var(--border)"),
+                                  color: "#fff",
+                                  fontSize: "0.75rem",
+                                  cursor: "pointer",
+                                }}
+                              >
+                                📡 Network Timeout (Success 2nd Try)
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setRetryScenario("outage_failed");
+                                  handleRunRetryDemo("outage_failed");
+                                }}
+                                style={{
+                                  padding: "4px 10px",
+                                  borderRadius: "6px",
+                                  background: retryScenario === "outage_failed" ? "rgba(239, 68, 68, 0.3)" : "rgba(255,255,255,0.05)",
+                                  border: "1px solid " + (retryScenario === "outage_failed" ? "#ef4444" : "var(--border)"),
+                                  color: "#fff",
+                                  fontSize: "0.75rem",
+                                  cursor: "pointer",
+                                }}
+                              >
+                                🚨 Persistent Outage (4 Attempts Failure)
+                              </button>
+                            </div>
+
+                            {/* Input Content Textarea */}
+                            <textarea
+                              rows={3}
+                              value={retryContent}
+                              onChange={(e) => setRetryContent(e.target.value)}
+                              placeholder="Entrez le texte à analyser via le client résilient..."
+                              style={{
+                                width: "100%",
+                                padding: "12px",
+                                borderRadius: "8px",
+                                background: "rgba(0,0,0,0.4)",
+                                border: "1px solid var(--border)",
+                                color: "#fff",
+                                fontSize: "0.85rem",
+                                marginBottom: "16px",
+                              }}
+                            />
+
+                            {/* Controls */}
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "12px", marginBottom: "16px" }}>
+                              <div>
+                                <label style={{ fontSize: "0.75rem", color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>
+                                  Modèle LLM :
+                                </label>
+                                <select
+                                  value={retryModel}
+                                  onChange={(e) => setRetryModel(e.target.value)}
+                                  style={{
+                                    width: "100%",
+                                    padding: "10px",
+                                    borderRadius: "8px",
+                                    background: "rgba(0,0,0,0.4)",
+                                    border: "1px solid var(--border)",
+                                    color: "#fff",
+                                    fontSize: "0.85rem",
+                                  }}
+                                >
+                                  <option value="gemini-1.5-flash">Google Gemini 1.5 Flash</option>
+                                  <option value="gpt-4o">OpenAI GPT-4o</option>
+                                  <option value="claude-3-5-sonnet-20241022">Anthropic Claude 3.5 Sonnet</option>
+                                </select>
+                              </div>
+
+                              <div>
+                                <label style={{ fontSize: "0.75rem", color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>
+                                  Max Tentatives (Attempts) :
+                                </label>
+                                <input
+                                  type="number"
+                                  value={retryMaxAttempts}
+                                  onChange={(e) => setRetryMaxAttempts(Number(e.target.value))}
+                                  min={1}
+                                  max={6}
+                                  style={{
+                                    width: "100%",
+                                    padding: "10px",
+                                    borderRadius: "8px",
+                                    background: "rgba(0,0,0,0.4)",
+                                    border: "1px solid var(--border)",
+                                    color: "#fff",
+                                    fontFamily: "monospace",
+                                    fontSize: "0.85rem",
+                                  }}
+                                />
+                              </div>
+
+                              <div>
+                                <label style={{ fontSize: "0.75rem", color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>
+                                  Délai Initial (s) :
+                                </label>
+                                <input
+                                  type="number"
+                                  step="0.5"
+                                  value={retryInitialDelay}
+                                  onChange={(e) => setRetryInitialDelay(Number(e.target.value))}
+                                  style={{
+                                    width: "100%",
+                                    padding: "10px",
+                                    borderRadius: "8px",
+                                    background: "rgba(0,0,0,0.4)",
+                                    border: "1px solid var(--border)",
+                                    color: "#fff",
+                                    fontFamily: "monospace",
+                                    fontSize: "0.85rem",
+                                  }}
+                                />
+                              </div>
+
+                              <div style={{ display: "flex", alignItems: "center", gap: "8px", paddingTop: "20px" }}>
+                                <input
+                                  type="checkbox"
+                                  id="retry_jitter_chk"
+                                  checked={retryJitter}
+                                  onChange={(e) => setRetryJitter(e.target.checked)}
+                                  style={{ width: "18px", height: "18px", cursor: "pointer" }}
+                                />
+                                <label htmlFor="retry_jitter_chk" style={{ fontSize: "0.85rem", color: "#fff", cursor: "pointer" }}>
+                                  🎲 Jitter Aléatoire (Tenacity)
+                                </label>
+                              </div>
+                            </div>
+
+                            {/* Demo Results Viewer */}
+                            {retryResult && (
+                              <div style={{ marginTop: "16px", background: "rgba(9, 5, 20, 0.8)", border: "1px solid var(--border)", borderRadius: "12px", overflow: "hidden" }}>
+                                <div style={{ display: "flex", borderBottom: "1px solid var(--border)", background: "rgba(0,0,0,0.3)" }}>
+                                  <button
+                                    onClick={() => setRetryTab("visual")}
+                                    style={{
+                                      padding: "10px 18px",
+                                      background: retryTab === "visual" ? "rgba(239, 68, 68, 0.2)" : "transparent",
+                                      border: "none",
+                                      borderBottom: retryTab === "visual" ? "2px solid #ef4444" : "none",
+                                      color: retryTab === "visual" ? "#fff" : "var(--text-muted)",
+                                      fontWeight: 600,
+                                      fontSize: "0.85rem",
+                                      cursor: "pointer",
+                                    }}
+                                  >
+                                    📊 Rendered Timeline & Resilience
+                                  </button>
+                                  <button
+                                    onClick={() => setRetryTab("json")}
+                                    style={{
+                                      padding: "10px 18px",
+                                      background: retryTab === "json" ? "rgba(239, 68, 68, 0.2)" : "transparent",
+                                      border: "none",
+                                      borderBottom: retryTab === "json" ? "2px solid #ef4444" : "none",
+                                      color: retryTab === "json" ? "#fff" : "var(--text-muted)",
+                                      fontWeight: 600,
+                                      fontSize: "0.85rem",
+                                      cursor: "pointer",
+                                    }}
+                                  >
+                                    💻 Raw JSON (Pydantic V2)
+                                  </button>
+                                </div>
+
+                                <div style={{ padding: "20px" }}>
+                                  {retryTab === "visual" && (
+                                    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                                      {/* Status Banner */}
+                                      <div
+                                        style={{
+                                          display: "flex",
+                                          justifyContent: "space-between",
+                                          alignItems: "center",
+                                          padding: "14px 18px",
+                                          borderRadius: "10px",
+                                          background: retryResult.is_success ? "rgba(16, 185, 129, 0.15)" : "rgba(239, 68, 68, 0.15)",
+                                          border: retryResult.is_success ? "1px solid rgba(16, 185, 129, 0.3)" : "1px solid rgba(239, 68, 68, 0.3)",
+                                        }}
+                                      >
+                                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                          <span
+                                            style={{
+                                              padding: "6px 14px",
+                                              borderRadius: "20px",
+                                              background: retryResult.is_success ? "#10b981" : "#ef4444",
+                                              color: "#fff",
+                                              fontWeight: 900,
+                                              fontSize: "0.85rem",
+                                            }}
+                                          >
+                                            {retryResult.is_success ? "✅ SUCCESS RECOVERED" : "❌ OUTAGE FAILED"}
+                                          </span>
+                                          <span style={{ fontSize: "0.85rem", color: "#fff" }}>
+                                            {retryResult.is_success
+                                              ? `Requête aboutie avec succès à la tentative #${retryResult.attempts_count} (Attente totale backoff: ${retryResult.total_backoff_seconds}s).`
+                                              : `Échec définitif après ${retryResult.attempts_count} tentatives max (Exit Code CLI: 1).`}
+                                          </span>
+                                        </div>
+                                        <span style={{ fontSize: "0.75rem", fontFamily: "monospace", color: "var(--text-muted)" }}>
+                                          Tenacity Policy: @retry(stop=4, wait=exponential)
+                                        </span>
+                                      </div>
+
+                                      {/* Attempts Log Stepper */}
+                                      <div>
+                                        <h5 style={{ fontSize: "0.9rem", fontWeight: 700, color: "#f59e0b", marginBottom: "10px" }}>
+                                          Chronologie des Tentatives de Réessai (Retry Stepper) :
+                                        </h5>
+                                        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                                          {retryResult.attempts_log?.map((log: any) => (
+                                            <div
+                                              key={log.attempt}
+                                              style={{
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "space-between",
+                                                padding: "10px 14px",
+                                                borderRadius: "8px",
+                                                background: log.status === "success"
+                                                  ? "rgba(16, 185, 129, 0.1)"
+                                                  : log.status === "fatal_error"
+                                                  ? "rgba(239, 68, 68, 0.15)"
+                                                  : "rgba(245, 158, 11, 0.1)",
+                                                border: "1px solid " + (log.status === "success" ? "rgba(16, 185, 129, 0.3)" : log.status === "fatal_error" ? "rgba(239, 68, 68, 0.3)" : "rgba(245, 158, 11, 0.3)"),
+                                              }}
+                                            >
+                                              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                                <span style={{ fontWeight: 800, fontSize: "0.85rem", color: log.status === "success" ? "#34d399" : log.status === "fatal_error" ? "#f87171" : "#fbbf24" }}>
+                                                  Tentative #{log.attempt}
+                                                </span>
+                                                <span style={{ fontSize: "0.8rem", color: "#d1d5db" }}>
+                                                  {log.error_message || "HTTP 200 OK — Réponse valide reçue."}
+                                                </span>
+                                              </div>
+                                              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                                                <span style={{ fontSize: "0.75rem", fontFamily: "monospace", color: "var(--text-muted)" }}>
+                                                  {log.backoff_strategy}
+                                                </span>
+                                                {log.sleep_seconds > 0 && (
+                                                  <span style={{ fontSize: "0.75rem", fontWeight: 700, padding: "2px 8px", borderRadius: "10px", background: "rgba(245, 158, 11, 0.2)", color: "#fbbf24" }}>
+                                                    ⏱️ Pause {log.sleep_seconds}s
+                                                  </span>
+                                                )}
+                                              </div>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+
+                                      {/* Report view if success */}
+                                      {retryResult.report && (
+                                        <>
+                                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                            <h4 style={{ fontSize: "1.2rem", fontWeight: 800, color: "#fff" }}>
+                                              {retryResult.report.title}
+                                            </h4>
+                                            <span
+                                              style={{
+                                                padding: "4px 12px",
+                                                borderRadius: "20px",
+                                                background: "rgba(239, 68, 68, 0.2)",
+                                                color: "#f87171",
+                                                fontWeight: 800,
+                                                fontSize: "0.75rem",
+                                                textTransform: "uppercase",
+                                              }}
+                                            >
+                                              Priorité : {retryResult.report.priority}
+                                            </span>
+                                          </div>
+
+                                          <div style={{ fontSize: "0.9rem", color: "#d1d5db", lineHeight: 1.6, background: "rgba(255,255,255,0.02)", padding: "12px", borderRadius: "8px" }}>
+                                            <strong>Executive Summary :</strong> {retryResult.report.summary}
+                                          </div>
+
+                                          <div>
+                                            <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "#f87171", marginBottom: "6px" }}>
+                                              Points Clés Résilience Réseau :
+                                            </div>
+                                            <ul style={{ paddingLeft: "20px", fontSize: "0.85rem", color: "var(--text-muted)", lineHeight: 1.6 }}>
+                                              {retryResult.report.key_points?.map((kp: string, idx: number) => (
+                                                <li key={idx}>{kp}</li>
+                                              ))}
+                                            </ul>
+                                          </div>
+                                        </>
+                                      )}
+
+                                      {/* Telemetry Bar */}
+                                      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "10px", padding: "12px", background: "rgba(239, 68, 68, 0.08)", borderRadius: "8px", border: "1px solid rgba(239, 68, 68, 0.2)" }}>
+                                        <div>
+                                          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Statut Execution</span>
+                                          <strong style={{ color: retryResult.is_success ? "#34d399" : "#f87171" }}>
+                                            {retryResult.is_success ? "RECOVERED" : "FAILED (Code 1)"}
+                                          </strong>
+                                        </div>
+                                        <div>
+                                          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Tentatives Effectuées</span>
+                                          <strong style={{ color: "#fbbf24" }}>{retryResult.attempts_count} / {retryResult.max_retries}</strong>
+                                        </div>
+                                        <div>
+                                          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Attente Backoff Totale</span>
+                                          <strong style={{ color: "#f59e0b" }}>{retryResult.total_backoff_seconds}s</strong>
+                                        </div>
+                                        <div>
+                                          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Coût Estimation FinOps</span>
+                                          <strong style={{ color: "#34d399" }}>${retryResult.telemetry?.estimated_cost_usd || 0}</strong>
+                                        </div>
+                                        <div>
+                                          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Pydantic V2 Validé</span>
+                                          <strong style={{ color: retryResult.telemetry?.pydantic_validated ? "#34d399" : "#f87171" }}>
+                                            {retryResult.telemetry?.pydantic_validated ? "True" : "False"}
+                                          </strong>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {retryTab === "json" && (
+                                    <pre style={{ fontSize: "0.8rem", color: "#f87171", fontFamily: "monospace", overflowX: "auto" }}>
+                                      {JSON.stringify(retryResult, null, 2)}
+                                    </pre>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
                     );
                   })()}
                 </div>
