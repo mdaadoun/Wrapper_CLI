@@ -173,3 +173,9 @@ Eliminating redundant LLM API requests and token costs by reusing verified analy
 
 ### Cache TTL (Time-To-Live)
 The duration in seconds for which a cached analysis report remains valid before requiring re-evaluation from the primary LLM model.
+
+### Automated Cache Purging
+Automated background cleanup during initialization that sweeps expired or malformed entries from the JSON cache file on disk.
+
+### Cache Bypass Flag (--no-cache)
+A CLI option that skips both reading from and writing to the local disk cache, executing fresh LLM analysis without modifying existing cache data.

@@ -49,6 +49,16 @@ def scan(
     demo: bool = typer.Option(
         False, "--demo", "-d", help="Run in demo mode with mocked LLM response."
     ),
+    cache_ttl: int = typer.Option(
+        3600,
+        "--cache-ttl",
+        help="Cache time-to-live in seconds (default: 3600s). 0 forces fresh analysis.",
+    ),
+    no_cache: bool = typer.Option(
+        False,
+        "--no-cache",
+        help="Bypass local caching (do not read or write cache).",
+    ),
 ) -> None:
     """
     Scan and analyze tech content from text, file, or URL.
@@ -69,9 +79,12 @@ def scan(
             typer.echo(f"Extracted {len(content)} characters.")
 
         # Local cache check
-        content_hash = compute_content_hash(content)
-        cache = ContentCache()
-        cached_report = cache.get(content_hash)
+        cached_report = None
+        cache = None
+        if not no_cache:
+            content_hash = compute_content_hash(content)
+            cache = ContentCache()
+            cached_report = cache.get(content_hash, ttl=cache_ttl)
 
         if cached_report is not None:
             if output.lower() == "console":
@@ -91,7 +104,8 @@ def scan(
                 )
 
             report = client.analyze(content=content, source=source)
-            cache.set(content_hash, report)
+            if not no_cache and cache is not None:
+                cache.set(content_hash, report, ttl=cache_ttl)
 
         # Output formatting phase
         out_fmt = output.lower()

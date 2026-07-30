@@ -203,3 +203,18 @@ Questions-réponses clés pour défendre l'architecture et les choix d'ingénier
 
 **Q : Comment l'immuabilité est-elle maintenue pour AnalysisReport lorsqu'il est restitué depuis le cache ?**
 *Réponse attendue :* AnalysisReport est un modèle Pydantic configuré avec frozen=True. Lorsqu'il est servi à partir du cache, une copie est instanciée avec is_cached=True, préservant la validation du schéma et l'immuabilité à travers l'ensemble des formateurs en aval.
+
+### 39. TTL configurable vs Expiration par défaut (Étape 7.2)
+
+**Q : Pourquoi supporter à la fois un TTL enregistré au niveau de l'entrée et une surcharge du TTL à l'exécution via --cache-ttl ?**
+*Réponse attendue :* Le TTL enregistré garantit que chaque élément de cache respecte sa fenêtre de fraîcheur par défaut (3600s), tandis que les surcharges de TTL à l'exécution permettent aux utilisateurs d'imposer des contraintes de fraîcheur plus strictes ou plus souples sur des invocations CLI spécifiques sans modifier les métadonnées enregistrées.
+
+### 40. Impact de performance de la purge au démarrage (Étape 7.2)
+
+**Q : Comment la purge automatique au démarrage maintient-elle les performances sur de grands fichiers de cache ?**
+*Réponse attendue :* `purge_expired()` effectue des comparaisons rapides d'horodatage ISO en mémoire et ne déclenche une opération d'écriture sur disque que si des entrées expirées ont réellement été détectées et purgées, minimisant ainsi le surcoût d'E/S tout en maintenant les fichiers de cache bornés.
+
+### 41. Différence opérationnelle : --no-cache vs --cache-ttl 0 (Étape 7.2)
+
+**Q : Quelle est la différence opérationnelle entre --no-cache et --cache-ttl 0 ?**
+*Réponse attendue :* `--cache-ttl 0` force un nouvel appel d'API et écrase l'entrée de cache locale avec le rapport nouvellement généré, tandis que `--no-cache` contourne totalement la lecture et l'écriture du cache, préservant ainsi les données en cache existantes sur disque.

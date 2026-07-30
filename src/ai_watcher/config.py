@@ -22,7 +22,7 @@ class Settings(BaseSettings):
 
     # Behavior Settings
     max_retries: int = 4
-    cache_ttl_seconds: int = 86400
+    cache_ttl_seconds: int = 3600
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

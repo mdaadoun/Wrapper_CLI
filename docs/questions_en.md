@@ -203,3 +203,18 @@ Targeted questions and answers covering architecture design choices and engineer
 
 **Q: How is immutability maintained for AnalysisReport when returned from cache?**
 *Expected Answer:* AnalysisReport is a Pydantic model configured with frozen=True. When served from cache, a copy is instantiated setting is_cached=True, preserving schema validation and immutability throughout downstream formatters.
+
+### 39. Configurable TTL vs Default Expiration (Step 7.2)
+
+**Q: Why support both entry-level stored TTL and a runtime TTL override via --cache-ttl?**
+*Expected Answer:* Stored TTL ensures individual cache items respect their default freshness window (3600s), while runtime TTL overrides enable users to enforce stricter or looser freshness constraints on specific CLI invocations without altering persisted entry metadata.
+
+### 40. Performance Impact of Startup Purging (Step 7.2)
+
+**Q: How does automatic purging on startup maintain performance on large cache files?**
+*Expected Answer:* `purge_expired()` performs fast ISO timestamp comparisons in memory and only triggers a disk write operation if expired entries were actually detected and purged, minimizing I/O overhead while keeping cache files bounded.
+
+### 41. Operational Difference: --no-cache vs --cache-ttl 0 (Step 7.2)
+
+**Q: What is the operational difference between --no-cache and --cache-ttl 0?**
+*Expected Answer:* `--cache-ttl 0` forces a fresh API call and overwrites the local cache entry with the newly generated report, whereas `--no-cache` bypasses cache reading and writing entirely, preserving existing cached data on disk.

@@ -168,3 +168,9 @@ Stockage des résultats d'analyse calculés indexés par une empreinte cryptogra
 
 ### Durée de vie du cache (Cache TTL - Time-To-Live)
 La durée en secondes pendant laquelle un rapport d'analyse en cache reste valide avant de nécessiter une réévaluation par le modèle LLM principal.
+
+### Purge automatique du cache (Automated Cache Purging)
+Nettoyage automatique en arrière-plan lors de l'initialisation qui élimine les entrées expirées ou corrompues du fichier JSON de cache sur disque.
+
+### Fanion de contournement du cache (Cache Bypass Flag - --no-cache)
+Option CLI ignorant à la fois la lecture et l'écriture dans le cache local sur disque, exécutant une analyse LLM fraîche sans modifier les données existantes du cache.

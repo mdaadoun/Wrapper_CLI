@@ -263,6 +263,62 @@ const TEST_DESCRIPTIONS: Record<
     output: "Styles de couleur appropriés appliqués aux tableaux de métriques.",
     concept: "Colorimétrie Dynamique des Métriques FinOps",
   },
+  "tests/test_cache.py": {
+    title: "📁 test_cache.py (Persistance SHA-256 & TTL configurable)",
+    objective: "Tester le système de cache local JSON avec empreinte SHA-256, purge automatique et invalidation TTL.",
+    input: "Rapports d'analyse sérialisés et hashes de contenus texte.",
+    output: "Rapports récupérés instantanément [CACHE HIT] ou invalides/purgés sur expiration TTL.",
+    concept: "Idempotence & Freshness Management (FinOps)",
+  },
+  "tests/test_cache.py::test_cache_set_and_get": {
+    title: "⚡ test_cache_set_and_get()",
+    objective: "Vérifier le stockage et la restitution exacte d'un rapport dans le cache JSON.",
+    input: "Content hash SHA-256 et instance AnalysisReport.",
+    output: "Rapport restitué avec is_cached=True.",
+    concept: "Persistance JSON Locale",
+  },
+  "tests/test_cache.py::test_cache_purge_expired": {
+    title: "⚡ test_cache_purge_expired()",
+    objective: "Valider la purge des entrées expirées selon la timestamp d'origine et le TTL.",
+    input: "Cache contenant des entrées valides et des entrées expirées.",
+    output: "Purge effective des entrées obsolètes et conservation des entrées valides sur disque.",
+    concept: "Invalidation de Cache & Garbage Collection",
+  },
+  "tests/test_cache.py::test_cache_auto_purge_on_init": {
+    title: "⚡ test_cache_auto_purge_on_init()",
+    objective: "Vérifier la purge automatique des entrées expirées au démarrage de ContentCache.",
+    input: "Instanciation de ContentCache() sur un fichier de cache existant.",
+    output: "Nettoyage automatique du fichier cache JSON dès l'initialisation.",
+    concept: "Auto-purging on Startup",
+  },
+  "tests/test_cache.py::test_cache_custom_ttl_override": {
+    title: "⚡ test_cache_custom_ttl_override()",
+    objective: "Tester le surdimensionnement dynamique du TTL lors d'un appel cache.get(hash, ttl=X).",
+    input: "Evaluation cache.get avec TTL personnalisé plus court/long que l'original.",
+    output: "Cache miss si l'âge dépasse le TTL personnalisé.",
+    concept: "Overriding TTL dynamique",
+  },
+  "tests/test_cache.py::test_cache_ttl_zero_override": {
+    title: "⚡ test_cache_ttl_zero_override()",
+    objective: "S'assurer qu'un TTL de 0 force un cache miss immédiat.",
+    input: "cache.get(hash, ttl=0)",
+    output: "Retourne None (cache miss garanti).",
+    concept: "Forçage de fraîcheur strict",
+  },
+  "tests/test_cli_scan_cache_ttl_zero": {
+    title: "⚡ test_cli_scan_cache_ttl_zero()",
+    objective: "Valider le flag CLI --cache-ttl 0 forçant une ré-analyse sans utiliser le cache.",
+    input: "runner.invoke(app, ['scan', 'text', '--demo', '--cache-ttl', '0'])",
+    output: "Exécution de l'analyse sans badge [CACHE HIT].",
+    concept: "Option CLI --cache-ttl",
+  },
+  "tests/test_cli_scan_no_cache_flag": {
+    title: "⚡ test_cli_scan_no_cache_flag()",
+    objective: "Valider le flag CLI --no-cache contournant la lecture et l'écriture du cache.",
+    input: "runner.invoke(app, ['scan', 'text', '--demo', '--no-cache'])",
+    output: "Absence d'écriture ou de lecture du fichier cache.json.",
+    concept: "Option CLI --no-cache",
+  },
 };
 
 function getFileIcon(name: string): string {

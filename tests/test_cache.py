@@ -184,3 +184,149 @@ def test_cli_scan_cache_hit(tmp_path, monkeypatch):
     result2 = runner.invoke(app, ["scan", "Unique content to analyze", "--demo"])
     assert result2.exit_code == 0
     assert "[CACHE HIT]" in result2.stdout
+
+
+def test_cache_purge_expired(tmp_path):
+    """Verify purge_expired removes expired entries from disk."""
+    cache_file = tmp_path / "cache.json"
+    cache = ContentCache(cache_file=cache_file, auto_purge=False)
+    report = get_mock_analysis_report()
+    valid_hash = compute_content_hash("valid content")
+    expired_hash = compute_content_hash("expired content")
+
+    past_time = (datetime.now(timezone.utc) - timedelta(seconds=100)).isoformat()
+    now_time = datetime.now(timezone.utc).isoformat()
+
+    cache._save(
+        {
+            valid_hash: {
+                "hash": valid_hash,
+                "created_at": now_time,
+                "ttl": 3600,
+                "report": report.model_dump(mode="json"),
+            },
+            expired_hash: {
+                "hash": expired_hash,
+                "created_at": past_time,
+                "ttl": 50,
+                "report": report.model_dump(mode="json"),
+            },
+        }
+    )
+
+    purged = cache.purge_expired()
+    assert purged == 1
+
+    loaded = cache._load()
+    assert valid_hash in loaded
+    assert expired_hash not in loaded
+
+
+def test_cache_auto_purge_on_init(tmp_path):
+    """Verify ContentCache automatically purges expired entries on initialization."""
+    cache_file = tmp_path / "cache.json"
+    cache_init = ContentCache(cache_file=cache_file, auto_purge=False)
+    report = get_mock_analysis_report()
+    expired_hash = compute_content_hash("auto purge content")
+
+    past_time = (datetime.now(timezone.utc) - timedelta(seconds=200)).isoformat()
+    cache_init._save(
+        {
+            expired_hash: {
+                "hash": expired_hash,
+                "created_at": past_time,
+                "ttl": 50,
+                "report": report.model_dump(mode="json"),
+            }
+        }
+    )
+
+    # Initializing ContentCache with default auto_purge=True purges expired entries
+    cache = ContentCache(cache_file=cache_file, auto_purge=True)
+    assert cache.get(expired_hash) is None
+    loaded = cache._load()
+    assert expired_hash not in loaded
+
+
+def test_cache_custom_ttl_override(tmp_path):
+    """Verify get with custom ttl overrides entry ttl."""
+    cache_file = tmp_path / "cache.json"
+    cache = ContentCache(cache_file=cache_file, auto_purge=False)
+    report = get_mock_analysis_report()
+    content_hash = compute_content_hash("custom ttl text")
+
+    past_time = (datetime.now(timezone.utc) - timedelta(seconds=30)).isoformat()
+    cache._save(
+        {
+            content_hash: {
+                "hash": content_hash,
+                "created_at": past_time,
+                "ttl": 3600,
+                "report": report.model_dump(mode="json"),
+            }
+        }
+    )
+
+    # Effective custom TTL of 10s is smaller than 30s elapsed time
+    assert cache.get(content_hash, ttl=10) is None
+    # Effective custom TTL of 100s is larger than 30s elapsed time
+    assert cache.get(content_hash, ttl=100) is not None
+
+
+def test_cache_ttl_zero_override(tmp_path):
+    """Verify ttl=0 forces cache miss."""
+    cache_file = tmp_path / "cache.json"
+    cache = ContentCache(cache_file=cache_file, auto_purge=False)
+    report = get_mock_analysis_report()
+    content_hash = compute_content_hash("ttl zero content")
+
+    cache.set(content_hash, report, ttl=3600)
+    assert cache.get(content_hash, ttl=0) is None
+
+
+def test_cli_scan_cache_ttl_zero(tmp_path, monkeypatch):
+    """Verify --cache-ttl 0 forces fresh API analysis without cache hit."""
+    cache_file = tmp_path / "cache.json"
+    monkeypatch.setattr(
+        "ai_watcher.main.ContentCache", lambda: ContentCache(cache_file=cache_file)
+    )
+
+    runner.invoke(app, ["scan", "TTL zero test text", "--demo"])
+    result = runner.invoke(
+        app, ["scan", "TTL zero test text", "--demo", "--cache-ttl", "0"]
+    )
+
+    assert result.exit_code == 0
+    assert "[CACHE HIT]" not in result.stdout
+    assert "Executing in DEMO mode" in result.stdout
+
+
+def test_cli_scan_no_cache_flag(tmp_path, monkeypatch):
+    """Verify --no-cache flag bypasses cache read and write."""
+    cache_file = tmp_path / "cache.json"
+    monkeypatch.setattr(
+        "ai_watcher.main.ContentCache", lambda: ContentCache(cache_file=cache_file)
+    )
+
+    result = runner.invoke(app, ["scan", "No cache test text", "--demo", "--no-cache"])
+    assert result.exit_code == 0
+    assert "[CACHE HIT]" not in result.stdout
+    assert not cache_file.exists()
+
+
+def test_cache_purge_corrupted_entries(tmp_path):
+    """Verify purge_expired handles invalid dictionary, missing created_at, or bad timestamp."""
+    cache_file = tmp_path / "cache.json"
+    cache = ContentCache(cache_file=cache_file, auto_purge=False)
+
+    cache._save(
+        {
+            "non_dict": "not_a_dict",
+            "missing_date": {"hash": "h1"},
+            "bad_date": {"created_at": "invalid-iso"},
+        }
+    )
+
+    purged = cache.purge_expired()
+    assert purged == 3
+    assert cache._load() == {}

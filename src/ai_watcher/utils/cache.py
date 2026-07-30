@@ -17,14 +17,24 @@ def compute_content_hash(content: str) -> str:
 class ContentCache:
     """Manages local JSON caching of analysis reports by SHA-256 content hash."""
 
-    def __init__(self, cache_file: Optional[Path | str] = None) -> None:
-        """Initialize ContentCache with target cache file path."""
+    def __init__(
+        self,
+        cache_file: Optional[Path | str] = None,
+        auto_purge: bool = True,
+    ) -> None:
+        """Initialize ContentCache with target cache file path and optional auto-purge."""
         if cache_file:
             self.cache_file = Path(cache_file)
         else:
             self.cache_file = Path.home() / ".cache" / "ai_watcher" / "cache.json"
+        if auto_purge and self.cache_file.exists():
+            self.purge_expired()
 
-    def get(self, content_hash: str) -> Optional[AnalysisReport]:
+    def get(
+        self,
+        content_hash: str,
+        ttl: Optional[int] = None,
+    ) -> Optional[AnalysisReport]:
         """Retrieve cached report if present and not expired."""
         cache_data = self._load()
         entry = cache_data.get(content_hash)
@@ -32,12 +42,15 @@ class ContentCache:
             return None
 
         created_at_str = entry.get("created_at")
-        ttl = entry.get("ttl", 86400)
+        effective_ttl = ttl if ttl is not None else entry.get("ttl", 3600)
+        if effective_ttl <= 0:
+            return None
+
         if created_at_str:
             try:
                 created_at = datetime.fromisoformat(created_at_str)
                 now = datetime.now(timezone.utc)
-                if (now - created_at).total_seconds() > ttl:
+                if (now - created_at).total_seconds() > effective_ttl:
                     return None
             except ValueError:
                 return None
@@ -56,7 +69,7 @@ class ContentCache:
         self,
         content_hash: str,
         report: AnalysisReport,
-        ttl: int = 86400,
+        ttl: int = 3600,
     ) -> None:
         """Persist analysis report with content hash and timestamp."""
         cache_data = self._load()
@@ -67,6 +80,38 @@ class ContentCache:
             "report": report.model_dump(mode="json"),
         }
         self._save(cache_data)
+
+    def purge_expired(self) -> int:
+        """Purge all expired cache entries from disk. Returns count of purged entries."""
+        cache_data = self._load()
+        if not cache_data:
+            return 0
+
+        now = datetime.now(timezone.utc)
+        purged_count = 0
+        valid_data: Dict[str, Any] = {}
+
+        for key, entry in cache_data.items():
+            if not isinstance(entry, dict):
+                purged_count += 1
+                continue
+            created_at_str = entry.get("created_at")
+            entry_ttl = entry.get("ttl", 3600)
+            if not created_at_str:
+                purged_count += 1
+                continue
+            try:
+                created_at = datetime.fromisoformat(created_at_str)
+                if (now - created_at).total_seconds() > entry_ttl:
+                    purged_count += 1
+                else:
+                    valid_data[key] = entry
+            except (ValueError, TypeError):
+                purged_count += 1
+
+        if purged_count > 0:
+            self._save(valid_data)
+        return purged_count
 
     def clear(self) -> None:
         """Purge local cache file."""
