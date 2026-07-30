@@ -10,7 +10,7 @@ Cette feuille de route détaille l'ordre chronologique des étapes pour réalise
 
 ```text
 Phase 1 : Adaptation Socle ──> Phase 2 : CLI Squelette ──> Phase 3 : Ingestion ──> Phase 4 : Client LLM ──> Phase 5 : FinOps ──> Phase 6 : Rich UI ──> Phase 7 : Cache ──> Phase 8 : Résilience ──> Phase 9 : Tests ──> Phase 10 : Docker & Livraison
-     (⏳ À faire)              (⏳ À faire)            (⏳ À faire)          (⏳ À faire)          (⏳ À faire)       (⏳ À faire)        (⏳ À faire)       (⏳ À faire)         (⏳ À faire)        (⏳ À faire)
+     (✅ Terminé)              (✅ Terminé)            (✅ Terminé)          (✅ Terminé)          (⏳ À faire)       (⏳ À faire)        (⏳ À faire)       (⏳ À faire)         (⏳ À faire)        (⏳ À faire)
 ```
 
 ---
@@ -96,7 +96,7 @@ Phase 1 : Adaptation Socle ──> Phase 2 : CLI Squelette ──> Phase 3 : Ing
 
 ---
 
-## Phase 4 : Client LLM & Structured Outputs — ⏳ À faire
+## Phase 4 : Client LLM & Structured Outputs — ✅ Terminé
 *Objectif : Interroger les API LLM et garantir des réponses structurées conformes au schéma Pydantic (SF-02).*
 
 ### Étape 4.1 : Modélisation des données de sortie (Pydantic V2) — ✅ Terminé
@@ -114,7 +114,7 @@ Phase 1 : Adaptation Socle ──> Phase 2 : CLI Squelette ──> Phase 3 : Ing
 *   **Concept clé :** Encapsulation du client API — isoler l'appel réseau dans une couche dédiée permet de le mocker en test, de le remplacer par un autre provider, et de centraliser la gestion d'erreurs.
 *   **Critère de validation :** Avec une clé API valide, `LLMClient().analyze("OpenAI lance GPT-5")` renvoie un `AnalysisReport` complet et validé. Sans clé, une `LLMClientError` est levée.
 
-### Étape 4.4 : Mode démo avec réponse mockée — ⏳ À faire
+### Étape 4.4 : Mode démo avec réponse mockée — ✅ Terminé
 *   **Description :** Ajouter un mode `--demo` au CLI qui court-circuite l'appel API et retourne un `AnalysisReport` pré-rempli avec des données de démonstration réalistes. Ce mode permet de tester l'intégralité du pipeline (ingestion → formatage → affichage) sans consommer de crédit API.
 *   **Concept clé :** Développement découplé — pouvoir tester le pipeline bout-en-bout sans dépendance externe accélère les itérations et réduit les coûts de développement.
 *   **Critère de validation :** `make run ARGS="scan 'test' --demo"` affiche un rapport complet sans aucun appel réseau.

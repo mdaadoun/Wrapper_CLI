@@ -238,6 +238,122 @@ function buildTree(files: CodeFileItem[]): TreeNode[] {
   return rootNodes;
 }
 
+const PHASES_DATA = [
+  {
+    id: 1,
+    title: "Phase 1 : Adaptation du Socle Technique",
+    status: "completed",
+    badge: "✅ Complété",
+    desc: "Adaptation du blueprint AIPE hérité en projet CLI autonome avec environnement virtuel strict, linter/formatter Ruff, typage strict Mypy et hook detect-secrets.",
+    concepts: ["Poetry Dependency Isolation", "Ruff Linter/Formatter", "Strict Mypy Type Hints", "Pre-commit Security Hooks", "Makefile Unified Commands"],
+    inputExample: "pyproject.toml + .pre-commit-config.yaml + Makefile",
+    outputExample: "Environnement configuré à 0 warning, make lint et make test fonctionnels en < 2s",
+    tests: "tests/test_config.py, tests/test_exceptions.py",
+  },
+  {
+    id: 2,
+    title: "Phase 2 : CLI Squelette & Détection Automatique",
+    status: "completed",
+    badge: "✅ Complété",
+    desc: "Implémentation de l'interface CLI Typer et du sous-système de détection automatique des types de source (texte brut, fichier local .txt/.md, URL http/https).",
+    concepts: ["Typer CLI Framework", "Pattern Matching Regex & Path Inspection", "SourceType Enum Dispatching", "Forced Source Flags (--text, --file, --url)"],
+    inputExample: 'Input: "https://news.ycombinator.com/item?id=12345" ou "docs/architecture.md" ou "Text content"',
+    outputExample: "SourceType.URL | SourceType.FILE | SourceType.TEXT",
+    tests: "tests/test_cli.py, tests/test_detector.py",
+    hasPlayground: "detector",
+  },
+  {
+    id: 3,
+    title: "Phase 3 : Ingestion & Scraping HTML",
+    status: "completed",
+    badge: "✅ Complété",
+    desc: "Scraping web sécurisé et extraction de texte brut depuis HTML ou fichiers locaux, avec décontamination des balises inutiles (script, style, nav) et garde-fous SSRF.",
+    concepts: ["BeautifulSoup4 Parsing", "Noise Tag Decomposition (script/style/nav)", "SSRF IP Validation & Transport Guardrails", "Pydantic Non-Empty ExtractedContent Contract"],
+    inputExample: 'HTML brut: "<html><body><script>alert(1)</script><h1>Titre</h1><p>Contenu utile</p></body></html>"',
+    outputExample: 'Texte nettoyé: "Titre\\nContenu utile" (garanti non-vide)',
+    tests: "tests/test_extractor.py, tests/test_core.py",
+    hasPlayground: "scraper",
+  },
+  {
+    id: 4,
+    title: "Phase 4 : Client LLM & Structured Outputs",
+    status: "completed",
+    badge: "✅ Complété",
+    desc: "Interrogation des API LLM (Gemini/OpenAI) avec garanties de sorties structurées Pydantic V2, System Prompt Engineering, extraction de tokens et mode démo mocké à coût 0.",
+    concepts: ["Pydantic V2 AnalysisReport Immutable Contract", "System Prompt Engineering & JSON Enforcement", "HTTPX REST API Encapsulation (Gemini/OpenAI)", "Mode Démo Offline Mocked Response", "Télémétrie FinOps (Tokens, Latence, Coût USD)"],
+    inputExample: 'Contenu à analyser: "OpenAI annonce le lancement du framework agentic autonome avec validation Pydantic V2 native..."',
+    outputExample: 'AnalysisReport { title: "Autonomous Agent Framework Release", summary: "...", key_points: [...], priority: "high", prompt_tokens: 450, completion_tokens: 180, estimated_cost_usd: 0.000315 }',
+    tests: "tests/test_schemas.py, tests/test_prompts.py, tests/test_llm_client.py, tests/test_coverage_edge_cases.py",
+    hasPlayground: "llm",
+  },
+  {
+    id: 5,
+    title: "Phase 5 : Calculatrice FinOps & Accounting",
+    status: "pending",
+    badge: "⏳ À venir",
+    desc: "Calcul en temps réel du coût financier de chaque appel API via grille tarifaire par modèle et mesure précise de latence.",
+    concepts: ["Token Pricing Matrix", "Direct Marginal Cost Calculator", "Latency & Financial Observability"],
+    inputExample: 'model="gemini-1.5-pro-latest", prompt_tokens=450, completion_tokens=180',
+    outputExample: "estimated_cost_usd=0.000315, execution_time_seconds=0.85s",
+    tests: "tests/test_cost.py",
+  },
+  {
+    id: 6,
+    title: "Phase 6 : Rich UI & Formats d'Export",
+    status: "pending",
+    badge: "⏳ À venir",
+    desc: "Rendu console élégant avec panneaux et tableaux colorés Rich, et options d'export multi-formats (Console, JSON, Markdown).",
+    concepts: ["Rich Terminal Panelling & Tables", "Multi-Format Exporters (-o json, -o markdown)"],
+    inputExample: "AnalysisReport + flag --output json",
+    outputExample: "Sortie JSON indendée sur stdout ou fichier report.md généré",
+    tests: "tests/test_console.py",
+  },
+  {
+    id: 7,
+    title: "Phase 7 : Système de Cache Local",
+    status: "pending",
+    badge: "⏳ À venir",
+    desc: "Évitement des appels API redondants via mise en cache sur disque indexée par hash MD5/SHA256 du contenu.",
+    concepts: ["Content Hashing", "Disk-backed Response Cache", "Cost & Latency Elimination"],
+    inputExample: "Contenu déjà analysé auparavant",
+    outputExample: "Rapport retourné en 0.001s avec is_cached=True et coût 0$",
+    tests: "À venir",
+  },
+  {
+    id: 8,
+    title: "Phase 8 : Résilience & Retry Adaptatif",
+    status: "pending",
+    badge: "⏳ À venir",
+    desc: "Gestion des erreurs réseau et rate-limits avec Exponential Backoff et Jitter (Tenacity).",
+    concepts: ["Exponential Backoff", "Rate Limit (HTTP 429) Handling", "Transient Failure Recovery"],
+    inputExample: "Réseau instable ou quota API temporairement dépassé",
+    outputExample: "Tentatives espacées (1s, 2s, 4s) jusqu'au succès sans crash CLI",
+    tests: "À venir",
+  },
+  {
+    id: 9,
+    title: "Phase 9 : Suite de Tests & Couverture 100%",
+    status: "pending",
+    badge: "⏳ À venir",
+    desc: "Mocks réseau complets avec HTTPX et Pytest-cov garantissant une couverture de code maximale.",
+    concepts: ["Integration Testing", "Mocks & Fixtures Pytest", "Coverage Reports"],
+    inputExample: "make test",
+    outputExample: "100% des tests passés avec rapport coverage.xml",
+    tests: "Suite complète pytest",
+  },
+  {
+    id: 10,
+    title: "Phase 10 : Conteneurisation & Livraison Docker",
+    status: "pending",
+    badge: "⏳ À venir",
+    desc: "Build Docker multi-stage durci et léger (<250 MB) exécuté sous utilisateur non-root.",
+    concepts: ["Multi-Stage Dockerfile", "Non-Root Security Hardening", "Zero-Setup Onboarding"],
+    inputExample: "make docker-build && docker run wrapper-cli scan --demo",
+    outputExample: "Rapport complet généré dans un conteneur sécurisé sans Python local",
+    tests: "scripts/simulate_onboarding.sh",
+  },
+];
+
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<TabType>("presentation");
   const [lang, setLang] = useState<"en" | "fr">("en");
@@ -245,6 +361,44 @@ export default function DashboardPage() {
   // HTML content states
   const [presentationHtml, setPresentationHtml] = useState("");
   const [roadmapHtml, setRoadmapHtml] = useState("");
+
+  // Interactive Roadmap State
+  const [selectedPhase, setSelectedPhase] = useState<number>(4);
+  const [roadmapViewMode, setRoadmapViewMode] = useState<"interactive" | "doc">("interactive");
+  const [detectorInput, setDetectorInput] = useState<string>("https://news.ycombinator.com/item?id=38000000");
+  const [htmlInput, setHtmlInput] = useState<string>(
+    "<html><body><script>var tracker=1;</script><style>.ad{color:red}</style><header><nav>Menu Top</nav></header><main><h1>LLM Security Breakthrough</h1><p>Autonomous agents now feature Pydantic V2 schema validation and FinOps metrics.</p></main><footer>Footer Links 2026</footer></body></html>"
+  );
+  const [demoContent, setDemoContent] = useState<string>(
+    "OpenAI lance une nouvelle suite SDK permettant l'orchestration multi-agents autonome. Le framework intègre la validation native Pydantic V2 avec une latence sub-100ms sur edge runtime et le suivi FinOps des tokens."
+  );
+  const [demoModel, setDemoModel] = useState<string>("gemini-1.5-pro-latest (mocked)");
+  const [demoResult, setDemoResult] = useState<any>(null);
+  const [demoLoading, setDemoLoading] = useState<boolean>(false);
+  const [demoOutputTab, setDemoOutputTab] = useState<"visual" | "json">("visual");
+
+  const handleRunDemoAnalysis = async () => {
+    setDemoLoading(true);
+    try {
+      const res = await fetch("/api/analyze-demo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: demoContent,
+          model: demoModel,
+          source: detectorInput || "raw_text",
+        }),
+      });
+      const data = await res.json();
+      if (data.status === "success") {
+        setDemoResult(data.report);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setDemoLoading(false);
+    }
+  };
 
   // Interview state
   const [questions, setQuestions] = useState<QuestionItem[]>([]);
@@ -658,10 +812,452 @@ export default function DashboardPage() {
 
           {/* ROADMAP TAB */}
           {activeTab === "roadmap" && (
-            <div
-              className="markdown-body"
-              dangerouslySetInnerHTML={{ __html: roadmapHtml }}
-            />
+            <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+              {/* Header Bar for Roadmap */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "16px 20px",
+                  background: "rgba(255, 255, 255, 0.02)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "12px",
+                }}
+              >
+                <div>
+                  <h2 style={{ fontSize: "1.3rem", fontWeight: 700, color: "#fff", display: "flex", alignItems: "center", gap: "8px" }}>
+                    <Map size={20} style={{ color: "var(--primary)" }} />
+                    {lang === "en" ? "Interactive Engineering Roadmap & Live Demos" : "Feuille de Route & Démos Interactives"}
+                  </h2>
+                  <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginTop: "4px" }}>
+                    {lang === "en"
+                      ? "Explore each phase, inspect data contracts (inputs/outputs), and execute live demos."
+                      : "Explorez chaque phase, inspectez les contrats de données (entrées/sorties) et testez les démos en direct."}
+                  </p>
+                </div>
+
+                {/* Toggle View Mode */}
+                <div style={{ display: "flex", gap: "8px", background: "rgba(0,0,0,0.3)", padding: "4px", borderRadius: "8px", border: "1px solid var(--border)" }}>
+                  <button
+                    onClick={() => setRoadmapViewMode("interactive")}
+                    style={{
+                      padding: "6px 14px",
+                      borderRadius: "6px",
+                      border: "none",
+                      background: roadmapViewMode === "interactive" ? "var(--primary)" : "transparent",
+                      color: roadmapViewMode === "interactive" ? "#fff" : "var(--text-muted)",
+                      fontWeight: 600,
+                      fontSize: "0.85rem",
+                      cursor: "pointer",
+                    }}
+                  >
+                    🎮 {lang === "en" ? "Interactive Demos" : "Démos Interactives"}
+                  </button>
+                  <button
+                    onClick={() => setRoadmapViewMode("doc")}
+                    style={{
+                      padding: "6px 14px",
+                      borderRadius: "6px",
+                      border: "none",
+                      background: roadmapViewMode === "doc" ? "var(--primary)" : "transparent",
+                      color: roadmapViewMode === "doc" ? "#fff" : "var(--text-muted)",
+                      fontWeight: 600,
+                      fontSize: "0.85rem",
+                      cursor: "pointer",
+                    }}
+                  >
+                    📖 {lang === "en" ? "Markdown Spec" : "Doc Markdown"}
+                  </button>
+                </div>
+              </div>
+
+              {roadmapViewMode === "doc" ? (
+                <div className="markdown-body" dangerouslySetInnerHTML={{ __html: roadmapHtml }} />
+              ) : (
+                <div style={{ display: "grid", gridTemplateColumns: "320px 1fr", gap: "24px" }}>
+                  {/* Left Column: Phase Selector Stepper */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                    {PHASES_DATA.map((phase) => {
+                      const isSelected = selectedPhase === phase.id;
+                      const isDone = phase.status === "completed";
+                      return (
+                        <button
+                          key={phase.id}
+                          onClick={() => setSelectedPhase(phase.id)}
+                          style={{
+                            textAlign: "left",
+                            padding: "14px 16px",
+                            borderRadius: "10px",
+                            border: isSelected ? "1px solid var(--primary)" : "1px solid var(--border)",
+                            background: isSelected ? "rgba(139, 92, 246, 0.15)" : "rgba(255, 255, 255, 0.02)",
+                            cursor: "pointer",
+                            transition: "all 0.2s ease",
+                          }}
+                        >
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                            <span style={{ fontSize: "0.75rem", fontWeight: 700, color: isDone ? "var(--success)" : "var(--warning)" }}>
+                              {phase.badge}
+                            </span>
+                            <span style={{ fontSize: "0.7rem", color: "var(--text-muted)" }}>Phase {phase.id}/10</span>
+                          </div>
+                          <div style={{ fontWeight: 600, fontSize: "0.9rem", color: isSelected ? "#fff" : "var(--text-main)" }}>
+                            {phase.title}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Right Column: Selected Phase Detail & Live Playground */}
+                  {(() => {
+                    const currentPhase = PHASES_DATA.find((p) => p.id === selectedPhase) || PHASES_DATA[3];
+                    return (
+                      <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                        {/* Phase Header Card */}
+                        <div style={{ padding: "20px", background: "rgba(255, 255, 255, 0.02)", border: "1px solid var(--border)", borderRadius: "12px" }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+                            <span
+                              style={{
+                                padding: "4px 12px",
+                                borderRadius: "20px",
+                                background: currentPhase.status === "completed" ? "rgba(16, 185, 129, 0.15)" : "rgba(245, 158, 11, 0.15)",
+                                border: currentPhase.status === "completed" ? "1px solid rgba(16, 185, 129, 0.3)" : "1px solid rgba(245, 158, 11, 0.3)",
+                                color: currentPhase.status === "completed" ? "var(--success)" : "var(--warning)",
+                                fontWeight: 700,
+                                fontSize: "0.8rem",
+                              }}
+                            >
+                              {currentPhase.badge}
+                            </span>
+                            <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
+                              Tests : <code>{currentPhase.tests}</code>
+                            </span>
+                          </div>
+
+                          <h3 style={{ fontSize: "1.3rem", fontWeight: 700, color: "#fff", marginBottom: "8px" }}>
+                            {currentPhase.title}
+                          </h3>
+                          <p style={{ fontSize: "0.95rem", color: "var(--text-muted)", lineHeight: 1.6, marginBottom: "16px" }}>
+                            {currentPhase.desc}
+                          </p>
+
+                          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                            {currentPhase.concepts.map((c, idx) => (
+                              <span
+                                key={idx}
+                                style={{
+                                  padding: "4px 10px",
+                                  borderRadius: "6px",
+                                  background: "rgba(139, 92, 246, 0.1)",
+                                  border: "1px solid rgba(139, 92, 246, 0.2)",
+                                  color: "var(--secondary)",
+                                  fontSize: "0.75rem",
+                                  fontWeight: 600,
+                                }}
+                              >
+                                💡 {c}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Input / Output Schema Specification */}
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                          <div style={{ padding: "16px", background: "rgba(0, 0, 0, 0.3)", border: "1px solid var(--border)", borderRadius: "10px" }}>
+                            <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--secondary)", marginBottom: "8px", textTransform: "uppercase" }}>
+                              📥 Contrat d'Entrée (Input)
+                            </div>
+                            <pre style={{ fontSize: "0.8rem", color: "#e5e7eb", whiteSpace: "pre-wrap", fontFamily: "monospace" }}>
+                              {currentPhase.inputExample}
+                            </pre>
+                          </div>
+
+                          <div style={{ padding: "16px", background: "rgba(0, 0, 0, 0.3)", border: "1px solid var(--border)", borderRadius: "10px" }}>
+                            <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--success)", marginBottom: "8px", textTransform: "uppercase" }}>
+                              📤 Contrat de Sortie (Output)
+                            </div>
+                            <pre style={{ fontSize: "0.8rem", color: "#e5e7eb", whiteSpace: "pre-wrap", fontFamily: "monospace" }}>
+                              {currentPhase.outputExample}
+                            </pre>
+                          </div>
+                        </div>
+
+                        {/* Interactive Playgrounds per Phase */}
+
+                        {/* PHASE 2 PLAYGROUND */}
+                        {currentPhase.id === 2 && (
+                          <div style={{ padding: "20px", background: "rgba(139, 92, 246, 0.05)", border: "1px solid rgba(139, 92, 246, 0.2)", borderRadius: "12px" }}>
+                            <h4 style={{ fontSize: "1.05rem", fontWeight: 700, color: "#fff", marginBottom: "12px", display: "flex", alignItems: "center", gap: "8px" }}>
+                              ⚡ Demo Live : Détection Automatique du Type de Source
+                            </h4>
+                            <div style={{ marginBottom: "12px" }}>
+                              <label style={{ fontSize: "0.8rem", color: "var(--text-muted)", display: "block", marginBottom: "6px" }}>
+                                Entrez une chaîne (Texte, chemin de fichier local, ou URL http/https) :
+                              </label>
+                              <input
+                                type="text"
+                                value={detectorInput}
+                                onChange={(e) => setDetectorInput(e.target.value)}
+                                style={{
+                                  width: "100%",
+                                  padding: "10px 14px",
+                                  borderRadius: "8px",
+                                  background: "rgba(0,0,0,0.4)",
+                                  border: "1px solid var(--border)",
+                                  color: "#fff",
+                                  fontFamily: "monospace",
+                                }}
+                              />
+                            </div>
+                            <div style={{ display: "flex", alignItems: "center", gap: "12px", background: "rgba(0,0,0,0.3)", padding: "12px 16px", borderRadius: "8px" }}>
+                              <span style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>Résultat de Détection :</span>
+                              <span
+                                style={{
+                                  padding: "4px 12px",
+                                  borderRadius: "6px",
+                                  background: detectorInput.startsWith("http://") || detectorInput.startsWith("https://") ? "rgba(59, 130, 246, 0.2)" : detectorInput.includes("/") || detectorInput.endsWith(".md") || detectorInput.endsWith(".txt") ? "rgba(245, 158, 11, 0.2)" : "rgba(16, 185, 129, 0.2)",
+                                  color: detectorInput.startsWith("http://") || detectorInput.startsWith("https://") ? "#60a5fa" : detectorInput.includes("/") || detectorInput.endsWith(".md") || detectorInput.endsWith(".txt") ? "#fbbf24" : "#34d399",
+                                  fontWeight: 700,
+                                  fontFamily: "monospace",
+                                }}
+                              >
+                                SourceType.{detectorInput.startsWith("http://") || detectorInput.startsWith("https://") ? "URL 🌐" : detectorInput.includes("/") || detectorInput.endsWith(".md") || detectorInput.endsWith(".txt") ? "FILE 📄" : "TEXT 📝"}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* PHASE 3 PLAYGROUND */}
+                        {currentPhase.id === 3 && (
+                          <div style={{ padding: "20px", background: "rgba(16, 185, 129, 0.05)", border: "1px solid rgba(16, 185, 129, 0.2)", borderRadius: "12px" }}>
+                            <h4 style={{ fontSize: "1.05rem", fontWeight: 700, color: "#fff", marginBottom: "12px" }}>
+                              🧹 Demo Live : Ingestion & Décontamination HTML
+                            </h4>
+                            <div style={{ marginBottom: "12px" }}>
+                              <label style={{ fontSize: "0.8rem", color: "var(--text-muted)", display: "block", marginBottom: "6px" }}>
+                                HTML brut d'entrée (contient du bruit : script, style, nav) :
+                              </label>
+                              <textarea
+                                rows={4}
+                                value={htmlInput}
+                                onChange={(e) => setHtmlInput(e.target.value)}
+                                style={{
+                                  width: "100%",
+                                  padding: "10px 14px",
+                                  borderRadius: "8px",
+                                  background: "rgba(0,0,0,0.4)",
+                                  border: "1px solid var(--border)",
+                                  color: "#fff",
+                                  fontFamily: "monospace",
+                                  fontSize: "0.8rem",
+                                }}
+                              />
+                            </div>
+                            <div style={{ padding: "12px 16px", background: "rgba(0,0,0,0.3)", borderRadius: "8px" }}>
+                              <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--success)", marginBottom: "4px" }}>
+                                ✨ ExtractedContent nettoyé (BeautifulSoup4 output) :
+                              </div>
+                              <pre style={{ fontSize: "0.85rem", color: "#34d399", fontFamily: "monospace", whiteSpace: "pre-wrap" }}>
+                                {htmlInput.replace(/<script[\s\S]*?<\/script>/gi, "").replace(/<style[\s\S]*?<\/style>/gi, "").replace(/<header[\s\S]*?<\/header>/gi, "").replace(/<footer[\s\S]*?<\/footer>/gi, "").replace(/<nav[\s\S]*?<\/nav>/gi, "").replace(/<[^>]+>/g, "\n").replace(/\n\s*\n/g, "\n").trim() || "Texte extrait nettoyé"}
+                              </pre>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* PHASE 4 PLAYGROUND - LLM CLIENT & STRUCTURED OUTPUTS */}
+                        {currentPhase.id === 4 && (
+                          <div style={{ padding: "24px", background: "rgba(139, 92, 246, 0.08)", border: "1px solid rgba(139, 92, 246, 0.3)", borderRadius: "14px" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                              <div>
+                                <h4 style={{ fontSize: "1.15rem", fontWeight: 800, color: "#fff", display: "flex", alignItems: "center", gap: "8px" }}>
+                                  ⚡ Demo Live : Client LLM & Structured Outputs (Phase 4)
+                                </h4>
+                                <p style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
+                                  Exécutez l'analyse structurée en mode démo offline (0 coût API) et visualisez le schéma Pydantic V2.
+                                </p>
+                              </div>
+                              <button
+                                onClick={handleRunDemoAnalysis}
+                                disabled={demoLoading}
+                                style={{
+                                  padding: "10px 20px",
+                                  borderRadius: "8px",
+                                  background: "linear-gradient(135deg, var(--primary) 0%, #ec4899 100%)",
+                                  color: "#fff",
+                                  fontWeight: 700,
+                                  fontSize: "0.9rem",
+                                  border: "none",
+                                  cursor: "pointer",
+                                  boxShadow: "0 4px 14px rgba(139, 92, 246, 0.4)",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "8px",
+                                }}
+                              >
+                                {demoLoading ? <Loader2 size={16} className="spin" /> : <Play size={16} />}
+                                {demoLoading ? "Analyse en cours..." : "Lancer l'Analyse Live"}
+                              </button>
+                            </div>
+
+                            {/* Preset Buttons */}
+                            <div style={{ display: "flex", gap: "8px", marginBottom: "14px", flexWrap: "wrap" }}>
+                              <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", alignSelf: "center" }}>Exemples d'articles :</span>
+                              <button
+                                onClick={() => setDemoContent("OpenAI annonce le lancement du framework agentic autonome avec validation Pydantic V2 native, latence sub-100ms sur edge runtime et le suivi FinOps des tokens.")}
+                                style={{ padding: "4px 10px", borderRadius: "6px", background: "rgba(255,255,255,0.05)", border: "1px solid var(--border)", color: "#fff", fontSize: "0.75rem", cursor: "pointer" }}
+                              >
+                                🚀 Release Agentic Framework
+                              </button>
+                              <button
+                                onClick={() => setDemoContent("URGENT: Conformité AI Act européenne et auditabilité des modèles de langage locaux pour les systèmes d'information d'entreprise critiques.")}
+                                style={{ padding: "4px 10px", borderRadius: "6px", background: "rgba(255,255,255,0.05)", border: "1px solid var(--border)", color: "#fff", fontSize: "0.75rem", cursor: "pointer" }}
+                              >
+                                ⚖️ Regulatory AI Act Audit
+                              </button>
+                            </div>
+
+                            <textarea
+                              rows={3}
+                              value={demoContent}
+                              onChange={(e) => setDemoContent(e.target.value)}
+                              placeholder="Entrez un article ou extrait d'actualité tech à analyser..."
+                              style={{
+                                width: "100%",
+                                padding: "12px",
+                                borderRadius: "8px",
+                                background: "rgba(0,0,0,0.4)",
+                                border: "1px solid var(--border)",
+                                color: "#fff",
+                                fontSize: "0.85rem",
+                                marginBottom: "16px",
+                              }}
+                            />
+
+                            {/* Demo Results Viewer */}
+                            {demoResult && (
+                              <div style={{ marginTop: "16px", background: "rgba(9, 5, 20, 0.8)", border: "1px solid var(--border)", borderRadius: "12px", overflow: "hidden" }}>
+                                <div style={{ display: "flex", borderBottom: "1px solid var(--border)", background: "rgba(0,0,0,0.3)" }}>
+                                  <button
+                                    onClick={() => setDemoOutputTab("visual")}
+                                    style={{
+                                      padding: "10px 18px",
+                                      background: demoOutputTab === "visual" ? "rgba(139, 92, 246, 0.2)" : "transparent",
+                                      border: "none",
+                                      borderBottom: demoOutputTab === "visual" ? "2px solid var(--primary)" : "none",
+                                      color: demoOutputTab === "visual" ? "#fff" : "var(--text-muted)",
+                                      fontWeight: 600,
+                                      fontSize: "0.85rem",
+                                      cursor: "pointer",
+                                    }}
+                                  >
+                                    📊 Rapport Exécutif Rendu
+                                  </button>
+                                  <button
+                                    onClick={() => setDemoOutputTab("json")}
+                                    style={{
+                                      padding: "10px 18px",
+                                      background: demoOutputTab === "json" ? "rgba(139, 92, 246, 0.2)" : "transparent",
+                                      border: "none",
+                                      borderBottom: demoOutputTab === "json" ? "2px solid var(--primary)" : "none",
+                                      color: demoOutputTab === "json" ? "#fff" : "var(--text-muted)",
+                                      fontWeight: 600,
+                                      fontSize: "0.85rem",
+                                      cursor: "pointer",
+                                    }}
+                                  >
+                                    💻 Payload JSON Pydantic V2
+                                  </button>
+                                </div>
+
+                                <div style={{ padding: "20px" }}>
+                                  {demoOutputTab === "visual" ? (
+                                    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                        <h4 style={{ fontSize: "1.2rem", fontWeight: 800, color: "#fff" }}>
+                                          {demoResult.title}
+                                        </h4>
+                                        <span
+                                          style={{
+                                            padding: "4px 12px",
+                                            borderRadius: "20px",
+                                            background: demoResult.priority === "high" ? "rgba(239, 68, 68, 0.2)" : "rgba(245, 158, 11, 0.2)",
+                                            color: demoResult.priority === "high" ? "#f87171" : "#fbbf24",
+                                            fontWeight: 800,
+                                            fontSize: "0.75rem",
+                                            textTransform: "uppercase",
+                                          }}
+                                        >
+                                          Priorité : {demoResult.priority}
+                                        </span>
+                                      </div>
+
+                                      <div style={{ fontSize: "0.9rem", color: "#d1d5db", lineHeight: 1.6, background: "rgba(255,255,255,0.02)", padding: "12px", borderRadius: "8px" }}>
+                                        <strong>Résumé Exécutif :</strong> {demoResult.summary}
+                                      </div>
+
+                                      <div>
+                                        <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--secondary)", marginBottom: "6px" }}>
+                                          Points Clés :
+                                        </div>
+                                        <ul style={{ paddingLeft: "20px", fontSize: "0.85rem", color: "var(--text-muted)", lineHeight: 1.6 }}>
+                                          {demoResult.key_points.map((kp: string, idx: number) => (
+                                            <li key={idx}>{kp}</li>
+                                          ))}
+                                        </ul>
+                                      </div>
+
+                                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px" }}>
+                                        <div style={{ background: "rgba(0,0,0,0.3)", padding: "10px", borderRadius: "8px", border: "1px solid var(--border)" }}>
+                                          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Impact Technique</span>
+                                          <span style={{ fontSize: "0.8rem", color: "#fff" }}>{demoResult.impact_technical}</span>
+                                        </div>
+                                        <div style={{ background: "rgba(0,0,0,0.3)", padding: "10px", borderRadius: "8px", border: "1px solid var(--border)" }}>
+                                          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Impact Business</span>
+                                          <span style={{ fontSize: "0.8rem", color: "#fff" }}>{demoResult.impact_business}</span>
+                                        </div>
+                                        <div style={{ background: "rgba(0,0,0,0.3)", padding: "10px", borderRadius: "8px", border: "1px solid var(--border)" }}>
+                                          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Impact AI Act / Réglementaire</span>
+                                          <span style={{ fontSize: "0.8rem", color: "#fff" }}>{demoResult.impact_regulatory || "N/A"}</span>
+                                        </div>
+                                      </div>
+
+                                      {/* FinOps Telemetry Bar */}
+                                      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "10px", padding: "12px", background: "rgba(16, 185, 129, 0.08)", borderRadius: "8px", border: "1px solid rgba(16, 185, 129, 0.2)" }}>
+                                        <div>
+                                          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Prompt Tokens</span>
+                                          <strong style={{ color: "#34d399" }}>{demoResult.prompt_tokens}</strong>
+                                        </div>
+                                        <div>
+                                          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Completion Tokens</span>
+                                          <strong style={{ color: "#34d399" }}>{demoResult.completion_tokens}</strong>
+                                        </div>
+                                        <div>
+                                          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Coût Estimé (USD)</span>
+                                          <strong style={{ color: "#34d399" }}>${demoResult.estimated_cost_usd}</strong>
+                                        </div>
+                                        <div>
+                                          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Temps d'Exécution</span>
+                                          <strong style={{ color: "#34d399" }}>{demoResult.execution_time_seconds}s</strong>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <pre style={{ fontSize: "0.8rem", color: "#a78bfa", fontFamily: "monospace", overflowX: "auto" }}>
+                                      {JSON.stringify(demoResult, null, 2)}
+                                    </pre>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+            </div>
           )}
 
           {/* GLOSSARY TAB */}

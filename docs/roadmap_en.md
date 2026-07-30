@@ -10,7 +10,7 @@ This roadmap outlines the chronological implementation steps for **Project 3: Au
 
 ```text
 Phase 1: Baseline Setup ──> Phase 2: CLI Skeleton ──> Phase 3: Ingestion ──> Phase 4: LLM Client ──> Phase 5: FinOps ──> Phase 6: Rich UI ──> Phase 7: Cache ──> Phase 8: Resilience ──> Phase 9: Testing ──> Phase 10: Docker & Release
-     (✅ Completed)                (⏳ Pending)            (⏳ Pending)          (⏳ Pending)         (⏳ Pending)      (⏳ Pending)       (⏳ Pending)      (⏳ Pending)        (⏳ Pending)       (⏳ Pending)
+     (✅ Completed)             (✅ Completed)          (✅ Completed)        (✅ Completed)       (⏳ Pending)      (⏳ Pending)       (⏳ Pending)      (⏳ Pending)        (⏳ Pending)       (⏳ Pending)
 ```
 
 ---
@@ -96,7 +96,7 @@ Phase 1: Baseline Setup ──> Phase 2: CLI Skeleton ──> Phase 3: Ingestion
 
 ---
 
-## Phase 4: LLM Client & Structured Outputs — ⏳ Pending
+## Phase 4: LLM Client & Structured Outputs — ✅ Completed
 *Goal: Query LLM APIs and guarantee structured output matching Pydantic schema (FS-02).*
 
 ### Step 4.1: Output Data Modeling (Pydantic V2) — ✅ Completed
@@ -104,7 +104,7 @@ Phase 1: Baseline Setup ──> Phase 2: CLI Skeleton ──> Phase 3: Ingestion
 * **Key Concept:** Structured Outputs & Data Contract — Pydantic V2 validates LLM JSON response and raises error on schema mismatch.
 * **Validation Criterion:** Instantiating `AnalysisReport` with valid data succeeds. Missing required field (`key_points` missing) raises `ValidationError`. Strict Mypy passes.
 
-### Step 4.2: System Prompt Engineering — ⏳ Pending
+### Step 4.2: System Prompt Engineering — ✅ Completed
 * **Description:** Author system prompt in `clients/prompts.py` instructing LLM to act as a senior AI analyst. Defines role, format constraints (JSON matching `AnalysisReport` schema), conciseness bounds (max 200 words summary, 3-5 key points), and expected sample output.
 * **Key Concept:** System Prompt Engineering — output quality and reliability depend on strict system instructions.
 * **Validation Criterion:** System prompt stored as typed constant. Explicitly mentions expected JSON schema and includes valid example parseable by `AnalysisReport.model_validate_json()`.
@@ -114,7 +114,7 @@ Phase 1: Baseline Setup ──> Phase 2: CLI Skeleton ──> Phase 3: Ingestion
 * **Key Concept:** API Client Encapsulation — isolating network calls enables mocking in tests, swapping providers, and centralizing error handling.
 * **Validation Criterion:** With valid API key, `LLMClient().analyze("OpenAI launches GPT-5")` returns validated `AnalysisReport`. Without key, raises `LLMClientError`.
 
-### Step 4.4: Demo Mode with Mocked Response — ⏳ Pending
+### Step 4.4: Demo Mode with Mocked Response — ✅ Completed
 * **Description:** Add `--demo` CLI flag bypassing network API call and returning pre-filled mock `AnalysisReport`. Enables testing full pipeline (ingestion → formatting → display) without spending API credits.
 * **Key Concept:** Decoupled Development — testing end-to-end pipeline without external dependencies accelerates iteration and reduces cost.
 * **Validation Criterion:** `make run ARGS="scan 'test' --demo"` renders full report with zero network calls.
