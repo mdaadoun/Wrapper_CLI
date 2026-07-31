@@ -204,3 +204,11 @@ A CLI option that skips both reading from and writing to the local disk cache, e
 - **HTTPX Client Mocking**: Technique of replacing real HTTPX transport clients with `MagicMock` objects to simulate REST API responses without network activity.
 - **Tenacity Retry Simulation**: Testing strategy for validating exponential backoff logic by controlling side effects on mocked methods and suppressing sleep delays.
 - **Schema Parsing Validation**: Verifying that raw candidate responses from Gemini/OpenAI API formats parse cleanly into immutable Pydantic V2 `AnalysisReport` models.
+
+
+### FinOps & Cache Unit Testing (Step 9.3)
+
+- **Deterministic Business Logic Verification**: Testing software components with fixed input sets to guarantee consistent, reproducible financial and caching outputs without external network dependencies.
+- **Pytest Fixture (`tmp_path`)**: A built-in Pytest fixture providing a unique `pathlib.Path` temporary directory for each test function, automatically cleaned up post-execution.
+- **Cache Invalidation & TTL (Time-To-Live)**: Mechanism where cached entries expire and become invalid after a predefined duration (in seconds), forcing a re-fetch of fresh data.
+- **FinOps Pricing Matrix Invariance**: Guarantee that cost calculations accurately reflect predefined token rates per 1M tokens across all supported model tiers without silent fallback behavior.

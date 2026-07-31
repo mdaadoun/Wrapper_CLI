@@ -305,14 +305,14 @@ const TEST_DESCRIPTIONS: Record<
     output: "Retourne None (cache miss garanti).",
     concept: "Forçage de fraîcheur strict",
   },
-  "tests/test_cli_scan_cache_ttl_zero": {
+  "tests/test_cache.py::test_cli_scan_cache_ttl_zero": {
     title: "⚡ test_cli_scan_cache_ttl_zero()",
     objective: "Valider le flag CLI --cache-ttl 0 forçant une ré-analyse sans utiliser le cache.",
     input: "runner.invoke(app, ['scan', 'text', '--demo', '--cache-ttl', '0'])",
     output: "Exécution de l'analyse sans badge [CACHE HIT].",
     concept: "Option CLI --cache-ttl",
   },
-  "tests/test_cli_scan_no_cache_flag": {
+  "tests/test_cache.py::test_cli_scan_no_cache_flag": {
     title: "⚡ test_cli_scan_no_cache_flag()",
     objective: "Valider le flag CLI --no-cache contournant la lecture et l'écriture du cache.",
     input: "runner.invoke(app, ['scan', 'text', '--demo', '--no-cache'])",

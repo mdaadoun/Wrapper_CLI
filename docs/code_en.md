@@ -113,3 +113,14 @@ The application adheres to the **Single Responsibility Principle (SRP)**. The co
 - **`test_llm_client_retry_exhausted_max_attempts`**: Mocks 4 consecutive 503 server errors, asserting `LLMRetryableError` is raised with `"❌ Failed after 4 attempts"` prefix.
 - **`test_llm_client_default_httpx_client_creation_and_close`**: Verifies that un-injected `LLMClient` instantiates a default `httpx.Client` and properly calls `close()` in the `finally` block.
 - **`test_llm_client_clean_json_text_utility`**: Validates helper logic stripping markdown code blocks surrounding JSON strings (` ```json ... ``` `).
+
+
+### FinOps & Cache Unit Tests (`utils/cost.py`, `utils/cache.py`, `tests/test_cost.py`, `tests/test_cache.py`)
+
+- **`test_calculate_cost_known_models`**: Verifies accurate USD cost computation across multi-provider models (GPT-4o mini, Gemini 1.5 Flash, Claude 3.5 Sonnet) per 1M tokens with 6-decimal rounding.
+- **`test_calculate_cost_unknown_model_raises`**: Confirms that unrecognized model names raise `UnknownModelError` listing supported models without silent fallback.
+- **`test_pricing_matrix_integrity`**: Asserts all 40+ models in `MODEL_PRICING` have positive rates and output rates $\ge$ input rates.
+- **`test_cache_set_and_get`**: Validates report serialization into local JSON cache by SHA-256 content hash with `is_cached=True` flag restoration.
+- **`test_cache_expired_ttl_and_purge`**: Verifies entry expiration past TTL and automated cleanup of expired entries via `purge_expired()` and startup `auto_purge`.
+- **`test_cache_zero_ttl_and_no_cache_flag`**: Ensures `--cache-ttl 0` and `--no-cache` CLI options force fresh analysis and bypass cache storage.
+- **`test_cache_resilience_corrupted_json_and_os_errors`**: Validates graceful handling of corrupted JSON files and disk write/delete `OSError` exceptions.

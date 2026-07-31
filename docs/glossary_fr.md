@@ -199,3 +199,11 @@ Option CLI ignorant à la fois la lecture et l'écriture dans le cache local sur
 - **Mocking de Client HTTPX** : Technique de remplacement des clients de transport HTTPX réels par des objets `MagicMock` pour simuler les réponses d'API REST sans activité réseau.
 - **Simulation de Retry Tenacity** : Stratégie de test pour valider la logique de backoff exponentiel en contrôlant les effets secondaires des méthodes mockées et en supprimant les délais de veille.
 - **Validation de Parsing de Schéma** : Vérification que les réponses brutes des formats d'API Gemini/OpenAI sont proprement analysées et converties en modèles Pydantic V2 `AnalysisReport` immuables.
+
+
+### Tests Unitaires FinOps & Cache (Étape 9.3)
+
+- **Vérification Déterministe de Logique Métier** : Test de composants logiciels avec des jeux d'entrées fixes garantissant des sorties financières et de cache reproductibles sans dépendance réseau externe.
+- **Fixture Pytest (`tmp_path`)** : Fixture Pytest native fournissant un répertoire temporaire `pathlib.Path` unique pour chaque fonction de test, automatiquement nettoyé après l'exécution.
+- **Invalidation de Cache & TTL (Time-To-Live)** : Mécanisme d'expiration où les entrées du cache deviennent invalides après une durée prédéfinie (en secondes), exigeant une ré-analyse des données.
+- **Invariance de la Grille Tarifaire FinOps** : Garantie que les calculs de coûts reflètent fidèlement les tarifs par million de tokens définis pour tous les modèles sans fallback silencieux.

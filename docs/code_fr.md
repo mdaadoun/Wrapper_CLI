@@ -108,3 +108,14 @@ L'application repose sur le **Single Responsibility Principle (SRP)**. Le code e
 - **`test_llm_client_retry_exhausted_max_attempts`** : Simule 4 erreurs serveur 503 consécutives, s'assurant que `LLMRetryableError` est levée avec le préfixe `"❌ Failed after 4 attempts"`.
 - **`test_llm_client_default_httpx_client_creation_and_close`** : Vérifie qu'un `LLMClient` non injecté instancie un client `httpx.Client` par défaut et appelle proprement `close()` dans le bloc `finally`.
 - **`test_llm_client_clean_json_text_utility`** : Valide la logique utilitaire nettoyant les blocs de code markdown entourant les chaînes JSON (` ```json ... ``` `).
+
+
+### Tests Unitaires FinOps & Cache (`utils/cost.py`, `utils/cache.py`, `tests/test_cost.py`, `tests/test_cache.py`)
+
+- **`test_calculate_cost_known_models`** : Vérifie le calcul exact des coûts USD pour les modèles multi-fournisseurs (GPT-4o mini, Gemini 1.5 Flash, Claude 3.5 Sonnet) par tranche de 1M de tokens avec arrondi à 6 décimales.
+- **`test_calculate_cost_unknown_model_raises`** : Confirme qu'un modèle non répertorié lève une exception `UnknownModelError` énumérant les modèles supportés sans fallback silencieux.
+- **`test_pricing_matrix_integrity`** : S'assure que les 40+ modèles de `MODEL_PRICING` ont des tarifs strictement positifs et que le tarif de sortie est supérieur ou égal au tarif d'entrée.
+- **`test_cache_set_and_get`** : Valide la sérialisation des rapports dans le cache JSON local par empreinte SHA-256 et la restitution avec l'indicateur `is_cached=True`.
+- **`test_cache_expired_ttl_and_purge`** : Vérifie l'expiration des entrées après dépassement du TTL et le nettoyage automatique via `purge_expired()` et `auto_purge` au démarrage.
+- **`test_cache_zero_ttl_and_no_cache_flag`** : Garantit que les options CLI `--cache-ttl 0` et `--no-cache` forcent une ré-analyse complète et évitent l'utilisation du cache.
+- **`test_cache_resilience_corrupted_json_and_os_errors`** : Valide la prise en charge sans crash des fichiers JSON corrompus et des exceptions système `OSError` lors de la lecture/écriture du cache.

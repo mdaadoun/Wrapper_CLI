@@ -266,3 +266,15 @@ Targeted questions and answers covering architecture design choices and engineer
 
 **Q: How does `LLMClient` ensure resilience against heterogeneous LLM provider formats?**
 > A: The `_parse_response` method checks for provider-specific dictionary keys (`candidates` for Gemini vs `choices` for OpenAI), extracts token usage metadata, strips optional markdown code fences, and validates the parsed dictionary against a unified Pydantic V2 `AnalysisReport` model.
+
+
+### FinOps & Cache Unit Tests (Step 9.3)
+
+**Q: Why use Pytest's `tmp_path` fixture instead of mocking file I/O functions for `ContentCache` testing?**
+> A: Using `tmp_path` allows testing real file system operations (creation, JSON serialization, unlinking, directory creation) in an isolated, ephemeral environment without mocking overhead or risk of polluting real user directories.
+
+**Q: How does `ContentCache` handle corrupted JSON cache files on disk?**
+> A: `ContentCache._load()` catches `json.JSONDecodeError` and `OSError` exceptions gracefully, returning an empty dictionary `{}` without crashing the CLI or surfacing tracebacks to the user.
+
+**Q: How is pricing accuracy maintained for token counts in `calculate_cost`?**
+> A: Input and output token counts are divided by 1,000,000.0 floating-point numbers, multiplied by their respective rates per 1M tokens from `MODEL_PRICING`, and rounded to 6 decimal places using `round(cost, 6)`.

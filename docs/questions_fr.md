@@ -266,3 +266,15 @@ Questions-réponses clés pour défendre l'architecture et les choix d'ingénier
 
 **Q : Comment `LLMClient` garantit-il la résilience face aux formats hétérogènes des fournisseurs LLM ?**
 > R : La méthode `_parse_response` vérifie la présence de clés spécifiques (`candidates` pour Gemini vs `choices` pour OpenAI), extrait les métadonnées d'utilisation des tokens, nettoie les blocs de code markdown facultatifs et valide le dictionnaire nettoyé selon un modèle Pydantic V2 `AnalysisReport` unifié.
+
+
+### Tests Unitaires FinOps & Cache (Étape 9.3)
+
+**Q : Pourquoi utiliser la fixture `tmp_path` de Pytest au lieu de mocker les fonctions d'E/S de fichier pour tester `ContentCache` ?**
+> R : Utiliser `tmp_path` permet de tester de vraies opérations sur le système de fichiers (création, sérialisation JSON, suppression, création de répertoires) dans un environnement isolé et éphémère sans la lourdeur du mocking ni le risque de polluer les répertoires réels de l'utilisateur.
+
+**Q : Comment `ContentCache` gère-t-il les fichiers de cache JSON corrompus sur disque ?**
+> R : `ContentCache._load()` intercepte les exceptions `json.JSONDecodeError` et `OSError` de manière transparente, renvoyant un dictionnaire vide `{}` sans faire planter le CLI ni afficher de tracebacks à l'utilisateur.
+
+**Q : Comment l'exactitude tarifaire est-elle garantie pour le décompte des tokens dans `calculate_cost` ?**
+> R : Les compteurs de tokens d'entrée et de sortie sont divisés par 1 000 000.0, multipliés par leurs tarifs respectifs par tranche de 1M de tokens dans `MODEL_PRICING`, puis arrondis à 6 décimales avec `round(cost, 6)`.
