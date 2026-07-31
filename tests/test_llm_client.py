@@ -1,12 +1,13 @@
 """Unit test suite for LLMClient module and API response parsing."""
 
+import json
 from unittest.mock import MagicMock, patch
 
 import httpx
 import pytest
 from ai_watcher.clients.llm_client import LLMClient
 from ai_watcher.clients.prompts import SAMPLE_ANALYSIS_REPORT_JSON
-from ai_watcher.exceptions import LLMClientError
+from ai_watcher.exceptions import LLMClientError, LLMRetryableError
 from ai_watcher.schemas.report import AnalysisReport
 
 
@@ -249,3 +250,94 @@ def test_llm_client_non_retryable_http_error() -> None:
             client.analyze(content="401 test content")
         assert mock_httpx.post.call_count == 1
         assert mock_sleep.call_count == 0
+
+
+def test_llm_client_default_httpx_client_creation_and_close() -> None:
+    """Verify default HTTPX client is created and closed when no httpx_client is injected."""
+    client = LLMClient(api_key="test-key")
+    mock_res = MagicMock(spec=httpx.Response)
+    mock_res.status_code = 200
+    mock_res.json.return_value = {
+        "candidates": [{"content": {"parts": [{"text": SAMPLE_ANALYSIS_REPORT_JSON}]}}]
+    }
+
+    with patch("httpx.Client.post", return_value=mock_res) as mock_post:
+        with patch("httpx.Client.close") as mock_close:
+            report = client.analyze(content="Default client test")
+            assert report.title == "Autonomous Agent Framework Release"
+            assert mock_post.call_count == 1
+            assert mock_close.call_count == 1
+
+
+def test_llm_client_retryable_error_already_formatted() -> None:
+    """Verify LLMRetryableError containing 'Failed after 4 attempts' is re-raised as-is."""
+    mock_httpx = MagicMock(spec=httpx.Client)
+    client = LLMClient(api_key="test-key", httpx_client=mock_httpx)
+
+    with patch.object(
+        client,
+        "_post_with_retry",
+        side_effect=LLMRetryableError("❌ Failed after 4 attempts: rate limit"),
+    ):
+        with pytest.raises(
+            LLMRetryableError, match="❌ Failed after 4 attempts: rate limit"
+        ):
+            client.analyze(content="Pre-formatted error content")
+
+
+def test_llm_client_response_json_decode_error() -> None:
+    """Verify JSONDecodeError during response parsing raises LLMClientError."""
+    mock_httpx = MagicMock(spec=httpx.Client)
+    mock_res = MagicMock(spec=httpx.Response)
+    mock_res.status_code = 200
+    mock_res.json.side_effect = json.JSONDecodeError("Unterminated string", "doc", 0)
+    mock_httpx.post.return_value = mock_res
+
+    client = LLMClient(api_key="test-key", httpx_client=mock_httpx)
+    with pytest.raises(LLMClientError, match="LLM API request error"):
+        client.analyze(content="Malformed JSON payload")
+
+
+def test_llm_client_response_json_not_a_dict() -> None:
+    """Verify JSON response containing array instead of object raises LLMClientError."""
+    mock_httpx = MagicMock(spec=httpx.Client)
+    mock_res = MagicMock(spec=httpx.Response)
+    mock_res.status_code = 200
+    mock_res.json.return_value = {
+        "candidates": [{"content": {"parts": [{"text": "[1, 2, 3]"}]}}]
+    }
+    mock_httpx.post.return_value = mock_res
+
+    client = LLMClient(api_key="test-key", httpx_client=mock_httpx)
+    with pytest.raises(LLMClientError, match="LLM response JSON is not an object"):
+        client.analyze(content="Array JSON content")
+
+
+def test_llm_client_custom_configuration() -> None:
+    """Verify LLMClient properly retains custom parameters passed during init."""
+    client = LLMClient(
+        api_key="custom-key",  # pragma: allowlist secret
+        model_name="gpt-4o",
+        temperature=0.7,
+        top_p=0.95,
+        max_tokens=2048,
+        timeout=15.0,
+    )
+    assert client.api_key == "custom-key"  # pragma: allowlist secret
+    assert client.model_name == "gpt-4o"
+    assert client.temperature == 0.7
+    assert client.top_p == 0.95
+    assert client.max_tokens == 2048
+    assert client.timeout == 15.0
+
+
+def test_llm_client_clean_json_text_utility() -> None:
+    """Verify _clean_json_text handles raw JSON and varied markdown fences."""
+    raw_json = '{"key": "value"}'
+    assert LLMClient._clean_json_text(raw_json) == raw_json
+
+    fenced = f"```json\n{raw_json}\n```"
+    assert LLMClient._clean_json_text(fenced) == raw_json
+
+    no_lang = f"```\n{raw_json}\n```"
+    assert LLMClient._clean_json_text(no_lang) == raw_json

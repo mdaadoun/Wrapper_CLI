@@ -190,3 +190,17 @@ A CLI option that skips both reading from and writing to the local disk cache, e
 - **Graceful Failure**: A software design pattern where runtime errors are caught, formatted, and presented cleanly without crashing the process or exposing raw stack traces.
 - **Exit Status / Code**: An integer value returned by a process to its parent shell upon completion (0 for success, non-zero e.g. 1 for errors).
 - **Rich Error Panel**: A styled terminal block rendered with the Rich library displaying error messages inside a red border box on stderr.
+
+
+### Extractor Unit Testing & SSRF Mocking
+
+- **Connect-time SSRF Guard**: A security mechanism that checks resolved target IP addresses at socket connection setup to prevent TOCTOU DNS-rebinding attacks.
+- **Ingestion Facade Pattern**: A design pattern exposing a single `extract()` interface that dispatches to specific text, file, or URL extractors based on `SourceType`.
+- **Deterministic Transport Mocking**: Testing pattern where network transports and socket calls return pre-configured responses without making real I/O requests.
+
+
+### LLM Client Unit Testing & Mocks (Step 9.2)
+
+- **HTTPX Client Mocking**: Technique of replacing real HTTPX transport clients with `MagicMock` objects to simulate REST API responses without network activity.
+- **Tenacity Retry Simulation**: Testing strategy for validating exponential backoff logic by controlling side effects on mocked methods and suppressing sleep delays.
+- **Schema Parsing Validation**: Verifying that raw candidate responses from Gemini/OpenAI API formats parse cleanly into immutable Pydantic V2 `AnalysisReport` models.

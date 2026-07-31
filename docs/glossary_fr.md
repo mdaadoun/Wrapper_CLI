@@ -185,3 +185,17 @@ Option CLI ignorant à la fois la lecture et l'écriture dans le cache local sur
 - **Gestion Gracieuse des Erreurs (Graceful Failure)** : Patron d'architecture logicielle où les erreurs d'exécution sont interceptées, formatées et présentées proprement sans faire planter le processus ni exposer de tracebacks.
 - **Code de Sortie (Exit Status / Code)** : Valeur entière renvoyée par un processus au shell parent lors de sa terminaison (0 pour le succès, non nul ex. 1 pour les erreurs).
 - **Panneau d'Erreur Rich (Rich Error Panel)** : Bloc d'affichage CLI stylisé avec la bibliothèque Rich affichant le message d'erreur dans une boîte rouge sur stderr.
+
+
+### Tests Unitaires de l'Extracteur & Mocking SSRF
+
+- **Connect-time SSRF Guard** : Mécanisme de sécurité vérifiant l'adresse IP résolue lors de la connexion socket pour éviter les attaques DNS rebinding.
+- **Ingestion Facade Pattern** : Patron de conception exposant une interface unique `extract()` qui redirige vers les extracteurs spécifiques selon le `SourceType`.
+- **Deterministic Transport Mocking** : Patron de test où la couche transport et les appels socket renvoient des réponses préconfigurées sans entamer de requêtes réseau.
+
+
+### Tests Unitaires du Client LLM & Mocks (Étape 9.2)
+
+- **Mocking de Client HTTPX** : Technique de remplacement des clients de transport HTTPX réels par des objets `MagicMock` pour simuler les réponses d'API REST sans activité réseau.
+- **Simulation de Retry Tenacity** : Stratégie de test pour valider la logique de backoff exponentiel en contrôlant les effets secondaires des méthodes mockées et en supprimant les délais de veille.
+- **Validation de Parsing de Schéma** : Vérification que les réponses brutes des formats d'API Gemini/OpenAI sont proprement analysées et converties en modèles Pydantic V2 `AnalysisReport` immuables.

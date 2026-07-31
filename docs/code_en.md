@@ -94,3 +94,22 @@ The application adheres to the **Single Responsibility Principle (SRP)**. The co
 - **`display_error`**: Formatter helper in `formatters/console.py` rendering domain exception messages inside a red Rich `Panel` targeting `stderr`.
 - **`scan` Error Catching**: Entrypoint error orchestration in `main.py` catching `WatcherError` and generic `Exception`, rendering via `display_error`, and raising `typer.Exit(code=1)`.
 - **`test_graceful_failure.py`**: Unit test suite validating red panel rendering, 4-attempt network outage simulations, domain error exit status `1`, and zero unhandled tracebacks.
+
+
+### Extractor Unit Tests (`core/extractor.py` & `tests/test_extractor.py`)
+
+- **`test_extract_from_file_read_error`**: Validates that I/O read exceptions on local files raise domain `ExtractionError`.
+- **`test_ssrf_transport_no_hostname`**: Verifies that requests lacking a valid URL host trigger `ExtractionError` inside `_SSRFSafeTransport`.
+- **`test_extract_from_url_redirect_missing_location`**: Asserts that HTTP 301/302 responses lacking a `Location` header raise `ExtractionError`.
+- **`test_extract_from_url_redirect_invalid_hostname`**: Ensures redirect target URLs with missing or unparseable hostnames raise `ExtractionError`.
+- **`test_extract_facade_invalid_source_type`**: Confirms that unsupported source types passed to the `extract()` facade trigger defensive `ExtractionError` handling.
+
+
+### LLM Client Unit Tests (Mocks) (`clients/llm_client.py` & `tests/test_llm_client.py`)
+
+- **`test_llm_client_successful_analysis_gemini_format`**: Validates parsing of standard 200 OK Gemini REST API payload into `AnalysisReport` with accurate token counts and FinOps cost estimation.
+- **`test_llm_client_successful_analysis_openai_format`**: Validates fallback parsing of OpenAI format response choices and usage metadata.
+- **`test_llm_client_retry_success_after_initial_failures`**: Mocks 3 consecutive 429 rate limit responses followed by 200 OK, verifying 4 HTTP attempts and 3 backoff sleep cycles.
+- **`test_llm_client_retry_exhausted_max_attempts`**: Mocks 4 consecutive 503 server errors, asserting `LLMRetryableError` is raised with `"❌ Failed after 4 attempts"` prefix.
+- **`test_llm_client_default_httpx_client_creation_and_close`**: Verifies that un-injected `LLMClient` instantiates a default `httpx.Client` and properly calls `close()` in the `finally` block.
+- **`test_llm_client_clean_json_text_utility`**: Validates helper logic stripping markdown code blocks surrounding JSON strings (` ```json ... ``` `).

@@ -242,3 +242,27 @@ Targeted questions and answers covering architecture design choices and engineer
 
 **Q: What is the role of `display_error` in the application architecture?**
 > A: It decouples exception handling in business logic from terminal presentation, allowing all CLI commands to present errors through a unified Rich UI component.
+
+
+### Extractor Unit Tests (Step 9.1)
+
+**Q: How do unit tests verify socket-level SSRF protection without reaching real network endpoints?**
+> A: By patching `socket.getaddrinfo` with synthetic IP address tuples (e.g., `127.0.0.1`, `10.0.0.1`, `93.184.216.34`) and verifying that `_SSRFSafeTransport` raises an explicit `ExtractionError` when private ranges are detected.
+
+**Q: How does the `extract()` facade guarantee non-empty clean output across all source types?**
+> A: After dispatching to the underlying strategy (text, file, or URL), the facade passes the raw text to `ExtractedContent.from_text()`, which strips whitespace and raises `EmptySourceError` if character count is zero.
+
+**Q: How are HTTP redirects and invalid Location headers tested deterministically?**
+> A: Tests inject mock `httpx.Response` objects with status 301 and custom headers or missing `next_request` properties, verifying that `extract_from_url` enforces maximum redirect limits and hostname validation.
+
+
+### LLM Client Unit Tests (Mocks) (Step 9.2)
+
+**Q: How do you unit test an LLM client without incurring API costs or network flakiness?**
+> A: By using dependency injection to supply a mocked `httpx.Client` or patching the POST request method. The test simulates various provider responses (Gemini `candidates` array, OpenAI `choices` array) and error status codes (429, 500) entirely in memory.
+
+**Q: Why is `time.sleep` patched during Tenacity retry testing?**
+> A: Exponential backoff introduces real-time delays (e.g., 2s, 4s, 8s). Patching `time.sleep` allows the test runner to verify that the retry decorator attempts the request 4 times without wasting execution time waiting for real timers.
+
+**Q: How does `LLMClient` ensure resilience against heterogeneous LLM provider formats?**
+> A: The `_parse_response` method checks for provider-specific dictionary keys (`candidates` for Gemini vs `choices` for OpenAI), extracts token usage metadata, strips optional markdown code fences, and validates the parsed dictionary against a unified Pydantic V2 `AnalysisReport` model.

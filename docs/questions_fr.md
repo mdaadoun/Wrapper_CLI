@@ -242,3 +242,27 @@ Questions-réponses clés pour défendre l'architecture et les choix d'ingénier
 
 **Q : Quel est le rôle de `display_error` dans l'architecture de l'application ?**
 > R : Elle sépare la gestion des exceptions dans la logique métier du rendu graphique du terminal, permettant à toutes les commandes CLI d'afficher des erreurs via un composant UI Rich unifié.
+
+
+### Tests Unitaires de l'Extracteur (Étape 9.1)
+
+**Q : Comment les tests unitaires vérifient-ils la protection SSRF au niveau socket sans effectuer de requêtes réseau réelles ?**
+> R : En patchant `socket.getaddrinfo` avec des n-uplets d'adresses IP synthétiques (ex: `127.0.0.1`, `10.0.0.1`, `93.184.216.34`) et en vérifiant que `_SSRFSafeTransport` lève une `ExtractionError` explicite lors de la détection de plages privées.
+
+**Q : Comment la façade `extract()` garantit-elle un contenu propre non vide pour tous les types de sources ?**
+> R : Après dispatching vers la stratégie sous-jacente (texte, fichier ou URL), la façade passe le texte brut à `ExtractedContent.from_text()`, qui nettoie les espaces et lève `EmptySourceError` si le nombre de caractères est nul.
+
+**Q : Comment les redirections HTTP et en-têtes Location invalides sont-ils testés de manière déterministe ?**
+> R : Les tests injectent des objets `httpx.Response` factices (statut 301) avec des en-têtes personnalisés ou des propriétés `next_request` absentes, vérifiant que `extract_from_url` applique les limites de redirection et la validation d'hôte.
+
+
+### Tests Unitaires du Client LLM (Mocks) (Étape 9.2)
+
+**Q : Comment tester unitaire un client LLM sans engager de coûts d'API ni subir l'instabilité réseau ?**
+> R : En utilisant l'injection de dépendances pour fournir un client `httpx.Client` factice ou en patchant la méthode de requête POST. Le test simule les réponses des fournisseurs (tableau `candidates` de Gemini, tableau `choices` d'OpenAI) et les codes d'erreur (429, 500) entièrement en mémoire.
+
+**Q : Pourquoi `time.sleep` est-il patché pendant les tests de réessai Tenacity ?**
+> R : Le backoff exponentiel introduit des délais réels (ex: 2s, 4s, 8s). Patcher `time.sleep` permet à l'exécuteur de tests de vérifier que le décorateur retente bien 4 fois sans perdre de temps à attendre de vrais minuteurs.
+
+**Q : Comment `LLMClient` garantit-il la résilience face aux formats hétérogènes des fournisseurs LLM ?**
+> R : La méthode `_parse_response` vérifie la présence de clés spécifiques (`candidates` pour Gemini vs `choices` pour OpenAI), extrait les métadonnées d'utilisation des tokens, nettoie les blocs de code markdown facultatifs et valide le dictionnaire nettoyé selon un modèle Pydantic V2 `AnalysisReport` unifié.

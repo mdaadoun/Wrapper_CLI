@@ -87,5 +87,24 @@ L'application repose sur le **Single Responsibility Principle (SRP)**. Le code e
 ### Gestion Gracieuse des Erreurs & Codes de Sortie (`console.py`, `main.py`, `test_graceful_failure.py`)
 
 - **`display_error`** : Fonction utilitaire dans `formatters/console.py` affichant les exceptions de domaine dans un `Panel` Rich rouge ciblant `stderr`.
-- **`scan` Error Catching** : Orchestration centralisée dans `main.py` attrapant `WatcherError` et `Exception`, déléguant l'affichage à `display_error` et levant `typer.Exit(code=1)`.
+- **`scan` Error Catching** : Orchestration centralisée dans `main.py` attrapant `WatcherError` et `Exception`, déléguant l'affichage à `display_error` et faisant sortir avec `typer.Exit(code=1)`.
 - **`test_graceful_failure.py`** : Suite de tests unitaires validant le rendu du panneau rouge, la simulation de panne réseau après 4 tentatives, le code de sortie `1` et l'absence totale de tracebacks.
+
+
+### Tests Unitaires de l'Extracteur (`core/extractor.py` & `tests/test_extractor.py`)
+
+- **`test_extract_from_file_read_error`** : Valide que les erreurs de lecture I/O sur les fichiers locaux lèvent une exception de domaine `ExtractionError`.
+- **`test_ssrf_transport_no_hostname`** : Vérifie que les requêtes sans nom d'hôte valide déclenchent `ExtractionError` dans `_SSRFSafeTransport`.
+- **`test_extract_from_url_redirect_missing_location`** : Valide que les réponses HTTP 301/302 sans en-tête `Location` lèvent une `ExtractionError`.
+- **`test_extract_from_url_redirect_invalid_hostname`** : S'assure que les URL de redirection avec des hôtes invalides lèvent une `ExtractionError`.
+- **`test_extract_facade_invalid_source_type`** : Confirme que les types de source non supportés passés à la façade `extract()` déclenchent la gestion défensive des erreurs de domaine.
+
+
+### Tests Unitaires du Client LLM (Mocks) (`clients/llm_client.py` & `tests/test_llm_client.py`)
+
+- **`test_llm_client_successful_analysis_gemini_format`** : Valide le parsing d'une réponse API REST Gemini 200 OK standard dans un `AnalysisReport` avec le décompte exact des tokens et l'estimation FinOps.
+- **`test_llm_client_successful_analysis_openai_format`** : Valide le parsing de secours des réponses au format OpenAI (choices et métadonnées d'usage).
+- **`test_llm_client_retry_success_after_initial_failures`** : Simule 3 réponses 429 rate limit consécutives suivies d'un 200 OK, vérifiant 4 tentatives HTTP et 3 cycles de sleep.
+- **`test_llm_client_retry_exhausted_max_attempts`** : Simule 4 erreurs serveur 503 consécutives, s'assurant que `LLMRetryableError` est levée avec le préfixe `"❌ Failed after 4 attempts"`.
+- **`test_llm_client_default_httpx_client_creation_and_close`** : Vérifie qu'un `LLMClient` non injecté instancie un client `httpx.Client` par défaut et appelle proprement `close()` dans le bloc `finally`.
+- **`test_llm_client_clean_json_text_utility`** : Valide la logique utilitaire nettoyant les blocs de code markdown entourant les chaînes JSON (` ```json ... ``` `).

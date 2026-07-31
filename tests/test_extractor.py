@@ -6,7 +6,8 @@ Covers: text normalisation, file extraction, SSRF-safe URL extraction,
 """
 
 from pathlib import Path
-from unittest.mock import patch
+from typing import Any
+from unittest.mock import PropertyMock, patch
 
 import httpx
 import pytest
@@ -410,3 +411,57 @@ def test_extract_facade_pydantic_validation() -> None:
     result = extract("Valid text", SourceType.TEXT)
     assert isinstance(result, str)
     assert result == "Valid text"
+
+
+def test_extract_from_file_read_error(tmp_path: Path) -> None:
+    """Ensure ExtractionError is raised when file reading encounters an I/O exception."""
+    test_file = tmp_path / "unreadable.txt"
+    test_file.write_text("content", encoding="utf-8")
+    with patch.object(Path, "read_text", side_effect=OSError("Read error")):
+        with pytest.raises(ExtractionError, match="Failed to read file"):
+            extract_from_file(test_file)
+
+
+def test_ssrf_transport_no_hostname() -> None:
+    """Transport raises ExtractionError if request URL host is None."""
+    transport = _SSRFSafeTransport(retries=0)
+    req = httpx.Request("GET", "https://example.com")
+    with patch.object(httpx.URL, "host", new_callable=PropertyMock, return_value=None):
+        with pytest.raises(ExtractionError, match="Request URL has no hostname"):
+            transport.handle_request(req)
+
+
+def test_extract_from_url_redirect_missing_location() -> None:
+    """Redirect response without Location header raises ExtractionError."""
+    redirect_resp = httpx.Response(
+        301, request=httpx.Request("GET", "https://example.com")
+    )
+    with patch.object(_SSRFSafeTransport, "handle_request", return_value=redirect_resp):
+        with pytest.raises(ExtractionError, match="Redirect with no Location header"):
+            extract_from_url("https://example.com")
+
+
+def test_extract_from_url_redirect_invalid_hostname() -> None:
+    """Redirect URL without valid hostname raises ExtractionError."""
+    redirect_resp = httpx.Response(
+        301,
+        headers={"Location": "https://example.com/next"},
+        request=httpx.Request("GET", "https://example.com"),
+    )
+    from urllib.parse import urlparse as _real_urlparse
+
+    def fake_urlparse(url_str: str) -> Any:
+        if url_str == "https://example.com/next":
+            return _real_urlparse("http://")
+        return _real_urlparse(url_str)
+
+    with patch.object(_SSRFSafeTransport, "handle_request", return_value=redirect_resp):
+        with patch("ai_watcher.core.extractor.urlparse", side_effect=fake_urlparse):
+            with pytest.raises(ExtractionError, match="Redirect URL has no hostname"):
+                extract_from_url("https://example.com")
+
+
+def test_extract_facade_invalid_source_type() -> None:
+    """Facade raises ExtractionError on invalid or unsupported source type."""
+    with pytest.raises(ExtractionError, match="Unknown source type"):
+        extract("text", "INVALID_SOURCE_TYPE")
