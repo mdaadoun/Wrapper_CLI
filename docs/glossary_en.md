@@ -212,3 +212,10 @@ A CLI option that skips both reading from and writing to the local disk cache, e
 - **Pytest Fixture (`tmp_path`)**: A built-in Pytest fixture providing a unique `pathlib.Path` temporary directory for each test function, automatically cleaned up post-execution.
 - **Cache Invalidation & TTL (Time-To-Live)**: Mechanism where cached entries expire and become invalid after a predefined duration (in seconds), forcing a re-fetch of fresh data.
 - **FinOps Pricing Matrix Invariance**: Guarantee that cost calculations accurately reflect predefined token rates per 1M tokens across all supported model tiers without silent fallback behavior.
+
+
+### End-to-End CLI Integration Testing (Step 9.4)
+
+- **End-to-End (E2E) CLI Testing**: Testing methodology where the CLI application is invoked via its top-level entrypoint to verify that all internal subsystems (CLI argument parsing, content extraction, business logic, formatting, and disk I/O) work cohesively.
+- **CliRunner Test Harness**: A test utility provided by Click/Typer that invokes CLI commands programmatically, capturing standard output, standard error, exit codes, and exceptions in an isolated context.
+- **Pipeline Component Integration**: The structural interaction and data flow between input ingestion (extractor), processing (LLM client analysis / cache), and output rendering (Rich console / export formatters).

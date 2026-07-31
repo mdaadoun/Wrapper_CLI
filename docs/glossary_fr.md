@@ -207,3 +207,10 @@ Option CLI ignorant à la fois la lecture et l'écriture dans le cache local sur
 - **Fixture Pytest (`tmp_path`)** : Fixture Pytest native fournissant un répertoire temporaire `pathlib.Path` unique pour chaque fonction de test, automatiquement nettoyé après l'exécution.
 - **Invalidation de Cache & TTL (Time-To-Live)** : Mécanisme d'expiration où les entrées du cache deviennent invalides après une durée prédéfinie (en secondes), exigeant une ré-analyse des données.
 - **Invariance de la Grille Tarifaire FinOps** : Garantie que les calculs de coûts reflètent fidèlement les tarifs par million de tokens définis pour tous les modèles sans fallback silencieux.
+
+
+### Tests d'Intégration CLI End-to-End (Étape 9.4)
+
+- **Tests CLI End-to-End (E2E)** : Méthodologie de test où l'application CLI est invoquée via son point d'entrée principal pour vérifier que tous les sous-systèmes internes (analyse d'arguments, extraction, logique métier, formatage et E/S disque) fonctionnent de concert.
+- **Harnais de Test CliRunner** : Utilitaire de test fourni par Click/Typer permettant d'invoquer des commandes CLI de manière programmatique, en capturant la sortie standard, la sortie d'erreur, le code de sortie et les exceptions dans un contexte isolé.
+- **Intégration des Composants du Pipeline** : Interaction structurelle et flux de données entre l'ingestion d'entrées (extracteur), le traitement (analyse du client LLM / cache) et le rendu des sorties (console Rich / formatteurs d'export).

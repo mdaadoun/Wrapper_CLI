@@ -2,6 +2,13 @@
 # Makefile - Unified Command Interface for Wrapper_CLI
 # ==============================================================================
 
+POETRY := $(shell command -v poetry 2>/dev/null)
+RUN_PREFIX := $(if $(POETRY),poetry run,.venv/bin/python -m)
+PYTEST_CMD := $(if $(POETRY),poetry run python -m pytest,.venv/bin/pytest)
+RUFF_CMD := $(if $(POETRY),poetry run ruff,.venv/bin/ruff)
+MYPY_CMD := $(if $(POETRY),poetry run python -m mypy,PYTHONPATH=src .venv/bin/mypy)
+CLI_CMD := $(if $(POETRY),poetry run python -m src.ai_watcher.main,PYTHONPATH=src .venv/bin/python -m src.ai_watcher.main)
+
 .PHONY: install clean lint test dev dashboard docker-build onboarding-check help
 
 help:
@@ -20,8 +27,8 @@ help:
 	@echo "======================================================================"
 
 install:
-	poetry install
-	poetry run pre-commit install
+	$(if $(POETRY),poetry install,.venv/bin/pip install -e .)
+	$(RUN_PREFIX) pre-commit install
 
 clean:
 	@echo "Cleaning cache directories and temporary files..."
@@ -31,17 +38,17 @@ clean:
 
 lint:
 	@echo "--- [1/3] Static analysis (Ruff) ---"
-	poetry run ruff check .
+	$(RUFF_CMD) check .
 	@echo "--- [2/3] Code formatting check (Ruff Format) ---"
-	poetry run ruff format --check .
+	$(RUFF_CMD) format --check .
 	@echo "--- [3/3] Strict type check (Mypy) ---"
-	poetry run python -m mypy src/
+	$(MYPY_CMD) src/
 
 test:
-	poetry run python -m pytest
+	$(PYTEST_CMD)
 
 run:
-	poetry run python -m src.ai_watcher.main $(ARGS)
+	$(CLI_CMD) $(ARGS)
 
 dashboard:
 	npm --prefix dashboard run dev

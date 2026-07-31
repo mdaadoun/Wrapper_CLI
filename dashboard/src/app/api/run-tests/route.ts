@@ -18,7 +18,7 @@ export async function POST(request: Request) {
       args = ["-m", "pytest", "tests/"];
     } else {
       const cleanName = testName.replace(/[^a-zA-Z0-9_.-/:]/g, "");
-      if (!cleanName.startsWith("tests/test_") || !cleanName.includes(".py")) {
+      if (!cleanName.startsWith("tests/") || !cleanName.includes(".py")) {
         return NextResponse.json(
           { status: "error", message: "Invalid test file or function name." },
           { status: 400 }

@@ -278,3 +278,15 @@ Questions-réponses clés pour défendre l'architecture et les choix d'ingénier
 
 **Q : Comment l'exactitude tarifaire est-elle garantie pour le décompte des tokens dans `calculate_cost` ?**
 > R : Les compteurs de tokens d'entrée et de sortie sont divisés par 1 000 000.0, multipliés par leurs tarifs respectifs par tranche de 1M de tokens dans `MODEL_PRICING`, puis arrondis à 6 décimales avec `round(cost, 6)`.
+
+
+### Tests d'Intégration CLI End-to-End (Étape 9.4)
+
+**Q : Pourquoi utiliser `CliRunner` de Typer plutôt que de lancer des sous-processus externes pour les tests d'intégration CLI ?**
+> R : `CliRunner` exécte les tests en processus au sein de Python, ce qui offre d'importants gains de performance (exécution de la suite en moins d'une seconde), une injection fluide des fixtures pytest (comme `monkeypatch` et `tmp_path`) et un suivi précis de la couverture de code par ligne via `pytest-cov`, là où les sous-processus créent de la surcharge et masquent la couverture.
+
+**Q : Comment s'assurer que les tests d'intégration CLI restent rapides, déterministes et isolés des dépendances externes ?**
+> R : Les tests d'intégration s'exécutent en mode démo (`--demo`) ou avec des appels HTTP/LLM factices, évitant toute dépendance réseau réelle. De plus, les fixtures pytest `monkeypatch` et `tmp_path` isolent les variables d'environnement locales et redirigent les E/S de cache et d'exportation vers des répertoires temporaires, éliminant toute fuite d'état entre les tests.
+
+**Q : Comment le dashboard exécuteur de tests Next.js découvre-t-il et exécute-t-il les tests d'intégration dans les sous-répertoires ?**
+> R : La route d'API du dashboard (`api/tests/list`) utilise un parcours récursif de répertoires pour collecter tous les fichiers `test_*.py` dans les sous-dossiers (comme `tests/integration/`), tandis que la route d'exécution (`api/run-tests`) valide les formats de chemin commençant par `tests/` pour exécuter dynamiquement des cibles de test spécifiques.

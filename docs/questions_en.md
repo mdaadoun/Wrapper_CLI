@@ -278,3 +278,15 @@ Targeted questions and answers covering architecture design choices and engineer
 
 **Q: How is pricing accuracy maintained for token counts in `calculate_cost`?**
 > A: Input and output token counts are divided by 1,000,000.0 floating-point numbers, multiplied by their respective rates per 1M tokens from `MODEL_PRICING`, and rounded to 6 decimal places using `round(cost, 6)`.
+
+
+### End-to-End CLI Integration Tests (Step 9.4)
+
+**Q: Why use Typer's `CliRunner` instead of spawning external subprocesses for CLI integration tests?**
+> A: `CliRunner` executes tests in-process within Python, which yields significant performance benefits (sub-second suite execution), seamless pytest fixture injection (like `monkeypatch` and `tmp_path`), and precise line-by-line code coverage tracking via `pytest-cov`, whereas subprocess calls create overhead and obscure code coverage measurement.
+
+**Q: How do you ensure CLI integration tests remain fast, deterministic, and isolated from external dependencies?**
+> A: Integration tests run in demo mode (`--demo`) or with mocked HTTP/LLM calls, preventing live network reliance. Additionally, pytest `monkeypatch` and `tmp_path` fixtures isolate local environment variables and redirect cache/export file I/O to temporary directories, eliminating state leaks across tests.
+
+**Q: How does the Next.js test runner dashboard discover and execute integration tests in subdirectories?**
+> A: The dashboard API route (`api/tests/list`) uses recursive directory traversal to collect all `test_*.py` files across subfolders (such as `tests/integration/`), while the runner API route (`api/run-tests`) validates path formats starting with `tests/` to execute specific test targets dynamically.

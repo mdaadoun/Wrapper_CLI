@@ -119,3 +119,15 @@ L'application repose sur le **Single Responsibility Principle (SRP)**. Le code e
 - **`test_cache_expired_ttl_and_purge`** : Vérifie l'expiration des entrées après dépassement du TTL et le nettoyage automatique via `purge_expired()` et `auto_purge` au démarrage.
 - **`test_cache_zero_ttl_and_no_cache_flag`** : Garantit que les options CLI `--cache-ttl 0` et `--no-cache` forcent une ré-analyse complète et évitent l'utilisation du cache.
 - **`test_cache_resilience_corrupted_json_and_os_errors`** : Valide la prise en charge sans crash des fichiers JSON corrompus et des exceptions système `OSError` lors de la lecture/écriture du cache.
+
+
+### Tests d'Intégration CLI End-to-End (`tests/integration/test_cli.py` & Routes API Dashboard)
+
+- **`test_e2e_scan_text_demo_mode`** : Exécute le pipeline CLI complet pour scanner du texte brut en mode démo, affirmant le code de sortie 0 et vérifiant le rendu des panneaux console Rich (Executive Summary, Key Points, FinOps Metrics).
+- **`test_e2e_scan_file_demo_mode`** : Valide la lecture de fichier de bout en bout, l'extraction de contenu et l'analyse en mode démo via des fixtures de fichiers markdown `tmp_path`.
+- **`test_e2e_scan_url_demo_mode`** : Teste la détection de source URL et l'exécution du pipeline avec un transport factice de scraping web HTTP.
+- **`test_e2e_scan_json_export`** : Vérifie que l'exportation `--output custom.json` écrit un fichier JSON valide sur disque contenant les champs `source`, `summary`, `key_points` et les métadonnées FinOps.
+- **`test_e2e_scan_markdown_export`** : Valide que l'exportation `--output custom.md` génère un document Markdown structuré commençant par `# [DEMO] Synthetic AI Tech Radar Report` et tous ses en-têtes.
+- **`test_e2e_scan_cache_flow_and_bypass`** : Teste le flux de mise en cache local de bout en bout en vérifiant l'absence de cache au premier essai, la notification `[CACHE HIT]` à l'exécution suivante et le contournement du cache avec `--no-cache`.
+- **`test_e2e_scan_invalid_source_error`** : S'assure que les entrées vides ou fichiers inexistants sortent avec le statut `1` et un formatage d'erreur propre sans tracebacks.
+- **`dashboard/src/app/api/tests/list/route.ts` & `run-tests/route.ts`** : Routes d'API mises à jour avec exploration récursive des répertoires et validation des chemins pour prendre en charge les suites de tests imbriquées comme `tests/integration/test_cli.py`.

@@ -124,3 +124,15 @@ The application adheres to the **Single Responsibility Principle (SRP)**. The co
 - **`test_cache_expired_ttl_and_purge`**: Verifies entry expiration past TTL and automated cleanup of expired entries via `purge_expired()` and startup `auto_purge`.
 - **`test_cache_zero_ttl_and_no_cache_flag`**: Ensures `--cache-ttl 0` and `--no-cache` CLI options force fresh analysis and bypass cache storage.
 - **`test_cache_resilience_corrupted_json_and_os_errors`**: Validates graceful handling of corrupted JSON files and disk write/delete `OSError` exceptions.
+
+
+### End-to-End CLI Integration Tests (`tests/integration/test_cli.py` & Dashboard API Routes)
+
+- **`test_e2e_scan_text_demo_mode`**: Executes complete CLI pipeline scanning raw text in demo mode, asserting exit code 0 and verifying rendering of Rich console panels (Executive Summary, Key Points, FinOps Metrics).
+- **`test_e2e_scan_file_demo_mode`**: Validates end-to-end file reading, content extraction, and demo mode analysis via `tmp_path` markdown file fixtures.
+- **`test_e2e_scan_url_demo_mode`**: Tests URL source detection and pipeline execution with mocked HTTP web scraping transport.
+- **`test_e2e_scan_json_export`**: Asserts `--output custom.json` CLI export writes a valid JSON file to disk containing `source`, `summary`, `key_points`, and FinOps metadata fields.
+- **`test_e2e_scan_markdown_export`**: Validates `--output custom.md` CLI export generates a structured Markdown document starting with `# [DEMO] Synthetic AI Tech Radar Report` and all section headers.
+- **`test_e2e_scan_cache_flow_and_bypass`**: Tests end-to-end local caching flow verifying cache miss on initial run, `[CACHE HIT]` notice on repeat execution, and cache bypass when passing `--no-cache`.
+- **`test_e2e_scan_invalid_source_error`**: Ensures whitespace inputs or non-existent files exit with status `1` and clean domain error formatting without tracebacks.
+- **`dashboard/src/app/api/tests/list/route.ts` & `run-tests/route.ts`**: Updated API routes with recursive file discovery and path validation supporting nested test suites like `tests/integration/test_cli.py`.

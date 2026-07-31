@@ -20,12 +20,27 @@ export async function GET() {
       },
     ];
 
-    const files = fs.readdirSync(testsDir);
-    const testFiles = files.filter((f) => f.startsWith("test_") && f.endsWith(".py")).sort();
+    function collectTestFiles(dir: string, baseRel: string): { relPath: string; fileName: string; fullPath: string }[] {
+      let results: { relPath: string; fileName: string; fullPath: string }[] = [];
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        const full = path.join(dir, entry.name);
+        const rel = `${baseRel}/${entry.name}`;
+        if (entry.isDirectory()) {
+          results = results.concat(collectTestFiles(full, rel));
+        } else if (entry.isFile() && entry.name.startsWith("test_") && entry.name.endsWith(".py")) {
+          results.push({ relPath: rel, fileName: entry.name, fullPath: full });
+        }
+      }
+      return results;
+    }
 
-    for (const fileName of testFiles) {
-      const relPath = `tests/${fileName}`;
-      const fullPath = path.join(testsDir, fileName);
+    const testFiles = collectTestFiles(testsDir, "tests").sort((a, b) => a.relPath.localeCompare(b.relPath));
+
+    for (const fileObj of testFiles) {
+      const relPath = fileObj.relPath;
+      const fileName = fileObj.fileName;
+      const fullPath = fileObj.fullPath;
       const fileContent = fs.readFileSync(fullPath, "utf-8");
 
       let fileDoc = "";
@@ -36,9 +51,9 @@ export async function GET() {
 
       testList.push({
         id: relPath,
-        name: `📁 ${fileName} (Full File)`,
+        name: `📁 ${relPath} (Full File)`,
         file: relPath,
-        docstring: fileDoc || `Executes all tests in ${fileName}.`,
+        docstring: fileDoc || `Executes all tests in ${relPath}.`,
         type: "file",
       });
 
