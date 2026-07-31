@@ -159,3 +159,16 @@ The application adheres to the **Single Responsibility Principle (SRP)**. The co
   - **`test_runtime_secrets_missing_key_raises_error`**: Asserts `ConfigurationError` when no API key env var is present.
   - **`test_cli_execution_without_env_var_exits_cleanly`**: Ensures CLI scan without env var exits with code 1, renders red Rich error panel, and hides Python tracebacks.
   - **`test_cli_execution_with_runtime_injected_openai_key`**: Validates full scan pipeline execution with runtime injected `OPENAI_API_KEY`.
+
+
+### Documentation Finalization & Integrity Verification (`src/ai_watcher/utils/docs.py` & `tests/test_docs.py`)
+
+- **`src/ai_watcher/utils/docs.py`**: Utility module providing project metadata, structured CLI usage references across 3 input sources (raw text, local file, web URL), option flag tables, Docker commands, and automated documentation integrity verification:
+  - **`get_project_metadata()`**: Returns central project metadata (name, version, description, phase, license).
+  - **`get_cli_usage_doc()`**: Returns structured dictionary containing CLI flags, Docker commands, and 3-source usage examples.
+  - **`verify_docs_integrity()`**: Scans repository root and `docs/` directory to verify presence and non-emptiness of all required documentation files (`README.md`, `README_fr.md`, specification, roadmap, glossary, questions, code docs).
+- **`tests/test_docs.py`**: Unit test suite for Step 10.3 documentation finalization:
+  - **`test_project_metadata()`**: Validates structure and non-empty values of project metadata.
+  - **`test_cli_usage_doc()`**: Asserts presence of usage examples for 3 input sources and option flags reference.
+  - **`test_verify_docs_integrity()`**: Ensures all required project documentation files exist on disk.
+  - **`test_readme_sections()`**: Validates that `README.md` contains all required sections (Features, Usage, Flags, Docker, FinOps, Quickstart).

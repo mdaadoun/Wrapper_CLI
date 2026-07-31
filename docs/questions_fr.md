@@ -314,3 +314,15 @@ Questions-réponses clés pour défendre l'architecture et les choix d'ingénier
 
 **Q : Comment `AliasChoices` de Pydantic simplifie-t-il la configuration au runtime à travers différents environnements ?**
 > R : `AliasChoices` permet à un champ de configuration unique (`gemini_api_key`) d'accepter des valeurs provenant de plusieurs variables d'environnement (telles que `OPENAI_API_KEY` ou `GEMINI_API_KEY`), garantissant une exécution fluide sur des conteneurs standards.
+
+
+### Finalisation de la Documentation & README (Étape 10.3)
+
+**Q : Pourquoi traiter la documentation comme du code testable dans un projet CLI industriel ?**
+> R : La dérive documentaire est une cause principale de friction pour les développeurs et d'erreurs opérationnelles. En implémentant des tests automatisés d'intégrité de la documentation (`test_docs.py`), nous garantissons que les documents requis existent, que les instructions du README restent exactes et que les flags d'options CLI correspondent à l'implémentation du code.
+
+**Q : Comment le dashboard interactif Next.js interagit-il avec la documentation CLI et le test runner ?**
+> R : Le dashboard lit les fichiers de documentation markdown depuis `docs/` et découvre dynamiquement les fonctions de test dans `tests/` grâce à l'analyse AST Python, permettant aux développeurs de parcourir les spécifications techniques, d'exécuter les suites de tests et de visualiser les métriques FinOps depuis une interface web interactive.
+
+**Q : Quels compromis de conception ont été faits lors de la structuration de la référence des flags d'options CLI et des instructions Docker dans le README ?**
+> R : Nous avons priorisé un onboarding immédiat des développeurs en moins de 5 minutes en plaçant en premier les commandes rapides de démarrage à copier-coller et les exemples multi-sources, suivis de tableaux de référence structurés pour les flags et de commandes Docker explicites pour les modes démo et d'injection de secrets en direct.

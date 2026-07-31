@@ -314,3 +314,15 @@ Targeted questions and answers covering architecture design choices and engineer
 
 **Q: How does Pydantic AliasChoices simplify runtime configuration across different environments?**
 > A: `AliasChoices` enables a single configuration field (`gemini_api_key`) to accept values from multiple environment variables (such as `OPENAI_API_KEY` or `GEMINI_API_KEY`), allowing seamless execution across standard container setups.
+
+
+### Documentation Finalization & README (Step 10.3)
+
+**Q: Why treat documentation as testable code in an industrial CLI project?**
+> A: Documentation drift is a primary cause of developer friction and operational errors. By implementing automated documentation integrity tests (`test_docs.py`), we guarantee that required docs exist, README instructions remain accurate, and CLI option flags match actual code implementation.
+
+**Q: How does the Next.js interactive dashboard interact with CLI documentation and test runner?**
+> A: The dashboard reads markdown documentation files from `docs/` and dynamically discovers test functions in `tests/` using Python AST analysis, enabling developers to browse technical specs, run test suites, and view FinOps metrics through an interactive web interface.
+
+**Q: What design trade-offs were made when structuring the CLI option flags reference and Docker instructions in the README?**
+> A: We prioritized immediate developer onboarding under 5 minutes by putting copy-paste quickstart commands and multi-source examples upfront, followed by structured option flag reference tables and explicit Docker commands for both demo and live secrets injection modes.

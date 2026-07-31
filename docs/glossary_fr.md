@@ -228,3 +228,10 @@ Option CLI ignorant à la fois la lecture et l'écriture dans le cache local sur
 - **Injection Dynamique de Secrets au Runtime** : Fourniture de clés API et d'identifiants sensibles aux applications conteneurisées lors de l'exécution via des variables d'environnement, évitant toute persistance dans les images de conteneurs.
 - **Zéro Secret Pré-intégré** : Norme de sécurité garantissant qu'aucune clé API, jeton ou identifiant n'est écrit en dur dans le code source ou embarqué dans les couches du système de fichiers du conteneur.
 - **Résolution d'Alias de Variables d'Environnement** : Configuration des analyseurs de paramètres pour mapper plusieurs noms de variables d'environnement standard vers un champ d'identifiant interne unique.
+
+
+### Finalisation de la Documentation & Intégrité (Étape 10.3)
+
+- **Documentation-as-Product** : La pratique consistant à appliquer la rigueur de l'ingénierie logicielle (linter, tests automatisés, contrôle de version, portes CI/CD) à la documentation technique.
+- **Dérive Documentaire (Documentation Drift)** : La divergence au fil du temps entre le comportement réel du code et la documentation écrite, palliée par la validation automatisée par les tests.
+- **Friction d'Onboarding** : La mesure du temps de configuration et de la complexité opérationnelle nécessaires à un développeur externe pour cloner un dépôt, compiler et exécuter une fonctionnalité opérationnelle.

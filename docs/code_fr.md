@@ -154,3 +154,16 @@ L'application repose sur le **Single Responsibility Principle (SRP)**. Le code e
   - **`test_runtime_secrets_missing_key_raises_error`** : Confirme la levée d'une `ConfigurationError` en l'absence de variable d'environnement d'API key.
   - **`test_cli_execution_without_env_var_exits_cleanly`** : S'assure que le scan CLI sans variable d'environnement quitte avec le code 1, affiche un panneau d'erreur Rich rouge et masque les tracebacks Python.
   - **`test_cli_execution_with_runtime_injected_openai_key`** : Valide l'exécution complète du pipeline de scan avec une clé `OPENAI_API_KEY` injectée au runtime.
+
+
+### Finalisation de la Documentation & Vérification d'Intégrité (`src/ai_watcher/utils/docs.py` & `tests/test_docs.py`)
+
+- **`src/ai_watcher/utils/docs.py`** : Module utilitaire fournissant les métadonnées du projet, les références d'utilisation CLI structurées selon 3 sources d'entrée (texte brut, fichier local, URL Web), les tableaux de flags, les commandes Docker et la vérification automatisée de l'intégrité de la documentation :
+  - **`get_project_metadata()`** : Renvoie les métadonnées centrales du projet (nom, version, description, phase, licence).
+  - **`get_cli_usage_doc()`** : Renvoie un dictionnaire structuré contenant les flags CLI, les commandes Docker et les exemples d'utilisation des 3 sources.
+  - **`verify_docs_integrity()`** : Scanne la racine du projet et le répertoire `docs/` pour vérifier la présence et la non-vacuité de tous les fichiers de documentation requis (`README.md`, `README_fr.md`, spécifications, feuille de route, glossaire, questions, documentation du code).
+- **`tests/test_docs.py`** : Suite de tests unitaires pour la finalisation de la documentation (Étape 10.3) :
+  - **`test_project_metadata()`** : Valide la structure et les valeurs non vides des métadonnées du projet.
+  - **`test_cli_usage_doc()`** : Confirme la présence des exemples d'utilisation des 3 sources et du tableau des flags.
+  - **`test_verify_docs_integrity()`** : S'assure que tous les fichiers de documentation requis existent sur disque.
+  - **`test_readme_sections()`** : Valide que `README.md` contient toutes les sections requises (Features, Usage, Flags, Docker, FinOps, Quickstart).

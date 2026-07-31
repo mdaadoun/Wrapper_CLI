@@ -347,6 +347,41 @@ const TEST_DESCRIPTIONS: Record<
     output: "Exit code 1 et message d'erreur 'Unexpected error'.",
     concept: "Fail-Safe Safety Guard",
   },
+  "tests/test_docs.py": {
+    title: "📁 test_docs.py (Documentation & Integration README)",
+    objective: "Valider l'intégrité de la documentation, les métadonnées projet, et le contenu du README.",
+    input: "Fichiers markdown dans docs/ et README.md.",
+    output: "Assertion de présence des fichiers docs et validation des sections README.",
+    concept: "Documentation-as-Product & Verification Integrity",
+  },
+  "tests/test_docs.py::test_project_metadata": {
+    title: "⚡ test_project_metadata()",
+    objective: "Vérifier l'exactitude des métadonnées centralisées du projet.",
+    input: "get_project_metadata()",
+    output: "Dictionnaire contenant nom, version, phase 10.3 et description.",
+    concept: "Centralized Project Metadata",
+  },
+  "tests/test_docs.py::test_cli_usage_doc": {
+    title: "⚡ test_cli_usage_doc()",
+    objective: "Vérifier la structure documentaire d'utilisation CLI (3 sources d'entrée, flags et Docker).",
+    input: "get_cli_usage_doc()",
+    output: "Exemples pour text, file, url et flags de commande.",
+    concept: "Usage Reference Validation",
+  },
+  "tests/test_docs.py::test_verify_docs_integrity": {
+    title: "⚡ test_verify_docs_integrity()",
+    objective: "S'assurer de la présence et de la non-vacuité de tous les fichiers de documentation.",
+    input: "verify_docs_integrity()",
+    output: "Liste vide de fichiers manquants (missing == []).",
+    concept: "Documentation Integrity Check",
+  },
+  "tests/test_docs.py::test_readme_sections": {
+    title: "⚡ test_readme_sections()",
+    objective: "Valider la présence des sections requises dans le fichier README.md.",
+    input: "Inspection du fichier README.md",
+    output: "Présence des sections Features, Usage, Flags, Docker, FinOps et Quickstart.",
+    concept: "README Compliance Gate",
+  },
 };
 
 function getFileIcon(name: string): string {
