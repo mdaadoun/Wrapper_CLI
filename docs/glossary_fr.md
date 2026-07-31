@@ -214,3 +214,10 @@ Option CLI ignorant à la fois la lecture et l'écriture dans le cache local sur
 - **Tests CLI End-to-End (E2E)** : Méthodologie de test où l'application CLI est invoquée via son point d'entrée principal pour vérifier que tous les sous-systèmes internes (analyse d'arguments, extraction, logique métier, formatage et E/S disque) fonctionnent de concert.
 - **Harnais de Test CliRunner** : Utilitaire de test fourni par Click/Typer permettant d'invoquer des commandes CLI de manière programmatique, en capturant la sortie standard, la sortie d'erreur, le code de sortie et les exceptions dans un contexte isolé.
 - **Intégration des Composants du Pipeline** : Interaction structurelle et flux de données entre l'ingestion d'entrées (extracteur), le traitement (analyse du client LLM / cache) et le rendu des sorties (console Rich / formatteurs d'export).
+
+
+### Conteneurisation CLI Multi-Stage (Étape 10.1)
+
+- **Directive ENTRYPOINT** : Instruction Dockerfile spécifiant la commande par défaut exécutée lors du démarrage d'un conteneur, permettant aux arguments transmis à `docker run` d'être directement ajoutés à l'exécutable.
+- **Build Docker Multi-Stage** : Technique d'optimisation d'image conteneurisée utilisant plusieurs instructions `FROM` dans un seul Dockerfile pour séparer l'environnement de build de l'image d'exécution finale, réduisant la taille et la surface d'attaque.
+- **Exécution de Conteneur Non-Privilégiée** : Exécution des processus applicatifs dans un conteneur sous un utilisateur système non-root (`appuser`) afin de limiter les risques de sécurité dans les environnements partagés.

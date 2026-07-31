@@ -290,3 +290,15 @@ Targeted questions and answers covering architecture design choices and engineer
 
 **Q: How does the Next.js test runner dashboard discover and execute integration tests in subdirectories?**
 > A: The dashboard API route (`api/tests/list`) uses recursive directory traversal to collect all `test_*.py` files across subfolders (such as `tests/integration/`), while the runner API route (`api/run-tests`) validates path formats starting with `tests/` to execute specific test targets dynamically.
+
+
+### Multi-Stage CLI Dockerfile Adaptation (Step 10.1)
+
+**Q: Why should a CLI application use ENTRYPOINT instead of CMD in its Dockerfile?**
+> A: Using `ENTRYPOINT` turns the Docker image into a self-contained executable. Any arguments appended to `docker run` (e.g., `docker run ai-watcher scan "content" --demo`) are passed directly to `ENTRYPOINT`, mimicking native CLI execution. `CMD` is better suited for default arguments or overridable server processes.
+
+**Q: How does a multi-stage Docker build improve container security and performance for a Python CLI tool?**
+> A: Multi-stage builds allow heavy build tools (like Poetry, compilers, and curl) to remain in the builder stage. Only the compiled virtual environment (`.venv`) and source code are copied into the lean runtime stage, reducing image size below 250 MB and eliminating unnecessary build utilities that could increase attack surface.
+
+**Q: Why is it important to create and switch to a non-root user (appuser) inside the container?**
+> A: By default, Docker containers run processes as root. Running as non-root (`appuser`) enforces the principle of least privilege, preventing a compromised container process from gaining root access on the host system or modifying containerized system files.

@@ -131,3 +131,15 @@ L'application repose sur le **Single Responsibility Principle (SRP)**. Le code e
 - **`test_e2e_scan_cache_flow_and_bypass`** : Teste le flux de mise en cache local de bout en bout en vérifiant l'absence de cache au premier essai, la notification `[CACHE HIT]` à l'exécution suivante et le contournement du cache avec `--no-cache`.
 - **`test_e2e_scan_invalid_source_error`** : S'assure que les entrées vides ou fichiers inexistants sortent avec le statut `1` et un formatage d'erreur propre sans tracebacks.
 - **`dashboard/src/app/api/tests/list/route.ts` & `run-tests/route.ts`** : Routes d'API mises à jour avec exploration récursive des répertoires et validation des chemins pour prendre en charge les suites de tests imbriquées comme `tests/integration/test_cli.py`.
+
+
+### Conteneurisation CLI Multi-Stage (`Dockerfile` & `tests/test_dockerfile.py`)
+
+- **`Dockerfile`** : Configuration du conteneur de production multi-stage. L'étape builder compile les dépendances avec Poetry (`poetry install --only main --no-root`). L'étape runtime copie `.venv` et `src/` vers une image propre `python:3.10-slim`, configure `PATH` et `PYTHONPATH`, impose l'exécution non-privilégiée sous `appuser:appgroup`, et définit `ENTRYPOINT ["python", "-m", "src.ai_watcher.main"]` avec les arguments par défaut `CMD ["scan", "--help"]`.
+- **`tests/test_dockerfile.py`** : Suite de tests unitaires validant la configuration de conteneurisation :
+  - **`test_dockerfile_exists_and_non_empty`** : Vérifie que `Dockerfile` existe à la racine du projet et n'est pas vide.
+  - **`test_dockerfile_multi_stage_structure`** : Valide les instructions multi-stage `builder` et `runtime` `FROM python:3.10-slim`.
+  - **`test_dockerfile_cli_entrypoint_configuration`** : S'assure que `ENTRYPOINT` pointe vers le module CLI principal, que `CMD` fournit l'aide par défaut et que les directives serveur (`uvicorn`, `EXPOSE`, `HEALTHCHECK`) sont supprimées.
+  - **`test_dockerfile_security_non_root_user`** : Confirme la création de l'utilisateur système `appuser` (UID 1000) / `appgroup` et le basculement d'utilisateur `USER appuser` avec `--chown`.
+  - **`test_dockerignore_exclusions`** : Valide l'exclusion de `.venv/`, `tests/`, `dashboard/`, `docs/` et `.git/`.
+  - **`test_makefile_docker_build_target`** : Vérifie que le `Makefile` contient la cible `docker-build` exécutant `docker build -t`.

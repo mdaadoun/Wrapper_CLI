@@ -290,3 +290,15 @@ Questions-réponses clés pour défendre l'architecture et les choix d'ingénier
 
 **Q : Comment le dashboard exécuteur de tests Next.js découvre-t-il et exécute-t-il les tests d'intégration dans les sous-répertoires ?**
 > R : La route d'API du dashboard (`api/tests/list`) utilise un parcours récursif de répertoires pour collecter tous les fichiers `test_*.py` dans les sous-dossiers (comme `tests/integration/`), tandis que la route d'exécution (`api/run-tests`) valide les formats de chemin commençant par `tests/` pour exécuter dynamiquement des cibles de test spécifiques.
+
+
+### Adaptation Dockerfile CLI Multi-Stage (Étape 10.1)
+
+**Q : Pourquoi une application CLI doit-elle utiliser ENTRYPOINT au lieu de CMD dans son Dockerfile ?**
+> R : L'utilisation d' `ENTRYPOINT` transforme l'image Docker en un exécutable autonome. Tous les arguments ajoutés à `docker run` (ex: `docker run ai-watcher scan "contenu" --demo`) sont transmis directement à `ENTRYPOINT`, imitant l'exécution CLI native. `CMD` est plus adapté pour des arguments par défaut ou des processus serveur surchargeables.
+
+**Q : Comment un build Docker multi-stage améliore-t-il la sécurité et les performances d'un outil CLI Python ?**
+> R : Les builds multi-stage permettent de conserver les outils de compilation lourds (comme Poetry, les compilateurs et curl) dans l'étape builder. Seul l'environnement virtuel compilé (`.venv`) et le code source sont copiés dans l'étape de runtime allégée, réduisant la taille de l'image sous les 250 Mo et éliminant les utilitaires de build inutiles qui pourraient augmenter la surface d'attaque.
+
+**Q : Pourquoi est-il important de créer et de basculer vers un utilisateur non-root (appuser) dans le conteneur ?**
+> R : Par défaut, les conteneurs Docker exécutent les processus en root. L'exécution en tant que non-root (`appuser`) applique le principe du moindre privilège, empêchant un processus de conteneur compromis d'obtenir un accès root sur le système hôte ou de modifier des fichiers système conteneurisés.

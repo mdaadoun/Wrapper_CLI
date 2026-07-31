@@ -219,3 +219,10 @@ A CLI option that skips both reading from and writing to the local disk cache, e
 - **End-to-End (E2E) CLI Testing**: Testing methodology where the CLI application is invoked via its top-level entrypoint to verify that all internal subsystems (CLI argument parsing, content extraction, business logic, formatting, and disk I/O) work cohesively.
 - **CliRunner Test Harness**: A test utility provided by Click/Typer that invokes CLI commands programmatically, capturing standard output, standard error, exit codes, and exceptions in an isolated context.
 - **Pipeline Component Integration**: The structural interaction and data flow between input ingestion (extractor), processing (LLM client analysis / cache), and output rendering (Rich console / export formatters).
+
+
+### Multi-Stage CLI Containerization (Step 10.1)
+
+- **ENTRYPOINT Directive**: A Dockerfile instruction specifying the default command executed when a container starts, allowing arguments passed to `docker run` to be appended directly to the executable.
+- **Multi-Stage Docker Build**: A container image optimization technique using multiple `FROM` statements in a single Dockerfile to separate the build environment from the final runtime image, reducing image size and attack surface.
+- **Unprivileged Container Execution**: Running application processes inside a container as a non-root system user (`appuser`) to mitigate security risks in shared or multi-tenant runtime environments.

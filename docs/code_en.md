@@ -136,3 +136,15 @@ The application adheres to the **Single Responsibility Principle (SRP)**. The co
 - **`test_e2e_scan_cache_flow_and_bypass`**: Tests end-to-end local caching flow verifying cache miss on initial run, `[CACHE HIT]` notice on repeat execution, and cache bypass when passing `--no-cache`.
 - **`test_e2e_scan_invalid_source_error`**: Ensures whitespace inputs or non-existent files exit with status `1` and clean domain error formatting without tracebacks.
 - **`dashboard/src/app/api/tests/list/route.ts` & `run-tests/route.ts`**: Updated API routes with recursive file discovery and path validation supporting nested test suites like `tests/integration/test_cli.py`.
+
+
+### Multi-Stage CLI Containerization (`Dockerfile` & `tests/test_dockerfile.py`)
+
+- **`Dockerfile`**: Multi-stage production container setup. Builder stage compiles dependencies using Poetry (`poetry install --only main --no-root`). Runtime stage copies `.venv` and `src/` to a clean `python:3.10-slim` image, configures `PATH` and `PYTHONPATH`, enforces unprivileged execution under `appuser:appgroup`, and sets `ENTRYPOINT ["python", "-m", "src.ai_watcher.main"]` with default `CMD ["scan", "--help"]`.
+- **`tests/test_dockerfile.py`**: Unit test suite validating containerization configuration:
+  - **`test_dockerfile_exists_and_non_empty`**: Asserts `Dockerfile` exists at project root and is non-empty.
+  - **`test_dockerfile_multi_stage_structure`**: Verifies multi-stage `builder` and `runtime` `FROM python:3.10-slim` statements.
+  - **`test_dockerfile_cli_entrypoint_configuration`**: Ensures `ENTRYPOINT` points to main CLI module, default `CMD` provides help args, and server directives (`uvicorn`, `EXPOSE`, `HEALTHCHECK`) are stripped.
+  - **`test_dockerfile_security_non_root_user`**: Confirms creation of system user `appuser` (UID 1000) / `appgroup` and `USER appuser` context switch with `--chown`.
+  - **`test_dockerignore_exclusions`**: Validates exclusion of `.venv/`, `tests/`, `dashboard/`, `docs/`, and `.git/`.
+  - **`test_makefile_docker_build_target`**: Verifies `Makefile` contains `docker-build` target executing `docker build -t`.

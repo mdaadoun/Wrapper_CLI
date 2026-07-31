@@ -1,5 +1,5 @@
 # ==============================================================================
-# Dockerfile - Multi-Stage Production Image for AIPE_Framework
+# Dockerfile - Multi-Stage Production Image for AI Watcher CLI
 # ==============================================================================
 
 # STAGE 1: BUILDER
@@ -33,6 +33,7 @@ LABEL version="0.1.0"
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PATH="/app/.venv/bin:${PATH}"
+ENV PYTHONPATH="/app/src:${PYTHONPATH}"
 
 WORKDIR /app
 
@@ -47,9 +48,6 @@ COPY --from=builder --chown=appuser:appgroup /app/.venv /app/.venv
 COPY --from=builder --chown=appuser:appgroup /app/src /app/src
 
 USER appuser
-EXPOSE 8000
 
-HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
-
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+ENTRYPOINT ["python", "-m", "src.ai_watcher.main"]
+CMD ["scan", "--help"]
