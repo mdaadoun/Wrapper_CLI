@@ -221,3 +221,10 @@ Option CLI ignorant à la fois la lecture et l'écriture dans le cache local sur
 - **Directive ENTRYPOINT** : Instruction Dockerfile spécifiant la commande par défaut exécutée lors du démarrage d'un conteneur, permettant aux arguments transmis à `docker run` d'être directement ajoutés à l'exécutable.
 - **Build Docker Multi-Stage** : Technique d'optimisation d'image conteneurisée utilisant plusieurs instructions `FROM` dans un seul Dockerfile pour séparer l'environnement de build de l'image d'exécution finale, réduisant la taille et la surface d'attaque.
 - **Exécution de Conteneur Non-Privilégiée** : Exécution des processus applicatifs dans un conteneur sous un utilisateur système non-root (`appuser`) afin de limiter les risques de sécurité dans les environnements partagés.
+
+
+### Injection de Secrets au Runtime (Étape 10.2)
+
+- **Injection Dynamique de Secrets au Runtime** : Fourniture de clés API et d'identifiants sensibles aux applications conteneurisées lors de l'exécution via des variables d'environnement, évitant toute persistance dans les images de conteneurs.
+- **Zéro Secret Pré-intégré** : Norme de sécurité garantissant qu'aucune clé API, jeton ou identifiant n'est écrit en dur dans le code source ou embarqué dans les couches du système de fichiers du conteneur.
+- **Résolution d'Alias de Variables d'Environnement** : Configuration des analyseurs de paramètres pour mapper plusieurs noms de variables d'environnement standard vers un champ d'identifiant interne unique.

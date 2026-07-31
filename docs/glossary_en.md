@@ -226,3 +226,10 @@ A CLI option that skips both reading from and writing to the local disk cache, e
 - **ENTRYPOINT Directive**: A Dockerfile instruction specifying the default command executed when a container starts, allowing arguments passed to `docker run` to be appended directly to the executable.
 - **Multi-Stage Docker Build**: A container image optimization technique using multiple `FROM` statements in a single Dockerfile to separate the build environment from the final runtime image, reducing image size and attack surface.
 - **Unprivileged Container Execution**: Running application processes inside a container as a non-root system user (`appuser`) to mitigate security risks in shared or multi-tenant runtime environments.
+
+
+### Runtime Secrets Injection (Step 10.2)
+
+- **Dynamic Runtime Secret Injection**: Supplying API keys and sensitive credentials to containerized applications at runtime via environment variables, avoiding credential persistence in container images.
+- **Zero-Baked Secrets**: A security standard ensuring no API keys, tokens, or credentials are hardcoded or embedded into container filesystem layers.
+- **Environment Variable Alias Resolution**: Configuring settings parsers to map multiple standard environment variable names to a single internal credential field.

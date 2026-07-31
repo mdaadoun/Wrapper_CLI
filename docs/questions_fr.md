@@ -302,3 +302,15 @@ Questions-réponses clés pour défendre l'architecture et les choix d'ingénier
 
 **Q : Pourquoi est-il important de créer et de basculer vers un utilisateur non-root (appuser) dans le conteneur ?**
 > R : Par défaut, les conteneurs Docker exécutent les processus en root. L'exécution en tant que non-root (`appuser`) applique le principe du moindre privilège, empêchant un processus de conteneur compromis d'obtenir un accès root sur le système hôte ou de modifier des fichiers système conteneurisés.
+
+
+### Injection de Secrets au Runtime (Étape 10.2)
+
+**Q : Pourquoi l'écriture en dur de secrets dans des images Docker ou des couches de build constitue-t-elle un risque de sécurité ?**
+> R : Les couches d'images Docker sont immuables et mises en cache. Tout secret déclaré ou copié lors du build de l'image reste visible dans l'historique `docker history` et les archives de couches, exposant les identifiants même s'ils sont supprimés dans des étapes ultérieures.
+
+**Q : Comment le CLI AI Watcher gère-t-il les secrets manquants au runtime lors d'une exécution hors mode démo ?**
+> R : Lorsqu'aucune variable d'environnement de clé API n'est fournie, `get_settings()` lève une `ConfigurationError`. Le CLI intercepte cette exception de domaine, affiche un panneau d'erreur Rich lisible sans tracebacks et quitte avec le code 1.
+
+**Q : Comment `AliasChoices` de Pydantic simplifie-t-il la configuration au runtime à travers différents environnements ?**
+> R : `AliasChoices` permet à un champ de configuration unique (`gemini_api_key`) d'accepter des valeurs provenant de plusieurs variables d'environnement (telles que `OPENAI_API_KEY` ou `GEMINI_API_KEY`), garantissant une exécution fluide sur des conteneurs standards.

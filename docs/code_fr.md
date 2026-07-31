@@ -143,3 +143,14 @@ L'application repose sur le **Single Responsibility Principle (SRP)**. Le code e
   - **`test_dockerfile_security_non_root_user`** : Confirme la création de l'utilisateur système `appuser` (UID 1000) / `appgroup` et le basculement d'utilisateur `USER appuser` avec `--chown`.
   - **`test_dockerignore_exclusions`** : Valide l'exclusion de `.venv/`, `tests/`, `dashboard/`, `docs/` et `.git/`.
   - **`test_makefile_docker_build_target`** : Vérifie que le `Makefile` contient la cible `docker-build` exécutant `docker build -t`.
+
+
+### Injection de Secrets au Runtime (`src/ai_watcher/config.py` & `tests/test_secrets_injection.py`)
+
+- **`src/ai_watcher/config.py`** : Configuration de la classe `Settings` héritant de Pydantic `BaseSettings` avec `AliasChoices` (`GEMINI_API_KEY`, `OPENAI_API_KEY`, `AI_WATCHER_API_KEY`) permettant l'injection dynamique d'identifiants au runtime (`docker run -e OPENAI_API_KEY=sk-...`). Impose l'absence totale de clés d'API écrites en dur dans le code ou les couches d'image Docker. `get_settings()` lève une `ConfigurationError` si aucune variable d'environnement n'est fournie.
+- **`tests/test_secrets_injection.py`** : Suite de tests unitaires pour l'Étape 10.2 sur l'injection de secrets au runtime :
+  - **`test_runtime_secrets_gemini_api_key`** : Vérifie la résolution dynamique de la variable d'environnement `GEMINI_API_KEY`.
+  - **`test_runtime_secrets_openai_api_key_alias`** : Valide le fonctionnement de l'alias de repli `OPENAI_API_KEY`.
+  - **`test_runtime_secrets_missing_key_raises_error`** : Confirme la levée d'une `ConfigurationError` en l'absence de variable d'environnement d'API key.
+  - **`test_cli_execution_without_env_var_exits_cleanly`** : S'assure que le scan CLI sans variable d'environnement quitte avec le code 1, affiche un panneau d'erreur Rich rouge et masque les tracebacks Python.
+  - **`test_cli_execution_with_runtime_injected_openai_key`** : Valide l'exécution complète du pipeline de scan avec une clé `OPENAI_API_KEY` injectée au runtime.

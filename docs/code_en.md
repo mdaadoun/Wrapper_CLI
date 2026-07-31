@@ -148,3 +148,14 @@ The application adheres to the **Single Responsibility Principle (SRP)**. The co
   - **`test_dockerfile_security_non_root_user`**: Confirms creation of system user `appuser` (UID 1000) / `appgroup` and `USER appuser` context switch with `--chown`.
   - **`test_dockerignore_exclusions`**: Validates exclusion of `.venv/`, `tests/`, `dashboard/`, `docs/`, and `.git/`.
   - **`test_makefile_docker_build_target`**: Verifies `Makefile` contains `docker-build` target executing `docker build -t`.
+
+
+### Runtime Secrets Injection (`src/ai_watcher/config.py` & `tests/test_secrets_injection.py`)
+
+- **`src/ai_watcher/config.py`**: Configured `Settings` class inheriting from Pydantic `BaseSettings` with `AliasChoices` (`GEMINI_API_KEY`, `OPENAI_API_KEY`, `AI_WATCHER_API_KEY`) enabling dynamic runtime credential injection (`docker run -e OPENAI_API_KEY=sk-...`). Enforces zero hardcoded credentials in container layers or codebase files. `get_settings()` raises `ConfigurationError` when no API key environment variable is set.
+- **`tests/test_secrets_injection.py`**: Unit test suite for Step 10.2 runtime secret injection:
+  - **`test_runtime_secrets_gemini_api_key`**: Verifies dynamic resolution of `GEMINI_API_KEY` environment variable.
+  - **`test_runtime_secrets_openai_api_key_alias`**: Validates `OPENAI_API_KEY` alias fallback support.
+  - **`test_runtime_secrets_missing_key_raises_error`**: Asserts `ConfigurationError` when no API key env var is present.
+  - **`test_cli_execution_without_env_var_exits_cleanly`**: Ensures CLI scan without env var exits with code 1, renders red Rich error panel, and hides Python tracebacks.
+  - **`test_cli_execution_with_runtime_injected_openai_key`**: Validates full scan pipeline execution with runtime injected `OPENAI_API_KEY`.

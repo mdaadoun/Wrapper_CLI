@@ -302,3 +302,15 @@ Targeted questions and answers covering architecture design choices and engineer
 
 **Q: Why is it important to create and switch to a non-root user (appuser) inside the container?**
 > A: By default, Docker containers run processes as root. Running as non-root (`appuser`) enforces the principle of least privilege, preventing a compromised container process from gaining root access on the host system or modifying containerized system files.
+
+
+### Runtime Secrets Injection (Step 10.2)
+
+**Q: Why is hardcoding secrets inside Docker images or build layers a security risk?**
+> A: Docker image layers are immutable and cached. Any secret declared or copied during image build remains visible in docker history and layer archives, exposing credentials even if deleted in subsequent build steps.
+
+**Q: How does the AI Watcher CLI handle missing runtime secrets when executed in non-demo mode?**
+> A: When no API key environment variable is provided, `get_settings()` raises a `ConfigurationError`. The CLI catches this domain exception, displays a human-readable Rich error panel without stack traces, and exits with code 1.
+
+**Q: How does Pydantic AliasChoices simplify runtime configuration across different environments?**
+> A: `AliasChoices` enables a single configuration field (`gemini_api_key`) to accept values from multiple environment variables (such as `OPENAI_API_KEY` or `GEMINI_API_KEY`), allowing seamless execution across standard container setups.

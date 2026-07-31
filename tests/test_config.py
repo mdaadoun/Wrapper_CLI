@@ -8,14 +8,15 @@ from ai_watcher.exceptions import ConfigurationError
 
 
 def test_missing_api_key_raises_error(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Ensure missing GEMINI_API_KEY raises ConfigurationError."""
-    # Temporarily remove env var if it exists
+    """Ensure missing API key environment variables raise ConfigurationError."""
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("AI_WATCHER_API_KEY", raising=False)
 
     with pytest.raises(ConfigurationError) as exc_info:
         get_settings()
 
-    assert "Missing or invalid configuration" in str(exc_info.value)
+    assert "Missing API key environment variable" in str(exc_info.value)
 
 
 def test_valid_config_loads_successfully(monkeypatch: pytest.MonkeyPatch) -> None:
