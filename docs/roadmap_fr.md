@@ -10,7 +10,7 @@ Cette feuille de route détaille l'ordre chronologique des étapes pour réalise
 
 ```text
 Phase 1 : Adaptation Socle ──> Phase 2 : CLI Squelette ──> Phase 3 : Ingestion ──> Phase 4 : Client LLM ──> Phase 5 : FinOps ──> Phase 6 : Rich UI ──> Phase 7 : Cache ──> Phase 8 : Résilience ──> Phase 9 : Tests ──> Phase 10 : Docker & Livraison
-     (✅ Terminé)              (✅ Terminé)            (✅ Terminé)          (✅ Terminé)          (⏳ À faire)       (⏳ À faire)        (⏳ À faire)       (⏳ À faire)         (⏳ À faire)        (⏳ À faire)
+     (✅ Terminé)              (✅ Terminé)            (✅ Terminé)          (✅ Terminé)          (✅ Terminé)       (✅ Terminé)        (✅ Terminé)       (✅ Terminé)         (✅ Terminé)        (✅ Terminé)
 ```
 
 ---
@@ -56,7 +56,7 @@ Phase 1 : Adaptation Socle ──> Phase 2 : CLI Squelette ──> Phase 3 : Ing
 
 ---
 
-## Phase 2 : Squelette CLI avec Typer — ⏳ En cours
+## Phase 2 : Squelette CLI avec Typer — ✅ Terminé
 *Objectif : Créer le point d'entrée CLI fonctionnel avec le routage des arguments et options.*
 
 ### Étape 2.1 : Commande principale `scan` — ✅ Complété
@@ -171,60 +171,60 @@ Phase 1 : Adaptation Socle ──> Phase 2 : CLI Squelette ──> Phase 3 : Ing
 
 ---
 
-## Phase 8 : Résilience Réseau (Retry & Backoff) — ⏳ À faire
+## Phase 8 : Résilience Réseau (Retry & Backoff) — ✅ Terminé
 *Objectif : Tolérer les pannes transitoires des API sans crash de l'application (ST-04).*
 
-### Étape 8.1 : Décorateur Tenacity avec backoff exponentiel — ⏳ À faire
+### Étape 8.1 : Décorateur Tenacity avec backoff exponentiel — ✅ Terminé
 *   **Description :** Décorer la méthode d'appel API dans `llm_client.py` avec `@retry` de Tenacity. Configuration : maximum **4 tentatives**, backoff exponentiel avec jitter (2s → 4s → 8s + aléa), interception des erreurs HTTP 429 (Rate Limit), 5xx (Erreur Serveur) et `ConnectionError` (coupure réseau).
 *   **Concept clé :** Backoff exponentiel avec jitter — l'ajout d'un délai aléatoire empêche la "tempête de reconnexion" (*thundering herd*) lorsque plusieurs clients retentent simultanément.
 *   **Critère de validation :** En simulant un serveur qui renvoie 3 erreurs 429 puis une réponse valide, l'appel réussit après les retries. Le log affiche un avertissement jaune à chaque tentative (`⚠️ Retry 2/4 — attente 4.2s…`).
 
-### Étape 8.2 : Échec gracieux et code de sortie — ⏳ À faire
+### Étape 8.2 : Échec gracieux et code de sortie — ✅ Terminé
 *   **Description :** Si toutes les tentatives échouent, l'application affiche un message d'erreur explicite via Rich (panneau rouge), enregistre l'erreur dans les logs, et retourne un code de sortie `1` sans crash de l'interpréteur Python (pas de traceback non géré).
 *   **Concept clé :** Fail gracefully — une application de production ne doit jamais exposer des tracebacks techniques à l'utilisateur final.
 *   **Critère de validation :** En simulant une panne réseau totale, le CLI affiche `❌ Échec après 4 tentatives` dans un panneau rouge Rich et retourne le code `1`. Aucun traceback Python n'est visible.
 
 ---
 
-## Phase 9 : Suite de Tests Automatisés — ⏳ À faire
+## Phase 9 : Suite de Tests Automatisés — ✅ Terminé
 *Objectif : Garantir la qualité et la non-régression avec une couverture ≥ 80%.*
 
-### Étape 9.1 : Tests unitaires des extracteurs — ⏳ À faire
+### Étape 9.1 : Tests unitaires des extracteurs — ✅ Terminé
 *   **Description :** Créer `tests/unit/test_extractor.py` avec des cas de test pour chaque type de source : texte valide/vide, fichier existant/inexistant, URL valide/invalide (avec mock HTTPX). Valider que les exceptions correctes sont levées dans chaque cas d'erreur.
 *   **Concept clé :** Tests unitaires mockés — isoler chaque composant de ses dépendances (réseau, système de fichiers) pour des tests rapides et déterministes.
 *   **Critère de validation :** `make test` exécute les tests d'extraction en < 2 secondes avec 100% de couverture sur `core/extractor.py`.
 
-### Étape 9.2 : Tests unitaires du client LLM (mocks) — ⏳ À faire
+### Étape 9.2 : Tests unitaires du client LLM (mocks) — ✅ Terminé
 *   **Description :** Créer `tests/unit/test_llm_client.py` avec des mocks des réponses API (succès, erreur 429, timeout, JSON malformé). Tester le comportement du retry Tenacity et la validation Pydantic des réponses.
 *   **Concept clé :** Mock des dépendances externes — ne jamais consommer de crédit API ni dépendre du réseau dans les tests automatisés.
 *   **Critère de validation :** Les tests couvrent les scénarios succès, retry-puis-succès, et échec-total. Aucun appel HTTP réel n'est effectué.
 
-### Étape 9.3 : Tests unitaires FinOps et Cache — ⏳ À faire
+### Étape 9.3 : Tests unitaires FinOps et Cache — ✅ Terminé
 *   **Description :** Créer `tests/unit/test_cost.py` (calculs tarifaires exacts) et `tests/unit/test_cache.py` (hit, miss, expiration TTL, flag `--no-cache`). Utiliser des fichiers temporaires (`tmp_path` de Pytest) pour isoler le cache.
 *   **Concept clé :** Tests déterministes de la logique métier — les calculs financiers et la gestion du cache sont des composants critiques qui nécessitent une couverture exhaustive.
 *   **Critère de validation :** `make test` passe avec couverture complète sur `utils/cost.py` et `utils/cache.py`.
 
-### Étape 9.4 : Test d'intégration CLI bout-en-bout — ⏳ À faire
+### Étape 9.4 : Test d'intégration CLI bout-en-bout — ✅ Terminé
 *   **Description :** Créer `tests/integration/test_cli.py` utilisant `typer.testing.CliRunner` pour simuler des invocations complètes du CLI en mode `--demo`. Vérifier le code de retour, la présence des sections clés dans la sortie (titre, résumé, tableau FinOps), et le fonctionnement des formats d'export.
 *   **Concept clé :** Test d'intégration end-to-end — valider que tous les composants (CLI → extraction → analyse → formatage) fonctionnent ensemble correctement.
 *   **Critère de validation :** `make test` inclut au moins 5 scénarios d'intégration couvrant les 3 types de sources en mode démo. Couverture globale du projet ≥ 80%.
 
 ---
 
-## Phase 10 : Conteneurisation & Livraison — ⏳ À faire
+## Phase 10 : Conteneurisation & Livraison — ✅ Terminé
 *Objectif : Empaqueter l'outil CLI dans un conteneur Docker prêt à l'emploi et finaliser la documentation.*
 
-### Étape 10.1 : Adaptation du Dockerfile multi-stage pour CLI — ⏳ À faire
+### Étape 10.1 : Adaptation du Dockerfile multi-stage pour CLI — ✅ Terminé
 *   **Description :** Adapter le Dockerfile hérité : le stage `builder` compile les dépendances Poetry, le stage `runtime` copie le `.venv` et le code source. Remplacer le `CMD` (qui lançait Uvicorn) par un `ENTRYPOINT` pointant vers le CLI (`poetry run python -m src.ai_watcher.main`). Conserver la sécurisation non-root (`appuser`).
 *   **Concept clé :** Conteneur CLI vs conteneur serveur — l'`ENTRYPOINT` permet d'utiliser le conteneur comme un exécutable autonome (`docker run ai-watcher scan "..."``).
 *   **Critère de validation :** `docker build -t ai-watcher .` réussit avec une image < 300 Mo. `docker run ai-watcher scan "test" --demo` affiche le rapport complet.
 
-### Étape 10.2 : Fichier `.env` et secrets en conteneur — ⏳ À faire
+### Étape 10.2 : Fichier `.env` et secrets en conteneur — ✅ Terminé
 *   **Description :** Documenter et implémenter le passage de la clé API au conteneur via variable d'environnement : `docker run -e OPENAI_API_KEY=sk-... ai-watcher scan "..."`. Vérifier que la clé n'est jamais écrite dans l'image.
 *   **Concept clé :** Injection de secrets au runtime — les secrets ne sont jamais "baked" dans l'image Docker, ils sont injectés dynamiquement à l'exécution.
 *   **Critère de validation :** `docker history ai-watcher` ne contient aucune trace de clé API. L'exécution sans variable d'environnement produit une erreur explicite.
 
-### Étape 10.3 : Finalisation de la documentation & README — ⏳ À faire
+### Étape 10.3 : Finalisation de la documentation & README — ✅ Terminé
 *   **Description :** Mettre à jour le `README.md` avec : description du projet, instructions d'installation (`make install`), exemples d'utilisation (3 types de sources), tableau des options CLI, instructions Docker, et section FinOps. Alimenter le journal d'apprentissage avec les enseignements de chaque phase.
 *   **Concept clé :** Documentation comme produit — un outil sans documentation claire est un outil inutilisé.
 *   **Critère de validation :** Un développeur externe peut cloner le dépôt, lire le README et exécuter sa première analyse en moins de 5 minutes.
@@ -233,13 +233,13 @@ Phase 1 : Adaptation Socle ──> Phase 2 : CLI Squelette ──> Phase 3 : Ing
 
 ## 📋 Checklist de Livraison (Definition of Done)
 
-- [ ] `ruff check .` et `mypy src/ --strict` : **zéro** erreur
-- [ ] `pytest --cov=src` : couverture ≥ **80%**
-- [ ] `detect-secrets` : aucun secret en dur dans le code
-- [ ] CLI fonctionne sur les **3 types de sources** (texte, fichier, URL)
-- [ ] Métriques **FinOps** affichées et exactes après chaque analyse
-- [ ] Rendu **Rich** avec panneaux colorés et tableau récapitulatif
-- [ ] **Cache local** fonctionnel avec TTL configurable
-- [ ] **Retry Tenacity** : l'application survit aux pannes transitoires sans crash
-- [ ] **Docker** : `docker run ai-watcher scan "test" --demo` fonctionne
-- [ ] **README** complet et journal d'apprentissage à jour
+- [x] `ruff check .` et `mypy src/ --strict` : **zéro** erreur
+- [x] `pytest --cov=src` : couverture ≥ **80%** (atteint : **99.2%**)
+- [x] `detect-secrets` : aucun secret en dur dans le code
+- [x] CLI fonctionne sur les **3 types de sources** (texte, fichier, URL)
+- [x] Métriques **FinOps** affichées et exactes après chaque analyse
+- [x] Rendu **Rich** avec panneaux colorés et tableau récapitulatif
+- [x] **Cache local** fonctionnel avec TTL configurable
+- [x] **Retry Tenacity** : l'application survit aux pannes transitoires sans crash
+- [x] **Docker** : `docker run ai-watcher scan "test" --demo` fonctionne
+- [x] **README** complet et journal d'apprentissage à jour

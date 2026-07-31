@@ -10,7 +10,7 @@ This roadmap outlines the chronological implementation steps for **Project 3: Au
 
 ```text
 Phase 1: Baseline Setup ──> Phase 2: CLI Skeleton ──> Phase 3: Ingestion ──> Phase 4: LLM Client ──> Phase 5: FinOps ──> Phase 6: Rich UI ──> Phase 7: Cache ──> Phase 8: Resilience ──> Phase 9: Testing ──> Phase 10: Docker & Release
-     (✅ Completed)             (✅ Completed)          (✅ Completed)        (✅ Completed)       (⏳ Pending)      (⏳ Pending)       (⏳ Pending)      (⏳ Pending)        (⏳ Pending)       (⏳ Pending)
+     (✅ Completed)             (✅ Completed)          (✅ Completed)        (✅ Completed)       (✅ Completed)    (✅ Completed)     (✅ Completed)    (✅ Completed)      (✅ Completed)     (✅ Completed)
 ```
 
 ---
@@ -171,60 +171,60 @@ Phase 1: Baseline Setup ──> Phase 2: CLI Skeleton ──> Phase 3: Ingestion
 
 ---
 
-## Phase 8: Network Resilience (Retry & Backoff) — ⏳ Pending
+## Phase 8: Network Resilience (Retry & Backoff) — ✅ Completed
 *Goal: Sustain transient API outages without application crashes (ST-04).*
 
-### Step 8.1: Tenacity Decorator with Exponential Backoff — ⏳ Pending
+### Step 8.1: Tenacity Decorator with Exponential Backoff — ✅ Completed
 * **Description:** Decorate API call method in `llm_client.py` using `@retry` from Tenacity. Settings: max **4 attempts**, exponential backoff with jitter (2s → 4s → 8s + random variation), handling HTTP 429 (Rate Limit), HTTP 5xx (Server Error), and `ConnectionError`.
 * **Key Concept:** Exponential Backoff with Jitter — randomized delay prevents thundering herd problem during service recovery.
 * **Validation Criterion:** Simulating 3 initial 429 failures followed by success resolves cleanly. Yellow warning log emitted on each attempt (`⚠️ Retry 2/4 — waiting 4.2s…`).
 
-### Step 8.2: Graceful Failure & Exit Codes — ⏳ Pending
+### Step 8.2: Graceful Failure & Exit Codes — ✅ Completed
 * **Description:** If all retry attempts fail, display clean error message via Rich (red panel), log error, and exit with code `1` without unhandled Python tracebacks.
 * **Key Concept:** Fail Gracefully — production applications never expose internal stack traces to end users.
 * **Validation Criterion:** Simulating complete network outage displays `❌ Failed after 4 attempts` in red Rich panel and exits with status `1`. Zero tracebacks emitted.
 
 ---
 
-## Phase 9: Automated Testing Suite — ⏳ Pending
+## Phase 9: Automated Testing Suite — ✅ Completed
 *Goal: Ensure software quality and regression prevention with ≥ 80% test coverage.*
 
-### Step 9.1: Extractor Unit Tests — ⏳ Pending
+### Step 9.1: Extractor Unit Tests — ✅ Completed
 * **Description:** Create `tests/unit/test_extractor.py` covering all source types: valid/empty text, existing/missing files, valid/invalid URLs (mocking HTTPX). Verify correct exceptions raised.
 * **Key Concept:** Mocked Unit Testing — isolate components from external I/O for fast, deterministic test suites.
 * **Validation Criterion:** `make test` completes in < 2 seconds with 100% line coverage on `core/extractor.py`.
 
-### Step 9.2: LLM Client Unit Tests (Mocks) — ⏳ Pending
+### Step 9.2: LLM Client Unit Tests (Mocks) — ✅ Completed
 * **Description:** Create `tests/unit/test_llm_client.py` mocking API responses (success, HTTP 429, timeout, malformed JSON). Test Tenacity retry behavior and Pydantic schema validation.
 * **Key Concept:** Mocking External Dependencies — zero real API calls or network reliance during automated test runs.
 * **Validation Criterion:** Tests cover success, retry-then-success, and total-failure paths without network traffic.
 
-### Step 9.3: FinOps & Cache Unit Tests — ⏳ Pending
+### Step 9.3: FinOps & Cache Unit Tests — ✅ Completed
 * **Description:** Create `tests/unit/test_cost.py` (pricing calculations) and `tests/unit/test_cache.py` (hit, miss, TTL expiration, `--no-cache` flag). Use Pytest temporary directory fixture (`tmp_path`).
 * **Key Concept:** Deterministic Business Logic Verification — financial logic and caching require exhaustive coverage.
 * **Validation Criterion:** `make test` achieves 100% coverage on `utils/cost.py` and `utils/cache.py`.
 
-### Step 9.4: End-to-End CLI Integration Testing — ⏳ Pending
+### Step 9.4: End-to-End CLI Integration Testing — ✅ Completed
 * **Description:** Create `tests/integration/test_cli.py` using `typer.testing.CliRunner` to simulate full CLI execution in `--demo` mode. Assert exit codes, expected Rich sections, and export outputs.
 * **Key Concept:** End-to-End Integration Testing — verify CLI, extractor, analyzer, and formatter modules function together.
 * **Validation Criterion:** `make test` includes 5 integration scenarios covering all source types in demo mode. Total project coverage ≥ 80%.
 
 ---
 
-## Phase 10: Containerization & Release — ⏳ Pending
+## Phase 10: Containerization & Release — ✅ Completed
 *Goal: Package CLI tool into production-ready Docker container and finalize documentation.*
 
-### Step 10.1: Multi-Stage CLI Dockerfile Adaptation — ⏳ Pending
+### Step 10.1: Multi-Stage CLI Dockerfile Adaptation — ✅ Completed
 * **Description:** Adapt inherited Dockerfile: `builder` stage compiles Poetry dependencies; `runtime` stage copies `.venv` and source code. Replace `CMD` with `ENTRYPOINT` (`poetry run python -m src.ai_watcher.main`). Maintain unprivileged non-root user (`appuser`).
 * **Key Concept:** CLI vs Server Containers — `ENTRYPOINT` enables running container directly as executable CLI (`docker run ai-watcher scan "..."`).
 * **Validation Criterion:** `docker build -t ai-watcher .` produces lightweight image (< 250 MB). `docker run ai-watcher scan "test" --demo` renders full report.
 
-### Step 10.2: Runtime Secrets Injection — ⏳ Pending
+### Step 10.2: Runtime Secrets Injection — ✅ Completed
 * **Description:** Document and implement passing API key via environment variable: `docker run -e OPENAI_API_KEY=sk-... ai-watcher scan "..."`. Ensure key is never baked into image layers.
 * **Key Concept:** Dynamic Runtime Secret Injection — zero hardcoded credentials in container images.
 * **Validation Criterion:** `docker history ai-watcher` reveals no API keys. Execution without environment variable exits with clear error message.
 
-### Step 10.3: Documentation Finalization & README — ⏳ Pending
+### Step 10.3: Documentation Finalization & README — ✅ Completed
 * **Description:** Update `README.md` with: project overview, installation (`make install`), CLI usage examples across 3 sources, option flags reference, Docker instructions, and FinOps breakdown. Update ADR logbook with key architectural learnings.
 * **Key Concept:** Documentation as Product — clear documentation guarantees usability and adoption.
 * **Validation Criterion:** External developer can clone repository, follow README, and execute first scan within 5 minutes.
@@ -233,13 +233,13 @@ Phase 1: Baseline Setup ──> Phase 2: CLI Skeleton ──> Phase 3: Ingestion
 
 ## 📋 Delivery Checklist (Definition of Done)
 
-- [ ] `ruff check .` and `mypy src/ --strict`: **zero** errors
-- [ ] `pytest --cov=src`: test coverage ≥ **80%**
-- [ ] `detect-secrets`: zero hardcoded secrets in code
-- [ ] CLI supports **3 input source types** (text, file, URL)
-- [ ] **FinOps** metrics displayed and verified after each analysis
-- [ ] **Rich UI** rendering with colored panels and metrics table
-- [ ] **Local cache** functional with configurable TTL
-- [ ] **Tenacity Retry**: application survives transient network failures gracefully
-- [ ] **Docker**: `docker run ai-watcher scan "test" --demo` executes cleanly
-- [ ] **README** complete & learning log updated
+- [x] `ruff check .` and `mypy src/ --strict`: **zero** errors
+- [x] `pytest --cov=src`: test coverage ≥ **80%** (achieved: **99.2%**)
+- [x] `detect-secrets`: zero hardcoded secrets in code
+- [x] CLI supports **3 input source types** (text, file, URL)
+- [x] **FinOps** metrics displayed and verified after each analysis
+- [x] **Rich UI** rendering with colored panels and metrics table
+- [x] **Local cache** functional with configurable TTL
+- [x] **Tenacity Retry**: application survives transient network failures gracefully
+- [x] **Docker**: `docker run ai-watcher scan "test" --demo` executes cleanly
+- [x] **README** complete & learning log updated

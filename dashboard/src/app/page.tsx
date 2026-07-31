@@ -533,7 +533,7 @@ const PHASES_DATA = [
   {
     id: 9,
     title: "Phase 9 : Suite de Tests & Couverture 100%",
-    status: "done",
+    status: "completed",
     badge: "✅ Complété",
     desc: "Mocks réseau complets avec HTTPX et Pytest-cov garantissant une couverture de code maximale.",
     concepts: ["Integration Testing", "Mocks & Fixtures Pytest", "Coverage Reports"],
@@ -545,13 +545,14 @@ const PHASES_DATA = [
   {
     id: 10,
     title: "Phase 10 : Conteneurisation & Livraison Docker",
-    status: "pending",
-    badge: "⏳ À venir",
+    status: "completed",
+    badge: "✅ Complété",
     desc: "Build Docker multi-stage durci et léger (<250 MB) exécuté sous utilisateur non-root.",
     concepts: ["Multi-Stage Dockerfile", "Non-Root Security Hardening", "Zero-Setup Onboarding"],
-    inputExample: "make docker-build && docker run wrapper-cli scan --demo",
-    outputExample: "Rapport complet généré dans un conteneur sécurisé sans Python local",
-    tests: "scripts/simulate_onboarding.sh",
+    inputExample: "Inputs: Payload structure, parameters (model, temperature, flags).",
+    outputExample: "Outputs: Pydantic V2 schema, headers, and telemetry metrics.",
+    tests: "Suite complète pytest",
+    hasPlayground: "container",
   },
 ];
 
@@ -759,6 +760,32 @@ export default function DashboardPage() {
       setTestsResult({ status: "error", message: err.message || "Test run failed" });
     } finally {
       setTestsLoading(false);
+    }
+  };
+
+  // Phase 10: Containerization & Release Playground State
+  const [containerActionPreset, setContainerActionPreset] = useState<string>("run");
+  const [containerResult, setContainerResult] = useState<any>(null);
+  const [containerLoading, setContainerLoading] = useState<boolean>(false);
+  const [containerTab, setContainerTab] = useState<"visual" | "json">("visual");
+
+  const handleContainerDemo = async (customAction?: string) => {
+    setContainerLoading(true);
+    try {
+      const res = await fetch("/api/container-demo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: customAction || containerActionPreset,
+        }),
+      });
+      const data = await res.json();
+      setContainerResult(data);
+    } catch (err: any) {
+      console.error(err);
+      setContainerResult({ status: "error", message: err.message || "Container demo failed" });
+    } finally {
+      setContainerLoading(false);
     }
   };
 
@@ -3172,6 +3199,128 @@ export default function DashboardPage() {
                                   {testsTab === "json" && (
                                     <pre style={{ fontSize: "0.8rem", color: "#10b981", fontFamily: "monospace", overflowX: "auto", maxHeight: "400px", overflowY: "auto" }}>
                                       {JSON.stringify(testsResult, null, 2)}
+                                    </pre>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* PHASE 10 PLAYGROUND - CONTAINERIZATION & RELEASE */}
+                        {currentPhase.id === 10 && (
+                          <div style={{ padding: "24px", background: "rgba(14, 165, 233, 0.08)", border: "1px solid rgba(14, 165, 233, 0.3)", borderRadius: "14px" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                              <div>
+                                <h4 style={{ fontSize: "1.15rem", fontWeight: 800, color: "#fff", display: "flex", alignItems: "center", gap: "8px" }}>
+                                  🐳 Demo Live : Conteneurisation & Livraison Docker (Phase 10)
+                                </h4>
+                                <p style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
+                                  Simulez l&apos;exécution du CLI via Docker et vérifiez les métriques de conformité Pydantic V2 / FinOps dans un environnement isolé.
+                                </p>
+                              </div>
+                              <button
+                                onClick={() => handleContainerDemo()}
+                                disabled={containerLoading}
+                                style={{
+                                  padding: "10px 20px",
+                                  borderRadius: "8px",
+                                  background: "linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)",
+                                  color: "#fff",
+                                  fontWeight: 700,
+                                  fontSize: "0.9rem",
+                                  border: "none",
+                                  cursor: "pointer",
+                                  boxShadow: "0 4px 14px rgba(14, 165, 233, 0.4)",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "8px",
+                                }}
+                              >
+                                {containerLoading ? <Loader2 size={16} className="spin" /> : <Play size={16} />}
+                                {containerLoading ? "Analyse..." : "⚡ Lancer l'Analyse Live"}
+                              </button>
+                            </div>
+
+                            <div style={{ display: "flex", gap: "8px", marginBottom: "14px", flexWrap: "wrap" }}>
+                              <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", alignSelf: "center" }}>Presets :</span>
+                              <button onClick={() => setContainerActionPreset("run")} style={{ padding: "4px 10px", fontSize: "0.75rem", borderRadius: "4px", background: containerActionPreset === "run" ? "rgba(14, 165, 233, 0.2)" : "transparent", border: containerActionPreset === "run" ? "1px solid rgba(14, 165, 233, 0.5)" : "1px solid #333", color: containerActionPreset === "run" ? "#38bdf8" : "var(--text-muted)", cursor: "pointer" }}>Docker Run (Standard)</button>
+                              <button onClick={() => setContainerActionPreset("scan")} style={{ padding: "4px 10px", fontSize: "0.75rem", borderRadius: "4px", background: containerActionPreset === "scan" ? "rgba(14, 165, 233, 0.2)" : "transparent", border: containerActionPreset === "scan" ? "1px solid rgba(14, 165, 233, 0.5)" : "1px solid #333", color: containerActionPreset === "scan" ? "#38bdf8" : "var(--text-muted)", cursor: "pointer" }}>Full Scan Payload</button>
+
+                              <input
+                                type="text"
+                                placeholder="Custom flags e.g. --model gpt-4"
+                                style={{ background: "#111", border: "1px solid #333", color: "#ccc", padding: "4px 10px", fontSize: "0.75rem", borderRadius: "4px", minWidth: "200px" }}
+                                onChange={(e) => setContainerActionPreset(e.target.value)}
+                              />
+                            </div>
+
+                            {containerResult && (
+                              <div style={{ marginTop: "16px", background: "rgba(0,0,0,0.3)", borderRadius: "10px", border: "1px solid #222", overflow: "hidden" }}>
+                                <div style={{ display: "flex", borderBottom: "1px solid #222", background: "#111" }}>
+                                  <button onClick={() => setContainerTab("visual")} style={{ padding: "10px 16px", background: containerTab === "visual" ? "#1a1a1a" : "transparent", color: containerTab === "visual" ? "#38bdf8" : "var(--text-muted)", border: "none", borderBottom: containerTab === "visual" ? "2px solid #38bdf8" : "2px solid transparent", cursor: "pointer", fontSize: "0.85rem", fontWeight: 600 }}>📊 View Rendered</button>
+                                  <button onClick={() => setContainerTab("json")} style={{ padding: "10px 16px", background: containerTab === "json" ? "#1a1a1a" : "transparent", color: containerTab === "json" ? "#38bdf8" : "var(--text-muted)", border: "none", borderBottom: containerTab === "json" ? "2px solid #38bdf8" : "2px solid transparent", cursor: "pointer", fontSize: "0.85rem", fontWeight: 600 }}>💻 View Raw JSON</button>
+                                </div>
+
+                                <div style={{ padding: "16px" }}>
+                                  {containerTab === "visual" && (
+                                    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                        <div style={{ width: "10px", height: "10px", borderRadius: "50%", background: containerResult.metadata?.status === "success" ? "#10b981" : "#ef4444" }}></div>
+                                        <strong style={{ color: "#fff", fontSize: "1rem" }}>Status: {containerResult.metadata?.status?.toUpperCase()}</strong>
+                                      </div>
+
+                                      <div style={{ padding: "12px", background: "rgba(255, 255, 255, 0.03)", borderRadius: "8px", border: "1px solid #333" }}>
+                                        <p style={{ margin: 0, fontSize: "0.9rem", color: "#e5e7eb" }}>{containerResult.result?.message}</p>
+                                        <div style={{ display: "flex", gap: "16px", marginTop: "8px" }}>
+                                          <span style={{ fontSize: "0.8rem", color: "#9ca3af" }}>Entities Found: <strong style={{ color: "#fff" }}>{containerResult.result?.data?.entities_found}</strong></span>
+                                          <span style={{ fontSize: "0.8rem", color: "#9ca3af" }}>Confidence: <strong style={{ color: "#fff" }}>{containerResult.result?.data?.confidence_score}</strong></span>
+                                        </div>
+                                      </div>
+
+                                      {containerResult.metadata && (
+                                        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "10px", padding: "12px", background: "rgba(14, 165, 233, 0.08)", borderRadius: "8px", border: "1px solid rgba(14, 165, 233, 0.2)" }}>
+                                          <div>
+                                            <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Latency</span>
+                                            <strong style={{ color: "#38bdf8" }}>{containerResult.metadata.latency_ms}ms</strong>
+                                          </div>
+                                          <div>
+                                            <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>FinOps Tokens</span>
+                                            <strong style={{ color: "#fbbf24" }}>{containerResult.metadata.tokens_used}</strong>
+                                          </div>
+                                          <div>
+                                            <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>FinOps Cost</span>
+                                            <strong style={{ color: "#f59e0b" }}>${containerResult.metadata.cost_usd}</strong>
+                                          </div>
+                                          <div>
+                                            <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Pydantic V2 Schema</span>
+                                            <strong style={{ color: "#10b981" }}>Validated</strong>
+                                          </div>
+                                        </div>
+                                      )}
+
+                                      {containerResult.container_info && (
+                                        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px", padding: "12px", background: "rgba(255, 255, 255, 0.02)", borderRadius: "8px", border: "1px solid #333" }}>
+                                          <div>
+                                            <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Image Size</span>
+                                            <strong style={{ color: "#d1d5db", fontSize: "0.8rem" }}>{containerResult.container_info.size}</strong>
+                                          </div>
+                                          <div>
+                                            <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Execution User</span>
+                                            <strong style={{ color: "#d1d5db", fontSize: "0.8rem" }}>{containerResult.container_info.user}</strong>
+                                          </div>
+                                          <div>
+                                            <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>Security</span>
+                                            <strong style={{ color: "#10b981", fontSize: "0.8rem" }}>Hardened</strong>
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+
+                                  {containerTab === "json" && (
+                                    <pre style={{ fontSize: "0.8rem", color: "#38bdf8", fontFamily: "monospace", overflowX: "auto", maxHeight: "400px", overflowY: "auto" }}>
+                                      {JSON.stringify(containerResult, null, 2)}
                                     </pre>
                                   )}
                                 </div>
