@@ -4,10 +4,10 @@
 
 POETRY := $(shell command -v poetry 2>/dev/null)
 RUN_PREFIX := $(if $(POETRY),poetry run,.venv/bin/python -m)
-PYTEST_CMD := $(if $(POETRY),poetry run python -m pytest,.venv/bin/pytest)
+PYTEST_CMD := $(if $(POETRY),poetry run env PYTHONPATH=src python -m pytest,.venv/bin/pytest)
 RUFF_CMD := $(if $(POETRY),poetry run ruff,.venv/bin/ruff)
-MYPY_CMD := $(if $(POETRY),poetry run python -m mypy,PYTHONPATH=src .venv/bin/mypy)
-CLI_CMD := $(if $(POETRY),poetry run python -m src.ai_watcher.main,PYTHONPATH=src .venv/bin/python -m src.ai_watcher.main)
+MYPY_CMD := $(if $(POETRY),poetry run env PYTHONPATH=src python -m mypy,PYTHONPATH=src .venv/bin/mypy)
+CLI_CMD := $(if $(POETRY),poetry run env PYTHONPATH=src python -m ai_watcher.main,PYTHONPATH=src .venv/bin/python -m ai_watcher.main)
 
 .PHONY: install clean lint test dev dashboard docker-build onboarding-check help
 

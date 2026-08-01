@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Automated, resilient, typed AI watcher CLI tool with FinOps tracking."
 authors = ["Michael <michael@example.com>"]
 readme = "README.md"
-packages = [{include = "src"}]
+packages = [{include = "ai_watcher", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"

@@ -2444,7 +2444,7 @@ export default function DashboardPage() {
                                       <div
                                         style={{
                                           display: "flex",
-                                          justify: "space-between",
+                                          justifyContent: "space-between",
                                           alignItems: "center",
                                           padding: "14px 18px",
                                           borderRadius: "10px",

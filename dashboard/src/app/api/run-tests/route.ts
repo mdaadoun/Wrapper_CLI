@@ -53,12 +53,12 @@ export async function POST(request: Request) {
       execFile(
         pythonExec,
         args,
-        { cwd: PROJECT_DIR, timeout: 30000, env: cleanEnv },
+        { cwd: PROJECT_DIR, timeout: 60000, env: cleanEnv },
         (error, stdout, stderr) => {
           if (error && error.killed) {
             resolve(
               NextResponse.json(
-                { status: "error", message: "Test execution timed out after 30 seconds." },
+                { status: "error", message: "Test execution timed out after 60 seconds." },
                 { status: 504 }
               )
             );

@@ -22,6 +22,12 @@ MODEL_PRICING: dict[str, dict[str, float]] = {
     "o1-mini": {"input_per_1m": 3.00, "output_per_1m": 12.00},
     "o3-mini": {"input_per_1m": 1.10, "output_per_1m": 4.40},
     # Google Gemini
+    "gemini-3.6-flash": {"input_per_1m": 1.50, "output_per_1m": 7.50},
+    "gemini-3.5-flash": {"input_per_1m": 1.50, "output_per_1m": 9.00},
+    "gemini-3.5-flash-lite": {"input_per_1m": 0.30, "output_per_1m": 2.50},
+    "gemini-3.1-flash-lite": {"input_per_1m": 0.25, "output_per_1m": 1.50},
+    "gemini-3.1-pro-preview": {"input_per_1m": 2.00, "output_per_1m": 12.00},
+    "gemini-3-flash-preview": {"input_per_1m": 0.075, "output_per_1m": 0.30},
     "gemini-2.5-pro-exp-03-25": {"input_per_1m": 1.25, "output_per_1m": 10.00},
     "gemini-2.0-flash": {"input_per_1m": 0.10, "output_per_1m": 0.40},
     "gemini-2.0-flash-lite": {"input_per_1m": 0.075, "output_per_1m": 0.30},
@@ -52,6 +58,8 @@ MODEL_PRICING: dict[str, dict[str, float]] = {
     "mixtral-8x7b": {"input_per_1m": 0.50, "output_per_1m": 0.50},
     "mixtral-8x22b": {"input_per_1m": 1.00, "output_per_1m": 1.00},
     # DeepSeek
+    "deepseek-v4-flash": {"input_per_1m": 0.0896, "output_per_1m": 0.1792},
+    "deepseek-v4-pro": {"input_per_1m": 0.435, "output_per_1m": 0.87},
     "deepseek-chat": {"input_per_1m": 0.14, "output_per_1m": 0.28},
     "deepseek-reasoner": {"input_per_1m": 0.55, "output_per_1m": 2.19},
     # Cohere
